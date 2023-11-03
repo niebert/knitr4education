@@ -1,2 +1,8 @@
 # knitr4education
 KnitR Examples used for a seminar at the University RPTU to create tailored individual worksheet according to the prerequisites of the learners.
+
+## Lanuage of R-Markdown Documents
+The primary language for the seminar is German at the RPTU but the code chunks can be used in other languages as well. To be able to translate and separate the course material in other languages subdirectory are created 
+* `de/` R-Markdown filses in german language
+* `en/` R-Markdown filses in english language
+
