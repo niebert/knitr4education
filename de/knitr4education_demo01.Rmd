@@ -1,0 +1,105 @@
+---
+title: "ODT Arbeitsblatt"
+author: "Bert Niehaus"
+date: "`r Sys.Date()`"
+output: odt_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Einleitung
+Das ist ein R Markdown-Dokument. Markdown ist eine einfache Formatierungs-Syntax für die Autorisierung von HTML-, PDF- und MS Word-Dokumenten. Weitere Details zur Verwendung von R Markdown siehe <http://rmarkdown.rstudio.com>.
+
+Wenn Sie auf die Schaltfläche **Knit*** klicken, wird ein Dokument generiert, das sowohl Inhalte als auch die Ausgabe von eingebetteten R-Code-Kissen innerhalb des Dokuments beinhaltet. Sie können einen R-Code so einbetten:
+
+```{r berechnung, echo=FALSE}
+vSumme <- 4*5+3
+```
+
+Im obigen Codechunk wurde die Summe von zwei Zahlen berechnet. Das Ergebnis der Summe ist `r vSumme`.
+
+### Erste Aufgabe für die Grundschule
+```{r grunschulaufgabe, echo=TRUE}
+vSummand1 <- 4
+vSummand2 <- 6
+vSumme <- vSummand1 + vSummand2 
+```
+Lieber Peter, berechne bitte die Summe der Zahlen `r vSummand1` und `r vSummand2`!
+
+Bitte überprüfe Deine Lösung
+`r vSummand1`  +  `r vSummand2` =  `r vSumme`
+
+## Mathematische Formeln 
+
+Mathematische Formeln und Symbole können im Fließtext erscheinen z.B. mit $ x \in \mathbb{R} $ oder als abgesetzte mathematische Formel  
+$$\overline{y_i} := \frac{1}{2n+1}\cdot \sum_{k=-n}^n y_{k+i}\quad \mbox{ mit } \quad i-n \geq 1 \mbox{ und }  i+n \leq m.$$
+Für mathematische Formeln gibt es zwei Darstellungsformen:
+
+* abgesetzte zentrierte mathematische Formeln werden mit zwei Dollarzeichen `$$` gerahmt und
+* Formeln im Fließtext mit jeweils einem Dollarzeichen `$`.
+
+### Normalverteilung - Latex-Notartion der Dichtefunktion
+$$
+f(x)= \frac{1}{\sigma\sqrt{2\pi}} {e^{-\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^2}}
+$$
+
+
+
+## Dynamisch berechnet Variable in mathematischer Formel
+Im folgenden Beispiel wird eine dynamische berechnete Variable in eine Formel eingebettet.
+```{r}
+a <- floor(runif(1, 1, 5))
+b <- floor(runif(1, 6, 15))
+n <- 3
+```
+
+Bitte berechnet das Integral 
+$$ f(x) = x^{`r n`}$$ 
+in folgenden Grenzen a=`r a` =und b=`r b`: 
+
+$$
+ y:= \int_{a}^{b} f(x) \, dx = \int_{`r a`}^{`r b`} x^{`r n`} \, dx
+$$
+```{r}
+vZaehler <- b^(n+1) - a^(n+1) 
+vNenner  <- n+1
+```
+
+Die Lösung des Integrals als Bruch lautet `r vZaehler` `r vNenner`:
+$$
+ y= \frac{`r vZaehler`}{`r vNenner`}
+$$
+
+## Voraussetzungen und Ziele
+Für die Erstellung von individuellen Arbeitsblättern gehen wir von folgenden Voraussetzungen aus:
+* Klasse mit 32 Schülerinnen und Schülern aus,
+* alle Schülerinnen und Schülern bekommen individuelle Aufgabenblätten und Hilfen,
+* alle 32 Aufgabenblätter werden mit einem KnitR-Durchlauf erzeugt,
+* die Aufgaben- und Hilfenauswahl basieren auf Schülerdaten die in Tabellenform vorliegen und für Erzeugung von individuellen Aufgabenblättern als Eingabedaten für R verwendet werden.
+
+## Zufallszahlen 
+Bei einem digitalen Arbeitsblatt bekommt jede Schülerinnen und jeder Schüler ein eigenes Aufgabenblatt und ggf. individuelle Hilfen und Lösungshinweise. 
+
+
+Zunächst wird die Generierung von individuellen Arbeitsblätter über Zufallszahlen umgesetzt. In einem späteren Schritt über die statistische Auswertung von Schülerdaten.
+
+Der folgende Befehl erzeugt 10 Zufallszahlen für eine stetige Gleichverteilung (uniforme Verteilung) auf dem Intervall $ [5,99] $. Dabei entsteht ein Vektor mit 10 Zahlen aus $ [5,99]^{10} $
+```{r}
+runif(10, 5, 99)
+```
+Für ganzzahlige Zufallszahlen kann man 
+* runden oder
+```{r}
+round(runif(10, 5, 99))
+```
+* die Gaußklammer
+anwenden.
+```{r}
+floor(runif(10, 5, 99))
+```
+
+## Zufällige Aufgaben mit Lösung 
+Es zufällig ein Polynom 2. Grades mit ganzzahligen Koeffizienten generiert werden und dann soll die entsprechende Lösung ebenfalls in  
+
