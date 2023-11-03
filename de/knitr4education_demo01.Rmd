@@ -10,12 +10,12 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## Einleitung
-Das ist ein R Markdown-Dokument. Markdown ist eine einfache Formatierungs-Syntax für die Autorisierung von HTML-, PDF- und MS Word-Dokumenten. Weitere Details zur Verwendung von R Markdown siehe <http://rmarkdown.rstudio.com>.
+Das ist ein R Markdown-Dokument. Markdown ist eine einfache Formatierungs-Syntax für die Erzeugung von LibreOffice-Dokumenten verwendet wird. Weitere Details zur Verwendung von R Markdown siehe <http://rmarkdown.rstudio.com>.
 
-Wenn Sie auf die Schaltfläche **Knit*** klicken, wird ein Dokument generiert, das sowohl Inhalte als auch die Ausgabe von eingebetteten R-Code-Kissen innerhalb des Dokuments beinhaltet. Sie können einen R-Code so einbetten:
+Wenn Sie auf die Schaltfläche **Knit*** klicken, wird ein Dokument generiert, das sowohl statischen Textinhalte als auch die Ausgabe von dynamisch berechnete Variableninhalten durch eingebettete R-Code-Chunks beinhaltet. Sie können einen R-Code so einbetten:
 
 ```{r berechnung, echo=FALSE}
-vSumme <- 4*5+3
+vSumme <- 4+13
 ```
 
 Im obigen Codechunk wurde die Summe von zwei Zahlen berechnet. Das Ergebnis der Summe ist `r vSumme`.
