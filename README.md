@@ -6,3 +6,6 @@ The primary language for the seminar is German at the RPTU but the code chunks c
 * `de/` R-Markdown filses in german language
 * `en/` R-Markdown filses in english language
 
+## Sample Data for Learning 
+* [guru99-edu](https://www.github.com/guru99-edu) provided sample data for learning R and KnitR (see [Sample Data for R-Programming](https://www.github.com/guru99-edu/R-Programming)
+* If you fork the sample data repository provide a reference to source similar to the [following example repository](https://www.github.com/niebert/R-Programming) 
