@@ -2,3 +2,5 @@
 Der Datenordner enthält kleine CSV-Dateien als Daten, die zum Erlernen der grundlegenden KnitR-Bedienung verwendet werden können, um Dokumente in LibreOffice oder LaTeX in einer Lernumgebung zu verarbeiten.
 * `data.csv` ist der grundlegende "Hello World" Datensatz, der 5 Namen (Zeilen) und für jeden Namen die Ergebnisse/Bewertungen für 3 Lernaufgaben enthält.
 * `datasumme.csv` hat eine angehängte Spalte, die das Ergebnis der ersten Lernaufgabe für teascher Schüler ist, um die Summe aller Punkte zu verarbeiten und eine Spalte für die Summe der Punkte zu den in `data.csv` gespeicherten Daten hinzuzufügen
+* `multreglin1.csv` sind Demorohdaten mit denen man ein mehrdimensionale lineare Regression mit dreidimensionalen Eingabenvektoren `(x1,x2,x3)`  und eindimensionalem Wertebereich in der Spalte `y` berechnen kann.
+* `multreglin.csv` sind Demorohdaten mit denen man ein mehrdimensionale lineare Regression mit dreidimensionalen Eingabenvektoren `(x1,x2,x3)` und zweidimensionalem Vektoren `(y1,y2)` aus Wertebereich berechnen kann. Insgesamt ist eine approximierende 3x2-Matrix für die Trainingsdaten in den 5 Spalten gesucht.
