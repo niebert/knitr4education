@@ -1,0 +1,152 @@
+### knitr4education - v0.0.4
+### https://www.github.com/niebert/knitr4education
+
+### Include this file in your KnitR code by placing the following code in your 
+### code chunk:
+# source("knitr4education.R")
+### If you store the library in a subdirectory 'lib/' use the following comamnd
+# source("lib/knitr4education.R")
+
+copy4vec <- function (pVec) {
+  return <- rep(0,length(pVec))
+  for (i in length(pVec)) {
+    return[i] <- pVec[i]
+  }
+  ## return cloned vector
+  return
+}
+
+echo4vec <- function (pVarname,pVec) {
+  print(paste(pVarname,"=(",paste(pVec,collapse=","),")"),sep="")
+}
+
+hello <- function(name) {
+  print(paste("Hallo ",name,"! Mache keinen Mist",sep=""))
+}
+
+loesung_ausgeben <- function(hilfe,name,solution) {
+  hilfe_ausgabe <-  str_replace(hilfetext,"SOLUTION",solution)
+  hilfe_ausgabe <-  str_replace(hilfe_ausgabe,"NAME",name)
+  ## Rückgabe der ersetzen Hilfe
+  hilfe_ausgabe
+}
+
+
+find_min4error <- function (pError, pGrad, pa, px_D, py_D, alpha=1, evalcount=100) {
+  ## Parameter
+  ## pError: Fehlerfunktion
+  ## pGrad:  Gradient der Fehlerfunktion
+  ## px_D: x-Vektoren der Daten für den Definitionsbereich
+  ## py_D: y-Sollwerte für die Fehlerfunktion
+  return <- rep(0,2) ### return <- c(0,0);
+  ## erste Komponente von return ist der minimale lambda-Wert
+  ## zweite Komponente von return ist der minimale Fehler
+  s4a <- (-evalcount:evalcount)/evalcount
+  #s4a <- 2*runif(2*evalcount+1,-1,1)
+  E4a <-  rep(0,2*evalcount+1) ## +1 wegen x4a=0
+  ## smin - Skalar für Gradient für das Minimum der berechneten Fehler
+  scalar4min <- s4a[1] ### ersten smin-Wert setzen - hier -1
+  ### Fehler in pa berechnen als Startwert
+  error4min <- pError( pa, px_D, py_D )
+  grad4a      <- alpha * pGrad( pa, px_D, py_D )
+  ## in Gradientenrichtung auswerten zwischen -1*pGrad und +1*Grad
+  ## die Fehlerfunktion auswerten und über die x4a-Liste iterieren
+  for (k in 1:length(s4a)) {
+    ## Fehler für den um x4a[k] skalierten Gradienten pGrad
+    ## und die Daten px_D, py_D berechnen
+    E4a[k] <- pError(pa + s4a[k]*grad4a, px_D, py_D)
+    ## Überprüfen, ob der Fehler kleiner ist als der
+    ## bisher berechnete minimale Fehler errormin
+    if (E4a[k] < error4min) {
+      error4min  <-E4a[k]
+      scalar4min <-s4a[k]
+    }
+  }
+  # plot(s4a,E4a)
+  return <- c(scalar4min,error4min)
+  ## Rückgabewert des Skalars für den Gradienten und dem minimalen Fehler
+  return
+}
+
+fuzzy_nand <- function (pf1,pf2) {
+  return <- rep(0,length(pf1))
+  for (i in 1:length(pf1)) {
+    return[i] <- 1 - min(pf1[i],pf2[2])
+  }
+  ### Rückgabewert ist das komponentenweise Minimum der beiden Vektoren pf1 und pf2
+  return
+}
+
+fuzzy_and <- function (pf1,pf2) {
+  return <- rep(0,length(pf1))
+  for (i in 1:length(pf1)) {
+    return[i] <- min(pf1[i],pf2[2])
+  }
+  ### Rückgabewert ist das komponentenweise Minimum der beiden Vektoren pf1 und pf2
+  return
+}
+
+fuzzy_or <- function (pf1,pf2) {
+  return <- rep(0,length(pf1))
+  for (i in 1:length(pf1)) {
+    return[i] <- max(pf1[i],pf2[i])
+  }
+  ### Rückgabewert ist das komponentenweise Maximum der beiden Vektoren pf1 und pf2
+  return
+}
+
+fuzzy_not <- function (pf1) {
+  return <- rep(0,length(pf1))
+  for (i in 1:length(pf1)) {
+    return[i] <- 1 - pf1[i]
+  }
+  ### Rückgabewert ist das komponentenweise Minimum der beiden Vektoren pf1 und pf2
+  return
+}
+
+fuzzy2_nand <- function (pf1,pf2) {
+  return <- rep(0,length(pf1))
+  for (i in 1:length(pf1)) {
+    return[i] <- 1-(pf1[i] * pf2[i])
+  }
+  ### Rückgabewert ist das komponentenweise Minimum der beiden Vektoren pf1 und pf2
+  return
+}
+
+fuzzy2_and <- function (pf1,pf2) {
+  return <- rep(0,length(pf1))
+  for (i in 1:length(pf1)) {
+    return[i] <- pf1[i] * pf2[i]
+  }
+  ### Rückgabewert ist das komponentenweise Minimum der beiden Vektoren pf1 und pf2
+  return
+}
+
+fuzzy2_or <- function (pf1,pf2) {
+  return <- rep(0,length(pf1))
+  for (i in 1:length(pf1)) {
+    return[i] <- 1 - (1-pf1[i]) * (1-pf2[i])
+  }
+  ### Rückgabewert ist das komponentenweise "Oder" der beiden Vektoren pf1 und pf2
+  return
+}
+
+fuzzy2_implication <- function (pf1,pf2) {
+  notf1 <-  fuzzy2_not(pf1)
+  return <- fuzzy2_or(notf1,pf2)
+  ### Rückgabewert ist das komponentenweise "Oder" der beiden Vektoren pf1 und pf2
+  return
+}
+
+koaktivitaetsmatrix <- function (pVecX,pVecY) {
+  colx <- length(pVecX)
+  mat <- matrix(pVecY , ncol=1) %*% matrix(pVecX,ncol=colx) 
+  
+  # return Kooktivitaetsmatrix mat als Rueckgabewert
+  mat
+}
+
+### AUFRUF koaktivitaetmatrix()
+# x <- c(1,0,1)
+# y <- c(0,1)
+# koaktivitaetsmatrix(x,y)
