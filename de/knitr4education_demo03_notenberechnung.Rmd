@@ -1,0 +1,151 @@
+---
+title: "ODT Arbeitsblatt 3 - Notengebung zu Punkten"
+author: "Bert Niehaus"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Einleitung
+In dem folgende R-Code werden mit Hilfe von 2 Funktionen zu einem Vektor mit Punkten `punkte`$\in \mathbb{R}^n$ und die Note automatisiert für alle Punkte berechnet.
+* $punkte\in \mathbb{R}^n$ enthält die Punkte (z.B. aus einer Klausur), für die die Noten ermitteln sollen.
+* $bestgrenze\in \mathbb{R}^+$ ist die Bestehensgrenze,
+* $maxpunkte \in \mathbb{R}^+$ ist die maximale Anzahl der Punkte, die in einer Klausur erreicht werden kann. 
+* Mit der Funktion `notengrenzen_calc(pPunkteMax, pBestGrenze,pBestIndex,pNotenSkala)`  kann die Notengrenzen berechnen, um die Noten zuordnen danach mit der Funktion `note_zuordnen()` dem Punktevektor zuordnen zu können.
+* `notenskala` enthält die Noten, die entsprechend der Notengrenzen den Punkten zugewiesen werden. Diese können Zahlenwert 1-6, Text "sehr gut", "sehr gut-" ..., oder auch Buchstaben A,B,C,D, und F für "failed" (amerikanisches Notensystem) sein, um entsprechend der Notengrenzen dan die Noten zuordnen zu können.
+
+## Notenberechnung
+
+### Funktion für Berechung der Notengrenzen
+
+```{r , echo=FALSE}
+notengrenzen_calc <- function(pPunkteMax, pBestGrenze,pBestIndex,pNotenSkala) {
+     grenze = rep(0, length(pNotenSkala))
+     imax <- length(pNotenSkala)
+     schritt <- pBestGrenze/(imax-pBestIndex)
+     ## Index für 6 bis zur 4 berechnen 
+     gi <- imax
+     ## Grenze unterhalb der Bestehensgrenze
+     g <- 0
+     while (gi > pBestIndex) {
+        # Füge die Grenze in den Vektor ein
+        g <- g + schritt
+        grenze[gi] <- g
+     
+        # Vermindere den Index
+        gi <- gi - 1 
+     }
+     ## Grenze oberhalb der Bestehensgrenze
+     schritt <- (pPunkteMax - pBestGrenze)/(pBestIndex)
+     ## Index für 4 und besser 
+     while (gi > 0) {
+        g <- g + schritt
+        grenze[gi] <- g
+        # Vermindere den Index
+        gi <- gi - 1 
+     }
+     ## Rückgabewert Vektor "grenze"
+     grenze
+}
+```
+
+Die oben definierte Funktion kann nun verwendet werden, um Notengrenzen zu berechnen.
+
+### Funktion zu Berechnung der Noten
+Die Anwendung der folgenden Funktion `note_zuordnen()` setzt voraus, dass man vorher bei einer gegebenen 
+* maximalen Anzahl von Punkten,
+* Bestehensgrenze und
+* einem Bestehensindex für eine Notenskala
+die Notengrenze berechnet hat.
+```{r}
+note_zuordnen <- function(pPunkte,pGrenzen,pNotenskala) {
+     ## Vektor mit der Länge der Punkte erstellen
+     ## in dem Vektor wird die Note eingetragen
+     note4punkte <- rep(0,length(pPunkte))
+     for (i in 1:length(pPunkte)) {
+       ## Notenindex auf schlechteste Note setzen
+       gi <- length(pNotenskala)
+       ## Noten auf schlechtesten Index setzen
+       note4punkte[i] <- pNotenskala[gi]
+       ## so lange die Note verbessern bis Note jeweilge Notengrenze kleiner als Punkte
+       while ((gi > 0) & (pPunkte[i] >= pGrenzen[gi]))  {
+          ## Index für die Grenze auf bessere Note setzen
+          gi <- gi - 1 
+          ## Notenbezeichnung setzen
+          note4punkte[i] <- pNotenskala[gi]
+       } 
+     }
+     ### Rückgabewert der Noten fuer alle Punkte
+     note4punkte        
+}
+
+```
+
+### Beispielberechnung für die Noten 1-6
+```{r noten1bis6, echo=TRUE}
+maxpunkte <- 100
+bestgrenze <- 40
+notenskala <- c("sehr gut","gut","befriedigend","ausreichend","mangelhaft","ungenügend")
+bestindex <- 4 ## Index für Note, mit der man gerade noch bestanden hat 4 "ausreichend"
+
+grenzen <- notengrenzen_calc(maxpunkte, bestgrenze,bestindex,notenskala)
+## grenzen <- c(100,85,70,55,40,20)
+## liefert die Grenzen für die Noten punkte<20 bedeutet "ungenügend"
+## liefert die Grenzen für die Noten 40 > punkte >= 20 bedeutet "mangelhaft"
+### Noten berechnen
+
+### Punkte für 5 Klausuren im Vektor "punkte"
+punkte <- c(23,92,33,89,60)
+
+noten <- note_zuordnen(punkte, grenzen, notenskala)
+
+### Notenberechnung ist nun abgeschlossen - Ausgabe
+print(noten)
+```
+
+### Beispielberechnung für Noten mit Tendenz
+In dem folgenden Beispiel werden die Gesamtpunkte und die Notengrenze beibehalten.
+Es nun mit den gleichen Punkte eine feinere Unterteilung der Notenskala vorgenommen, dabei werden Noten zwischen 1+ und 6 mit Tendenzen + und - vergeben, wobei die Note 6 ohne Tendenz vergeben wird.
+Damit ändert sich die Notenskala und der Index für die schwächste Note (hier 4), mit der man gerade nich bestanden hat.
+```{r notentendenz, echo=TRUE}
+maxpunkte <- 100
+bestgrenze <- 40
+notenskala <- c("1","1-","2+","2","2-","3+","3","3-","4+","4","5+","5","5-","6")
+bestindex <- 10 ## Index für Note, mit der man gerade noch bestanden hat 4 "ausreichend"
+
+grenzen <- notengrenzen_calc(maxpunkte, bestgrenze,bestindex,notenskala)
+## grenzen <- c(100,85,70,55,40,20)
+## liefert die Grenzen für die Noten punkte<20 bedeutet "ungenügend"
+## liefert die Grenzen für die Noten 40 > punkte >= 20 bedeutet "mangelhaft"
+### Noten berechnen
+
+### Punkte für 5 Klausuren im Vektor "punkte"
+punkte <- c(23,92,33,89,60)
+
+noten <- note_zuordnen(punkte, grenzen, notenskala)
+
+### Notenberechnung ist nun abgeschlossen - Ausgabe
+print(noten)
+```
+
+### KLausurergebnisse laden 
+Nun kann man das auf die Klausurergebnisse der Demodatei anwenden-
+
+```{r laden}
+studentdata <- read.csv("data/klausur.csv", header=TRUE, stringsAsFactors=FALSE)
+
+a1 <- studentdata$aufgabe1
+a2 <- studentdata$aufgabe2
+a3 <- studentdata$aufgabe3
+
+### Punktesumme berechnen
+summe <- a1 + a2 + a3
+### in studentdata die Spalte "summe" ergänzen
+studentdata$summe <- summe
+### Erste Zeile enthält die maximale Anzahl der Aufgaben
+
+
+```
