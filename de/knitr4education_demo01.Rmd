@@ -40,7 +40,7 @@ Für mathematische Formeln gibt es zwei Darstellungsformen:
 * abgesetzte zentrierte mathematische Formeln werden mit zwei Dollarzeichen `$$` gerahmt und
 * Formeln im Fließtext mit jeweils einem Dollarzeichen `$`.
 
-### Normalverteilung - Latex-Notartion der Dichtefunktion
+### Normalverteilung - Latex-Notation der Dichtefunktion
 $$
 f(x)= \frac{1}{\sigma\sqrt{2\pi}} {e^{-\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^2}}
 $$
