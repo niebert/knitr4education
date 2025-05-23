@@ -172,3 +172,9 @@ grenzen <- notengrenzen_calc(maxpunkte, bestgrenze,bestindex,notenskala)
 noten <- note_zuordnen(punkte, grenzen, notenskala)
 studentdata$noten <- noten
 ```
+## Speichern der Daten
+In der obigen Datenverarbeitung wurde im Dataframe `studentdata` die Spalte `summe`, `bestanden` und `note` ergänzt und diese erweiterte Datentabelle wird nun in einer neuen Datei mit dem Namen `klausurnote.csv` abgespeichert, damit die Ausgangsdatei in diesem Demo nicht überschrieben wird. 
+Wahl eines neuen Dateinamens ist prinzipiell empfehlenswert, damit bei einer fehlerhaften Berechnung nicht die Rohdaten verändert werden.
+```{r speichern}
+write.csv(studentdata, "data/klausurnote.csv", row.names = FALSE)
+```
