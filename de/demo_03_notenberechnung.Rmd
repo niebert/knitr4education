@@ -1,5 +1,5 @@
 ---
-title: "ODT Arbeitsblatt 3 - Notengebung zu Punkten"
+title: "HTML Arbeitsblatt 3 - Notengebung zu Punkten"
 author: "Bert Niehaus"
 date: "`r Sys.Date()`"
 output: html_document
