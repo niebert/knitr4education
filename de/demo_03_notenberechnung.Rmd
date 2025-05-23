@@ -154,3 +154,21 @@ summe <- a1 + a2 + a3
 ### in studentdata die Spalte "summe" ergänzen
 studentdata$summe <- summe
 ```
+### Notenskala für die Punkte berechnen 
+```{r}
+maxpunkte <- 100
+bestgrenze <- 40
+notenskala <- c("1","1-","2+","2","2-","3+","3","3-","4+","4","4-","5+","5","5-","6")
+bestindex <- 10 ## Index für Note, mit der man gerade noch bestanden hat 4 "ausreichend"
+
+# Der Vektor "grenzen" enthält die Punktegrenzen, ab der man die betreffende Note
+# aus der Notenskala erhält. Diese werden in Abhängigkeit von der Bestehensgrenze gewählt.
+grenzen <- notengrenzen_calc(maxpunkte, bestgrenze,bestindex,notenskala)
+
+### Noten berechnen
+# Gesamtpunktzahl der Klausur findet man im Vektor "summe"
+# die Summe ist eine Vektor z.B. summe <- c(23,92,33,89,60)
+
+noten <- note_zuordnen(punkte, grenzen, notenskala)
+studentdata$noten <- noten
+```
