@@ -1,0 +1,103 @@
+---
+title: "Demo 2 - Laden und Speichern"
+author: "Bert Niehaus"
+date: "2023-01-09"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+### Mit dieser Option kann man die Codeausgabe in dem KnitR-Dokument global anpassen
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Einleitung
+
+In diesem Dokument werden Dateien geladen und gespeichert. Dabei wird eine CSV-Datei mit 4 Spalte in ein Dataframe `studentdata` eingeladen. Die Spaltenbezeichnung in der geladenen Datei sind wie folgt gewählt:
+* (Spalte 1) `name` enthält den Vornamen der Person, die die Klausur geschrieben hat,
+* (Spalte 2) `aufgabe1` enthält die Punkte für die Aufgabe 1 aus der Klausur,
+* (Spalte 3) `aufgabe2` enthält die Punkte für die Aufgabe 2 aus der Klausur,
+* (Spalte 4) `aufgabe3` enthält die Punkte für die Aufgabe 3 aus der Klausur.
+Danach werden die Punktesumme der Aufgaben 1 bis 3 berechnet und eine weitere Spalte `summe` in dem dem Dataframe `studentdata` ergänzt.
+
+
+## Laden der Daten in eine Dataframe
+Mit dem folgenden Code wird die CSV-Datei geladen.
+```{r laden}
+studentdata <- read.csv("data/data.csv", header=TRUE, stringsAsFactors=FALSE)
+```
+Der Dateframe `studentdata` enthält nun die Daten aus der Datei `data.csv`.
+
+## Punktesumme berechnen
+Mit dem folgenden Code werden einzelne Spalten aus dem Dataframe extrahiert und in den Variablen `a1`, `a2` und `a3` gespeichert. Mit diesen Vektoren wird die Vektorsumme berechnet und in dem Vektor `summe` .
+
+```{r summeberechnen}
+### Spaltenvektoren in die Variable a1, a2, a3 extrahieren.
+a1 <- studentdata$aufgabe1
+a2 <- studentdata$aufgabe2
+a3 <- studentdata$aufgabe3
+
+### Vektoriell die Summe der Spaltenvektoren berechnen
+summe <- a1 + a2 + a3
+
+### Spalte "summe" im Dataframe "studentdata" ergänzen
+studentdata$summe <- summe
+```
+
+## Bestandenvektor berechnen
+
+Die Funktion bekommt eine Punkteliste der Klausur und eine  Bestehensgrenze als Eingabe.
+
+```{r, bestandenvektor}
+bestanden_vektor <- function(pPointVec,pBestGrenze) {
+  # pPointVec <- c(23,42,12,44,30)
+  ### Der bestandenvektor soll nachher als Textausgabe für die Übungsblätter verwendet werden.
+  bestvektor <- rep("-",length(pPointVec))
+  for (i in length(pPointVec)) {
+      if (pPointVec[i] >= pBestGrenze) {
+         bestvektor[i] <- "bestanden"  
+      } else {
+         bestvektor[i] <- "nicht bestanden"  
+      }
+  }
+  ### bestvektor <- c("bestanden","bestanden","nicht bestanden", "nicht bestanden", "bestanden")
+  ### bestandenvektor wird zurückgegeben
+  bestvektor 
+}
+
+best <- bestanden_vektor(summe,2.0);
+```
+
+
+## Informationen aus den Dataframe im Text
+In dem folgenden Abschnitt wird gezeigt, wie man die Daten aus dem Dataframe dynamisch im Text einfügen kann. Dabei werden folgende Aspekte behandelt.
+* Einfügen von Informaiionen direkt im Text,
+* Erstellen von individuellen Information für einen einzelnen Datensatz und 
+* Ergänzen einer Textinformation, die über alle Datensätze läuft.
+
+### Informaiionen aus Variable direkt im Text
+In dem folgenden Satz werden Information aus den geladenen Vektoren verwendet. 
+Die Person `r name[2]`  Punktzahl von Aufgabe 1 ist `r a1[2]` Punkte erreicht. Insgesamt hat `r name[2]`  in der Klausur insgesamt `r summe[2]` Punkte erreicht.
+
+### Textinformation für einen einzelnen Datensatz
+In dem folgenden Codechunk wird ein Klausurindex `ki` festgelegt. Dies bestimmt, welche Datensatz auf dem Dataframe. Dieser Klausurindex legt fest, welche Zeile im Dataframe für die Ausgabe verwendet wird.
+```{r klausurindex}
+ki <- 2 ## zweite Zeile aus den Daten verwenden. 
+```
+Nun kann man anolog zum ersten Beispiel den K
+
+### Überprüfen des Klausurindex 
+Wenn man die Anzahl der Datensätze nicht kennt, kann man noch überprüfen, ob die Tabelle im Dataframe `studentdata` auch genügend Zeile enthält, dass die Zeile mit dem Index `ki` auch dargestellt werden kann. Man die Anzahl der Datensätze z.B. an der Lönge des Vektors `a1` oder des Vektors `summe` überprüfen. Dies erfolgt im nachstehenden Code als Vergleich von dem Klausurindex `ki` mit der Länge des Vektors `summe`:
+```{r}
+if (ki >= length(summe)) {
+  ## Klausurindex ki ist zu groß gewählt. Man setzt den Index auf 1
+  ki <- 1
+}
+```
+
+## Speichern der Daten
+In der obigen Datenverarbeitung wurde im Dataframe `studentdata` die Spalte `summe` ergänzt und diese erweiterte Datentabelle wird nun in einer neuen Datei mit dem Namen `datasumme.csv` abgespeichert, damit die Ausgangsdatei in diesem Demo nicht überschrieben wird. 
+Wahl eines neuen Dateinamens ist prinzipiell empfehlenswert, damit bei einer fehlerhaften Berechnung nicht die Rohdaten verändert werden.
+```{r speichern}
+write.csv(studentdata, "datasumme.csv", row.names = FALSE)
+```
+
