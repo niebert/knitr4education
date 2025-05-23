@@ -52,7 +52,7 @@ bestanden_vektor <- function(pPointVec,pBestGrenze) {
   # pPointVec <- c(23,42,12,44,30)
   ### Der bestandenvektor soll nachher als Textausgabe für die Übungsblätter verwendet werden.
   bestvektor <- rep("-",length(pPointVec))
-  for (i in length(pPointVec)) {
+  for (i in 1:length(pPointVec)) {
       if (pPointVec[i] >= pBestGrenze) {
          bestvektor[i] <- "bestanden"  
       } else {
