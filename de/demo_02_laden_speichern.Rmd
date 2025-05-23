@@ -65,6 +65,7 @@ bestanden_vektor <- function(pPointVec,pBestGrenze) {
 }
 
 best <- bestanden_vektor(summe,2.0);
+studentdata$bestanden <- best 
 ```
 
 
