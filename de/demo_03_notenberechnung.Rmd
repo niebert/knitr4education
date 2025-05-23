@@ -131,7 +131,7 @@ noten <- note_zuordnen(punkte, grenzen, notenskala)
 print(noten)
 ```
 
-### KLausurergebnisse laden 
+### Klausurergebnisse laden 
 Nun kann man das auf die Klausurergebnisse der Demodatei anwenden-
 
 ```{r laden}
@@ -141,11 +141,16 @@ a1 <- studentdata$aufgabe1
 a2 <- studentdata$aufgabe2
 a3 <- studentdata$aufgabe3
 
-### Punktesumme berechnen
+
+### Erste Zeile enthält die maximale Anzahl der Aufgaben
+```
+
+### Punktesummen berechnen 
+
+In folgenden Beispiel werden die Punktesummen in der Variable `summe` berechnet und dann dem Dataframe `studentdata` als Spalte zugewiesen.
+
+```{r punktesummen}
 summe <- a1 + a2 + a3
 ### in studentdata die Spalte "summe" ergänzen
 studentdata$summe <- summe
-### Erste Zeile enthält die maximale Anzahl der Aufgaben
-
-
 ```
