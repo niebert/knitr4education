@@ -2,7 +2,7 @@
 title: "HTML Arbeitsblatt 3 - Notengebung zu Punkten"
 author: "Bert Niehaus"
 date: "`r Sys.Date()`"
-output: html_document
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
@@ -18,10 +18,13 @@ In dem folgende R-Code werden mit Hilfe von 2 Funktionen zu einem Vektor mit Pun
 * `notenskala` enthält die Noten, die entsprechend der Notengrenzen den Punkten zugewiesen werden. Diese können Zahlenwert 1-6, Text "sehr gut", "sehr gut-" ..., oder auch Buchstaben A,B,C,D, und F für "failed" (amerikanisches Notensystem) sein, um entsprechend der Notengrenzen dan die Noten zuordnen zu können.
 
 ## Notenberechnung
+Die Notenberechnung erfolgt in zwei Schritten:
+* **Notengrenzen:** Berechnung der Notengrenzen bei gegebener Maximalpunktzahl, Bestehensgrenze und den verwendeten Notenskala,
+* **Notenzuordnung:** Dabei wird den Punkten die entsprechende Note bei Erreichen der Notengrenze zugeordnet
 
 ### Funktion für Berechung der Notengrenzen
 
-```{r , echo=FALSE}
+```{r , echo=TRUE}
 notengrenzen_calc <- function(pPunkteMax, pBestGrenze,pBestIndex,pNotenSkala) {
      grenze = rep(0, length(pNotenSkala))
      imax <- length(pNotenSkala)
@@ -54,6 +57,39 @@ notengrenzen_calc <- function(pPunkteMax, pBestGrenze,pBestIndex,pNotenSkala) {
 
 Die oben definierte Funktion kann nun verwendet werden, um Notengrenzen zu berechnen.
 
+### Notengrenzen in Abhängigkeit von Bestehensgrenze 
+In dem folgenden Beispiel werden die Notengrenzen in Abhängigkeit von der Bestehensgrenze bestimmt.
+```{r ,echo=FALSE}
+maxpunkte <- 200
+bestgrenze <- 80
+notenskala <- c("sehr gut","gut","befriedigend","ausreichend","mangelhaft","ungenügend")
+bestindex <- 4 ## Index für Note, mit der man gerade noch bestanden hat 4 "ausreichend"
+grenzen <- notengrenzen_calc(maxpunkte, bestgrenze,bestindex,notenskala)
+```
+In dieser Beispielrechnung für eine Klausur konnten maximal `r maxpunkte` erreicht werden. Dabei wurde als Bestehensgrenze die Punktezahl `r ` festfelegt. Das sind `r 100 * bestgrenze/maxpunkte` Prozent der Punkte. Nach der Berechnung der Notengrenzen ergibt sich.
+```{r ,echo=FALSE}
+df4grenzen <- data.frame(Notenskala=notenskala)  
+#df4grenzen$Note <- notenskala
+Notengrenze <- rep("-",length(notenskala))
+for (i in 1:length(Notengrenze)) {
+  Notengrenze[i] <- paste(grenzen[i],"-",grenzen[i+1])
+}
+Notengrenze[length(Notengrenze)] <- paste(grenzen[length(Notengrenze)],"-",0)
+df4grenzen$Notengrenze <-Notengrenze  
+```
+
+Nun wird die Tabelle mit den Notengrenze erstellt:
+
+```{r , echo=FALSE}
+knitr::kable(
+  df4grenzen, booktabs = TRUE,
+  align=c('l','c'),
+  caption = 'Geladene Daten aus der Datei data.csv.'
+)
+```
+
+
+
 ### Funktion zu Berechnung der Noten
 Die Anwendung der folgenden Funktion `note_zuordnen()` setzt voraus, dass man vorher bei einer gegebenen 
 * maximalen Anzahl von Punkten,
@@ -83,6 +119,7 @@ note_zuordnen <- function(pPunkte,pGrenzen,pNotenskala) {
 }
 
 ```
+
 
 ### Beispielberechnung für die Noten 1-6
 ```{r noten1bis6, echo=TRUE}
@@ -141,9 +178,19 @@ a1 <- studentdata$aufgabe1
 a2 <- studentdata$aufgabe2
 a3 <- studentdata$aufgabe3
 
-
-### Erste Zeile enthält die maximale Anzahl der Aufgaben
 ```
+
+Die erste Datenzeile (2. Zeile) enthält die maximale Anzahl der Punkte für die jeweilige Aufgabe.
+
+### Ausgangstabelle anzeigen
+Die folgende Tabelle enthält die geladenen Daten.
+```{r , echo=FALSE}
+knitr::kable(
+  studentdata, booktabs = TRUE,
+  caption = 'Geladene Daten aus der Datei data.csv.'
+)
+```
+
 
 ### Punktesummen berechnen 
 
@@ -155,12 +202,23 @@ summe <- a1 + a2 + a3
 studentdata$summe <- summe
 ```
 
+### Ausgangstabelle mit berechneter Summe
+Die folgende Tabelle enthält die geladenen Daten.
+```{r}
+knitr::kable(
+  studentdata, booktabs = TRUE,
+  caption = 'Geladene Daten mit Summespalte für data.csv.'
+)
+```
+
 ### Notenskala und Noten für die Punkte berechnen 
 ```{r}
-maxpunkte <- 100
-bestgrenze <- 40
+maxpunkte <- summe[1] ## erste Zeile MAX enthält die maximal erreichbaren Punkte
+bestgrenze <- summe[1] * 0.5 ## Bestehensgrenze ist 50% der Gesamtpunktzahl
+### Als Notenskala werden die deutschen Noten mit Tendenz verwendet
 notenskala <- c("1","1-","2+","2","2-","3+","3","3-","4+","4","4-","5+","5","5-","6")
-bestindex <- 10 ## Index für Note, mit der man gerade noch bestanden hat 4 "ausreichend"
+bestindex <- 10 ## Index für Note, mit der man gerade noch bestanden hat. 
+### In Index 10 steht "4" als "ausreichend" und mit "4-" hat man nicht mehr bestanden.
 
 # Der Vektor "grenzen" enthält die Punktegrenzen, ab der man die betreffende Note
 # aus der Notenskala erhält. Diese werden in Abhängigkeit von der Bestehensgrenze gewählt.
@@ -170,22 +228,34 @@ grenzen <- notengrenzen_calc(maxpunkte, bestgrenze,bestindex,notenskala)
 # Gesamtpunktzahl der Klausur findet man im Vektor "summe"
 # die Summe ist eine Vektor z.B. summe <- c(23,92,33,89,60)
 
-noten <- note_zuordnen(punkte, grenzen, notenskala)
+noten <- note_zuordnen(summe, grenzen, notenskala)
 studentdata$noten <- noten
 ```
 
+### Ausgangstabelle mit berechneter Note
+Die folgende Tabelle enthält Noten auf Basis der berechnen Punktesummen für die geladenen Daten.
+Als Bestehensgrenze wurde `r bestgrenze` Punkte festgelegt bei eine möglichen Gesamtpunktzahl von `r summe[1]` Punkten.
+```{r}
+knitr::kable(
+  studentdata, booktabs = TRUE,
+  align=c('l','r','r','r','r','c'),
+  caption = 'Geladene Daten mit Summespalte für data.csv.'
+)
+```
 ## Bestandenvektor berechnen
 
 Die Funktion bekommt eine Punkteliste der Klausur und eine  Bestehensgrenze als Eingabe.
 
 ```{r, bestandenvektor}
-bestanden_vektor <- function(pPointVec,pBestGrenze) {
+bestanden_vektor <- function(pPunkte,pBestGrenze) {
   # pPointVec <- c(23,42,12,44,30)
   ### Der bestandenvektor soll nachher als Textausgabe für die Übungsblätter verwendet werden.
-  bestvektor <- rep("-",length(pPointVec))
-  for (i in 1:length(pPointVec)) {
-      print(pPointVec[i])    
-      if (pPointVec[i] >= pBestGrenze) {
+  bestvektor <- rep("-",length(pPunkte))
+  for (i in 1:length(pPunkte)) {
+      ## Wenn die Punkte der i-ten Klausur die Bestehensgrenze erreicht,
+      ## dann soll in dem Bestehensvektor die "bestanden" stehen und
+      ## unterhalb der Bestehensgrenze "nicht bestanden" in den Bestehensvektor beschrieben werden.
+      if (pPunkte[i] >= pBestGrenze) {
          bestvektor[i] <- "bestanden"  
       } else {
          bestvektor[i] <- "nicht bestanden"  
@@ -196,10 +266,21 @@ bestanden_vektor <- function(pPointVec,pBestGrenze) {
   bestvektor 
 }
 
-best <- bestanden_vektor(summe,2.0)
+### Im Vektor "summe" stehen die Punktesumme und "bestgrenze" ist die Bestehensgrenze
+best <- bestanden_vektor(summe,bestgrenze)
+### Nun wird der Bestehensvektor in dem Dataframe "studentdata" ergänzt.
 studentdata$bestanden <- best
 ```
 
+### Spalte für das Bestanden
+In letzten Spalte wurde nun noch eine weitere Textspalte ergänzt, die das Bestehen als Textvariable mit "bestanden" bzw. "nicht bestanden" enthält.
+```{r}
+knitr::kable(
+  studentdata, booktabs = TRUE,
+  align=c('l','r','r','r','r','c','l'),
+  caption = 'Geladene Daten mit Summespalte für data.csv.'
+)
+```
 ## Speichern der Daten
 In der obigen Datenverarbeitung wurde im Dataframe `studentdata` die Spalte `summe`, `bestanden` und `note` ergänzt und diese erweiterte Datentabelle wird nun in einer neuen Datei mit dem Namen `klausurnote.csv` abgespeichert, damit die Ausgangsdatei in diesem Demo nicht überschrieben wird. 
 Wahl eines neuen Dateinamens ist prinzipiell empfehlenswert, damit bei einer fehlerhaften Berechnung nicht die Rohdaten verändert werden.
