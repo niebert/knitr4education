@@ -1,5 +1,5 @@
 ---
-title: "ODT Arbeitsblatt 1"
+title: "Demo 1 - Code Chunks und mathematische Formeln"
 author: "Bert Niehaus"
 date: "`r Sys.Date()`"
 output: odt_document
