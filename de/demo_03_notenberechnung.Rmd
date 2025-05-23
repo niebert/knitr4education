@@ -154,7 +154,8 @@ summe <- a1 + a2 + a3
 ### in studentdata die Spalte "summe" ergänzen
 studentdata$summe <- summe
 ```
-### Notenskala für die Punkte berechnen 
+
+### Notenskala und Noten für die Punkte berechnen 
 ```{r}
 maxpunkte <- 100
 bestgrenze <- 40
@@ -172,6 +173,33 @@ grenzen <- notengrenzen_calc(maxpunkte, bestgrenze,bestindex,notenskala)
 noten <- note_zuordnen(punkte, grenzen, notenskala)
 studentdata$noten <- noten
 ```
+
+## Bestandenvektor berechnen
+
+Die Funktion bekommt eine Punkteliste der Klausur und eine  Bestehensgrenze als Eingabe.
+
+```{r, bestandenvektor}
+bestanden_vektor <- function(pPointVec,pBestGrenze) {
+  # pPointVec <- c(23,42,12,44,30)
+  ### Der bestandenvektor soll nachher als Textausgabe für die Übungsblätter verwendet werden.
+  bestvektor <- rep("-",length(pPointVec))
+  for (i in 1:length(pPointVec)) {
+      print(pPointVec[i])    
+      if (pPointVec[i] >= pBestGrenze) {
+         bestvektor[i] <- "bestanden"  
+      } else {
+         bestvektor[i] <- "nicht bestanden"  
+      }
+  }
+  ### bestvektor <- c("bestanden","bestanden","nicht bestanden", "nicht bestanden", "bestanden")
+  ### bestandenvektor wird zurückgegeben
+  bestvektor 
+}
+
+best <- bestanden_vektor(summe,2.0)
+studentdata$bestanden <- best
+```
+
 ## Speichern der Daten
 In der obigen Datenverarbeitung wurde im Dataframe `studentdata` die Spalte `summe`, `bestanden` und `note` ergänzt und diese erweiterte Datentabelle wird nun in einer neuen Datei mit dem Namen `klausurnote.csv` abgespeichert, damit die Ausgangsdatei in diesem Demo nicht überschrieben wird. 
 Wahl eines neuen Dateinamens ist prinzipiell empfehlenswert, damit bei einer fehlerhaften Berechnung nicht die Rohdaten verändert werden.
