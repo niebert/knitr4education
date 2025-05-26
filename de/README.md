@@ -3,7 +3,7 @@ Die Demodateien wurden für Wikiversity-Lernumgebungen erzeugt, die Studierende 
 * **Demo 1:** Zeigt die prinzipielle Verwendung von Codechunks, mathematischen Formeln und der Verwendnug von Variableninhalten im Text.
 
 ### Verzeichnisse 
-* **(Daten - `/data`)** Das Verzeichnis `/data` erhält Demodaten, die man in der Lernresource [KnitR in Wikiversity](https://de.wikiversity.org/wiki/KnitR). Weitere Daten zu Testzwecken findet man in dem Repository https://github.com/guru99-edu/R-Programming von [guru99-edu](https://github.com/guru99-edu).
+* **(Daten - `/data`)** Das Verzeichnis [/data](/data) erhält Demodaten, die man in der Lernresource [KnitR in Wikiversity](https://de.wikiversity.org/wiki/KnitR). Weitere Daten zu Testzwecken findet man in dem Repository https://github.com/guru99-edu/R-Programming von [guru99-edu](https://github.com/guru99-edu).
 * **(Funktionsammlung - Library `/lib`)** in der Programmierung ist es üblich, oft verwendete Funktionen für die erneute Nutzung in Bibliotheken zusammenzufassen. Diese Bibliotheken im Kontext der [KnitR-Lernumgebung](https://de.wikiversity.org/wiki/KnitR) erstellt wurden, werden in dem Unterverzeichnis `lib/` abgespeichert.
 * **(Ausgaben Demo - `/out4knitr`)** Das Verzeichnis `/out4knitr` erhält Ausgabedateien von [KnitR](https://de.wikiversity.org/wiki/KnitR), die man sich hier ansehen kann. 
 
