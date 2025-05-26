@@ -283,7 +283,7 @@ knitr::kable(
 ```
 ## Häufigkeit der Noten im Diagramm
 Mit den folgenden Befehlen kann man die Häufigkeit der Noten in einem Balkendiagramm darstellen.
-```r
+```{r}
 # der Vektor mit den Noten hat die folgenden Gestalt
 #noten <- c(4, 3, 5, 4, 3, 5, 4, 3, 5, 4, 3, 5)
 
