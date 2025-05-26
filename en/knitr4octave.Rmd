@@ -15,13 +15,13 @@ This is an R Markdown document, that used [Octave](https://octave.org/) (see <ht
 
 When you click the **Knit** button a document will be generated and the included  Octave code will be executed (similar to R code chunks). KnitR needs to know, where Octace is located in the file system to be execute during a KnitR run. After generation of output from Octave (e.g. a figure) the results in file can be included in the KnitR document (e.g. import a graph or diagram).  You can embed an Octave code with a code chunk similar to code chunks in R:
 
-This text above is pure text before code chunk in Octave.
+This text above is pure text before code chunk in Octave. The following code chunk contains Octave code. The paramater `engine.path='/usr/bin/octave'` tells R, where to find the Octace software on your system. On Linux it is e.g. `/usr/bin/octave`. Adapt the path to you local path to `Octave`. On Linux and MacOSX you can find the path to the `octave` executable with the command `which octave`.
 ```{octave,engine.path='/usr/bin/octave',results='asis',echo=TRUE}
   x = -10:0.1:10;
   plot (x, sin (x)); 
   print -djpg ./myfigure.jpg 
 ```
-After the execution of the code chunk the generated image by Octave in available as file "myfigure.jpg" in the same directory of the R-Markdown document. The following R-Markdown code imports the generated figure "myfigure.jpg" in the document.
+After the execution of the code chunk the generated image by Octave in available as file `myfigure.jpg` in the same directory of the R-Markdown document. The following R-Markdown code imports the generated figure "myfigure.jpg" in the document.
 ![My Plot of the sin-function with Octave](./myfigure.jpg)
 
 ## Plots in R
