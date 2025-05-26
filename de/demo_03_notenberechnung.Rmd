@@ -361,7 +361,23 @@ Mit den folgenden Befehlen kann man die Häufigkeit der Noten in einem Balkendia
 # noten <- c(4, 3, 5, 4, 3, 5, 4, 3, 5, 4, 3, 5,1,2,2,6,6)
 
 # Häufigkeit von Noteneinträgen ermitteln
-haeufigkeit <- table(noten)
+
+# Häufigkeit von Noteneinträgen ermitteln
+# Das erste Element enthält die maximale Punktzahl in der Klausur,
+# deshalb darf diese Zeile nicht mitgezaehlt werden
+ohne_element1 <- function(pVektor) {
+  len <- length(pVektor)-1
+  ret <- rep(0,len)
+  for (i in 1:len) {
+    ret[i] <- pVektor[i+1]
+  }
+  ## return Vektor ohne 1. Element
+  ret
+}
+
+noten_ohne1 <- ohne_element1(noten)
+haeufigkeit <- table(noten_ohne1)
+
 
 # Balkendiagramm erstellen
 barplot(
