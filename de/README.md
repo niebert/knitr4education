@@ -9,7 +9,7 @@ Die Demodateien wurden für Wikiversity-Lernumgebungen erzeugt, die Studierende 
 
 ### Datensätze 
 Beispieldatensätze sind erstellt worden, um mit diesen die Funktionsweise von bestimmten Funktionen in R zu erlernen.
-Diese finden Sie in dem Unterverzeichnis `data/` oder bei [R-Programming](https://github.com/guru99-edu/R-Programming).
+Diese finden Sie in dem Unterverzeichnis [`data/`](data) oder bei [`R-Programming`](https://github.com/guru99-edu/R-Programming).
 
 ### Funktionssammlungen / Bibliotheken
 Bibliotheken können in R bzw. in KnitR-Code-Chunks mit `source("mylib.R")` eingebunden werden. Durch die Verwendung von Bibliotheken kann man Funktionen für mehrere R-Markdowndateien mit [KnitR](https://de.wikiversity.org/wiki/KnitR) verfügbar machen. 
