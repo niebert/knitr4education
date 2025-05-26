@@ -10,8 +10,8 @@ Diese Verzeichnis enthält Output-Dateien für KnitR. Im Kopf der R-Markdown-Dat
 * Im Kopf der R-Markdown-Datei kann man das Ausgabeformat festlegen.
 ```ỳaml
 ---
-title: "ODT Arbeitsblatt 2 Notenberechnung "
-author: "Bert Niehaus"
+title: "ODT Arbeitsblatt - Learning Analytics "
+author: "Vorname Nachname"
 date: "`r Sys.Date()`"
 output: odt_document
 ---
