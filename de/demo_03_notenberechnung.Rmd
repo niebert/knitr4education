@@ -281,6 +281,26 @@ knitr::kable(
   caption = 'Geladene Daten mit Summespalte für data.csv.'
 )
 ```
+## Häufigkeit der Noten im Diagramm
+Mit den folgenden Befehlen kann man die Häufigkeit der Noten in einem Balkendiagramm darstellen.
+```r
+# der Vektor mit den Noten hat die folgenden Gestalt
+#noten <- c(4, 3, 5, 4, 3, 5, 4, 3, 5, 4, 3, 5)
+
+# Häufigkeit von Noteneinträgen ermitteln
+haeufigkeit <- table(noten)
+
+# Balkendiagramm erstellen
+barplot(
+  haeufigkeit,
+  main = "Häufigkeit von Noten",
+  xlab = "Noten",
+  ylab = "Häufigkeit",
+  col = "blue",
+  border = "black"
+)
+```
+
 ## Speichern der Daten
 In der obigen Datenverarbeitung wurde im Dataframe `studentdata` die Spalte `summe`, `bestanden` und `note` ergänzt und diese erweiterte Datentabelle wird nun in einer neuen Datei mit dem Namen `klausurnote.csv` abgespeichert, damit die Ausgangsdatei in diesem Demo nicht überschrieben wird. 
 Wahl eines neuen Dateinamens ist prinzipiell empfehlenswert, damit bei einer fehlerhaften Berechnung nicht die Rohdaten verändert werden.
