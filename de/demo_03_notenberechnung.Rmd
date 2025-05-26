@@ -17,6 +17,30 @@ In dem folgende R-Code werden mit Hilfe von 2 Funktionen zu einem Vektor mit Pun
 * Mit der Funktion `notengrenzen_calc(pPunkteMax, pBestGrenze,pBestIndex,pNotenSkala)`  kann die Notengrenzen berechnen, um die Noten zuordnen danach mit der Funktion `note_zuordnen()` dem Punktevektor zuordnen zu können.
 * `notenskala` enthält die Noten, die entsprechend der Notengrenzen den Punkten zugewiesen werden. Diese können Zahlenwert 1-6, Text "sehr gut", "sehr gut-" ..., oder auch Buchstaben A,B,C,D, und F für "failed" (amerikanisches Notensystem) sein, um entsprechend der Notengrenzen dan die Noten zuordnen zu können.
 
+## Klausurergebnisse laden 
+Die Klausurergebnisse werden in dieser Demodatei aus einem Unterordner `/data` geladen. Für diese Daten werden die Noten automatisch in dieser KnitR-Datei berechnet. Die Klausur besteht aus 3 Aufgaben.
+
+```{r laden}
+studentdata <- read.csv("data/klausur.csv", header=TRUE, stringsAsFactors=FALSE)
+
+a1 <- studentdata$aufgabe1
+a2 <- studentdata$aufgabe2
+a3 <- studentdata$aufgabe3
+
+## Es wurden die Spalten aus der Tabelle `aufgabe1`, `aufgabe2`, `aufgabe3` 
+## den Vektoren `a1`, `a2`, `a3` zugeordnet.
+
+## Nun kann man vektorielle Addition durchführen und die Punktesumme berechnen.
+summe <- a1 + a2 + a3
+
+## Die Punktesumme wird nun auch wieder `studentdata` zugewiesen.
+studentdata$summe <- summe
+## Ab dieser Codezeile hat `studentdata`  eine weitere Spalte.
+```
+
+Die erste Datenzeile (2. Zeile) enthält die maximale Anzahl der Punkte für die jeweilige Aufgabe.
+
+
 ## Notenberechnung
 Die Notenberechnung erfolgt in zwei Schritten:
 * **Notengrenzen:** Berechnung der Notengrenzen bei gegebener Maximalpunktzahl, Bestehensgrenze und den verwendeten Notenskala,
@@ -167,20 +191,6 @@ noten <- note_zuordnen(punkte, grenzen, notenskala)
 ### Notenberechnung ist nun abgeschlossen - Ausgabe
 print(noten)
 ```
-
-### Klausurergebnisse laden 
-Nun kann man das auf die Klausurergebnisse der Demodatei anwenden-
-
-```{r laden}
-studentdata <- read.csv("data/klausur.csv", header=TRUE, stringsAsFactors=FALSE)
-
-a1 <- studentdata$aufgabe1
-a2 <- studentdata$aufgabe2
-a3 <- studentdata$aufgabe3
-
-```
-
-Die erste Datenzeile (2. Zeile) enthält die maximale Anzahl der Punkte für die jeweilige Aufgabe.
 
 ### Ausgangstabelle anzeigen
 Die folgende Tabelle enthält die geladenen Daten.
