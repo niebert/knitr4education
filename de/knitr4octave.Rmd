@@ -21,7 +21,7 @@ This text above is pure text before code chunk in Octave.
   plot (x, sin (x)); 
   print -djpg ./myfigure.jpg 
 ```
-After the execution of the code chunk the generated image by Octave in available as file "myfigure.jpg" in the same directory of the R-Markdown document. The following R-Markdown code imports the generated figure "myfigure.jpg" in the document.
+After the execution of the code chunk the generated image by Octave in available as file `myfigure.jpg` in the same directory of the R-Markdown document. The following R-Markdown code imports the generated figure "myfigure.jpg" in the document.
 ![My Plot of the sin-function with Octave](./myfigure.jpg)
 
 ## Plots in R
