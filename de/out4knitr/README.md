@@ -1,8 +1,9 @@
 ## Output für KnitR
 Diese Verzeichnis enthält Output-Dateien für KnitR. Im Kopf der R-Markdown-Datei kann man das Ausgabeformat festlegen.
-* `html_document` erzeugt eine HTML-Datei aus dem R-Markdown-Dokument.
-* `odt_document` erzeugt eine ODT-Datei aus dem R-Markdown-Dokument, die man mit [LibreOffice-Writer](https://www.libreoffice.org/download/download-libreoffice/)   weiter bearbeiten kann.
-* `pdf_document` erzeugt eine PDF-Datei direkt aus dem R-Markdown-Dokument. Dabei sollte LaTeX auf Ihrem Rechner installiert sein:
+* **(HTML)** `html_document` erzeugt eine HTML-Datei aus dem R-Markdown-Dokument.
+*  **(LibreOffice)** `odt_document` erzeugt eine ODT-Datei aus dem R-Markdown-Dokument, die man mit [LibreOffice-Writer](https://www.libreoffice.org/download/download-libreoffice/)   weiter bearbeiten kann.
+*  **(Latex)** `latex_document` erzeugt eine LaTeX-Datei aus dem R-Markdown-Dokument.
+*  **(PDF)** `pdf_document` erzeugt eine PDF-Datei direkt aus dem R-Markdown-Dokument. Dabei sollte LaTeX auf Ihrem Rechner installiert sein:
   * `Linux` - ist in Ihrem Packagemanager auf Linux enthalten (starten Sie dazu Ihren Paketmanager auf Ihrem Linux
   * `Windows` - es gibt z.B. die Latex-Installation von [MikTex](https://miktex.org/) und [Tex Live](https://www.tug.org/texlive/)
   * `MacOSX` - es gibt [MacTeX](https://www.tug.org/mactex/) als Installation für den Mac.
