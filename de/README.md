@@ -13,4 +13,4 @@ Beispieldatensätze sind erstellt worden, um mit diesen die Funktionsweise von b
 Diese finden Sie in dem Unterverzeichnis `data/`.
 
 ### Funktionssammlungen / Bibliotheken
-Bibliotheken können in R bzw. in KnitR-Code-Chunks mit `source("mylib.R")` eingebunden werden.
+Bibliotheken können in R bzw. in KnitR-Code-Chunks mit `source("mylib.R")` eingebunden werden. Durch die Verwendung von Bibliotheken kann man Funktionen für mehrere R-Markdowndateien mit [KnitR](https://de.wikiversity.org/wiki/KnitR) verfügbar machen. 
