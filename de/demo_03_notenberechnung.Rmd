@@ -32,18 +32,24 @@ a3 <- studentdata$aufgabe3
 
 ```
 
+### Spaltenvektoren aus dem Dataframe extrahieren 
+Die Klausurergebnisse befinden sich nach dem Laden in dem Dataframe `studentdata`. Aus dieser Datenstruktur sollen nun einzelne Spalten extrahiert werden.  Es wurden die Spalten  `aufgabe1`, `aufgabe2`, `aufgabe3` aus der Tabelle den Vektoren `a1`, `a2`, `a3` zugeordnet. Die hat im Wesentlichen die Funktion, die Notation und den Zugriff auf die Vektoren zu vereinfachen.
+
+```{r spaltenvektoren}
+
+a1 <- studentdata$aufgabe1
+a2 <- studentdata$aufgabe2
+a3 <- studentdata$aufgabe3
+
+```
+
 ### Punktesummen berechnen 
 
-In folgenden Beispiel werden die Punktesummen in der Variable `summe` berechnet und dann dem Dataframe `studentdata` als Spalte zugewiesen.
+In folgenden Beispiel werden die Punktesummen in der Variable `summe` berechnet und dann dem Dataframe `studentdata` als Spalte zugewiesen. Oben wurden die Spalten  `aufgabe1`, `aufgabe2`, `aufgabe3` aus der Tabelle `data.csv`  den Vektoren `a1`, `a2`, `a3` zugeordnet. Mit den Spaltenvektoren wird die Vektorsumme  `summe` berechnet und dann eine weitere Spalte im Dataframe `studentdata` ergänzt. Die Berechnung der Summe erfolgt im Sinne der linearen Algebra als Vektoraddition.
+
 
 ```{r punktesummen}
-## Oben wurden die Spalten  `aufgabe1`, `aufgabe2`, `aufgabe3` aus der Tabelle data.csv  
-## den Vektoren `a1`, `a2`, `a3` zugeordnet.
-
-## Nun wurde vektoriell Punktesumme berechnet
 summe <- a1 + a2 + a3
-
-### in dem Dataframe `studentdata` wird nun die Spalte "summe" ergänzt und mit dem Vektor `summe` definiert
 studentdata$summe <- summe
 ```
 
@@ -59,7 +65,7 @@ knitr::kable(
 Die erste Datenzeile (2. Zeile) enthält die maximale Anzahl der Punkte für die jeweilige Aufgabe.
 
 
-## Notenberechnung
+## Notenberechnung 
 Die Notenberechnung erfolgt in zwei Schritten:
 * **Notengrenzen:** Berechnung der Notengrenzen bei gegebener Maximalpunktzahl, Bestehensgrenze und den verwendeten Notenskala,
 * **Notenzuordnung:** Dabei wird den Punkten die entsprechende Note bei Erreichen der Notengrenze zugeordnet
@@ -92,6 +98,7 @@ notengrenzen_calc <- function(pPunkteMax, pBestGrenze,pBestIndex,pNotenSkala) {
         # Vermindere den Index
         gi <- gi - 1 
      }
+     grenze <- round(grenze * 10)/10
      ## Rückgabewert Vektor "grenze"
      grenze
 }
@@ -102,31 +109,50 @@ Die oben definierte Funktion kann nun verwendet werden, um Notengrenzen zu berec
 ### Notengrenzen in Abhängigkeit von Bestehensgrenze 
 In dem folgenden Beispiel werden die Notengrenzen in Abhängigkeit von der Bestehensgrenze bestimmt.
 ```{r ,echo=FALSE}
-maxpunkte <- 200
-bestgrenze <- 80
-notenskala <- c("sehr gut","gut","befriedigend","ausreichend","mangelhaft","ungenügend")
-bestindex <- 4 ## Index für Note, mit der man gerade noch bestanden hat 4 "ausreichend"
-grenzen <- notengrenzen_calc(maxpunkte, bestgrenze,bestindex,notenskala)
+#### Alternativ explizite Angabe der maximalen Punktzahl
+# z.B. maxpunkte <- 52
+maxpunkte <- summe[1] 
+#### Alternativ explizite Angabe der Bestehensgrenze
+# z.B. bestgrenze <- 26
+bestgrenze <- round(maxpunkte/2)
+
+#### Notenskala festlegen - hier Noten als Text
+notenskala1 <- c("sehr gut","gut","befriedigend","ausreichend","mangelhaft","ungenügend")
+bestindex1 <- 4 ## Index für Note, mit der man gerade noch bestanden hat 4 "ausreichend"
+grenzen1 <- notengrenzen_calc(maxpunkte, bestgrenze,bestindex1,notenskala1)
 ```
-In dieser Beispielrechnung für eine Klausur konnten maximal `r maxpunkte` erreicht werden. Dabei wurde als Bestehensgrenze die Punktezahl `r ` festfelegt. Das sind `r 100 * bestgrenze/maxpunkte` Prozent der Punkte. Nach der Berechnung der Notengrenzen ergibt sich.
+
+### Notengrenzen in einer Tabelle ausgeben
+In dieser Beispielrechnung für eine Klausur konnten maximal `r maxpunkte` erreicht werden (siehe obiger Code-Chunk). Dabei wurde als Bestehensgrenze die Punktezahl `r bestgrenze` festfelegt. Das sind `r 100 * bestgrenze/maxpunkte` Prozent der Punkte. Nach der Berechnung der Notengrenzen ergibt sich.
 ```{r ,echo=FALSE}
-df4grenzen <- data.frame(Notenskala=notenskala)  
-#df4grenzen$Note <- notenskala
-Notengrenze <- rep("-",length(notenskala))
-for (i in 1:length(Notengrenze)) {
-  Notengrenze[i] <- paste(grenzen[i],"-",grenzen[i+1])
+tabelle4grenzen <- function (pNotenSkala,pGrenzen) {
+  ## Erzeuge einen Dataframe mit der Notenskala in der 1. Spalte 
+  return4df <- data.frame(Notenskala=pNotenSkala)  
+  max_i <- length(pNotenSkala) 
+
+  Notengrenze <- rep("-",max_i)
+  ## Berechne die Notengrenzen z.B. "22-28" 
+  for (i in 1:(max_i-1)) {
+    Notengrenze[i] <- paste(pGrenzen[i],"-",pGrenzen[i+1])
+  }
+  ## Setze die Punktegrenzen für schlechteste Note
+  Notengrenze[max_i] <- paste(pGrenzen[max_i],"-",0)
+  return4df$Notengrenze <-Notengrenze  
+  
+  ## return Dataframe mit Punktegrenzen
+  return4df
 }
-Notengrenze[length(Notengrenze)] <- paste(grenzen[length(Notengrenze)],"-",0)
-df4grenzen$Notengrenze <-Notengrenze  
 ```
 
 Nun wird die Tabelle mit den Notengrenze erstellt:
 
 ```{r , echo=FALSE}
+df4grenzen <- tabelle4grenzen(notenskala1,grenzen1)
+
 knitr::kable(
   df4grenzen, booktabs = TRUE,
   align=c('l','c'),
-  caption = 'Geladene Daten aus der Datei data.csv.'
+  caption = 'Punktegrenzen für die Noten'
 )
 ```
 
@@ -142,14 +168,20 @@ die Notengrenze berechnet hat.
 note_zuordnen <- function(pPunkte,pGrenzen,pNotenskala) {
      ## Vektor mit der Länge der Punkte erstellen
      ## in dem Vektor wird die Note eingetragen
-     note4punkte <- rep(0,length(pPunkte))
-     for (i in 1:length(pPunkte)) {
+     anzahl_klausuren <- length(pPunkte)
+     #print(paste("anzahl_klausuren =",anzahl_klausuren))
+     
+     anzahl_noten <- length(pNotenskala)
+     #print(paste("anzahl_noten =",anzahl_noten))
+     
+     note4punkte <- rep(0,anzahl_klausuren)
+     for (i in 1:anzahl_klausuren) {
        ## Notenindex auf schlechteste Note setzen
-       gi <- length(pNotenskala)
+       gi <- anzahl_noten
        ## Noten auf schlechtesten Index setzen
        note4punkte[i] <- pNotenskala[gi]
        ## so lange die Note verbessern bis Note jeweilge Notengrenze kleiner als Punkte
-       while ((gi > 0) & (pPunkte[i] >= pGrenzen[gi]))  {
+       while ((gi > 1) & (pPunkte[i] >= pGrenzen[gi]))  {
           ## Index für die Grenze auf bessere Note setzen
           gi <- gi - 1 
           ## Notenbezeichnung setzen
@@ -165,24 +197,28 @@ note_zuordnen <- function(pPunkte,pGrenzen,pNotenskala) {
 
 ### Beispielberechnung für die Noten 1-6
 ```{r noten1bis6, echo=TRUE}
-maxpunkte <- 100
-bestgrenze <- 40
-notenskala <- c("sehr gut","gut","befriedigend","ausreichend","mangelhaft","ungenügend")
-bestindex <- 4 ## Index für Note, mit der man gerade noch bestanden hat 4 "ausreichend"
+maxpunkte <- summe[1] 
+#### Angabe der maximalen Punktzahl
+# z.B. maxpunkte <- 52
+bestgrenze <- round(maxpunkte/2)
+#### Angabe der Bestehensgrenze
+# z.B. bestgrenze <- 26
+notenskala1 <- c("sehr gut","gut","befriedigend","ausreichend","mangelhaft","ungenügend")
+bestindex1 <- 4 ## Index für Note, mit der man gerade noch bestanden hat 4 "ausreichend"
 
-grenzen <- notengrenzen_calc(maxpunkte, bestgrenze,bestindex,notenskala)
+grenzen <- notengrenzen_calc(maxpunkte, bestgrenze,bestindex1,notenskala1)
 ## grenzen <- c(100,85,70,55,40,20)
 ## liefert die Grenzen für die Noten punkte<20 bedeutet "ungenügend"
 ## liefert die Grenzen für die Noten 40 > punkte >= 20 bedeutet "mangelhaft"
 ### Noten berechnen
 
 ### Punkte für 5 Klausuren im Vektor "punkte"
-punkte <- c(23,92,33,89,60)
+#summe <- c(23,92,33,89,60)
 
-noten <- note_zuordnen(punkte, grenzen, notenskala)
-
+noten <- note_zuordnen(summe, grenzen1, notenskala1)
 ### Notenberechnung ist nun abgeschlossen - Ausgabe
-print(noten)
+
+studentdata$noten <- noten
 ```
 
 ### Beispielberechnung für Noten mit Tendenz
@@ -190,26 +226,35 @@ In dem folgenden Beispiel werden die Gesamtpunkte und die Notengrenze beibehalte
 Es nun mit den gleichen Punkte eine feinere Unterteilung der Notenskala vorgenommen, dabei werden Noten zwischen 1+ und 6 mit Tendenzen + und - vergeben, wobei die Note 6 ohne Tendenz vergeben wird.
 Damit ändert sich die Notenskala und der Index für die schwächste Note (hier 4), mit der man gerade nich bestanden hat.
 ```{r notentendenz, echo=TRUE}
-maxpunkte <- 100
-bestgrenze <- 40
-notenskala <- c("1","1-","2+","2","2-","3+","3","3-","4+","4","5+","5","5-","6")
-bestindex <- 10 ## Index für Note, mit der man gerade noch bestanden hat 4 "ausreichend"
+maxpunkte <- summe[1]
+bestgrenze <- round(maxpunkte/2)
+notenskala2 <- c("1+","1","1-","2+","2","2-","3+","3","3-","4+","4","4-","5+","5","5-","6")
+bestindex2 <- 11 ## Index für Note, mit der man gerade noch bestanden hat 4 "ausreichend"
 
-grenzen <- notengrenzen_calc(maxpunkte, bestgrenze,bestindex,notenskala)
-## grenzen <- c(100,85,70,55,40,20)
+grenzen2 <- notengrenzen_calc(maxpunkte, bestgrenze,bestindex2,notenskala2)
 ## liefert die Grenzen für die Noten punkte<20 bedeutet "ungenügend"
 ## liefert die Grenzen für die Noten 40 > punkte >= 20 bedeutet "mangelhaft"
 ### Noten berechnen
 
 ### Punkte für 5 Klausuren im Vektor "punkte"
-punkte <- c(23,92,33,89,60)
+# summe <- c(23,92,33,89,60)
 
-noten <- note_zuordnen(punkte, grenzen, notenskala)
+noten2 <- note_zuordnen(summe, grenzen2, notenskala2)
 
 ### Notenberechnung ist nun abgeschlossen - Ausgabe
-print(noten)
+studentdata$noten2 <- noten2
 ```
 
+### Notengrenze für Noten mit Tendenz
+```{r , echo=FALSE}
+df4grenzen <- tabelle4grenzen(notenskala2,grenzen2)
+
+knitr::kable(
+  df4grenzen, booktabs = TRUE,
+  align=c('l','c'),
+  caption = 'Punktegrenzen für die Noten'
+)
+```
 ### Ausgangstabelle anzeigen
 Die folgende Tabelle enthält die geladenen Daten.
 ```{r , echo=FALSE}
@@ -220,26 +265,44 @@ knitr::kable(
 ```
 
 
+### Notengrenzen mit Tendenz in einer Tabelle ausgeben
+In dieser Beispielrechnung für eine Klausur konnten maximal `r maxpunkte` erreicht werden (siehe obiger Code-Chunk). Dabei wurde als Bestehensgrenze die Punktezahl `r bestgrenze` festfelegt. Das sind `r 100 * bestgrenze/maxpunkte` Prozent der Punkte. Nach der Berechnung der Notengrenzen ergibt sich.
+```{r ,echo=FALSE}
+## Erzeuge einen Dataframe mit der Notenskala in der 1. Spalte 
+df4grenzen <- data.frame(Notenskala=notenskala2)  
+max_i <- length(notenskala2) 
+
+Notengrenze <- rep("-",max_i)
+## Berechne die Notengrenzen z.B. "22-28" 
+for (i in 1:(max_i-1)) {
+  Notengrenze[i] <- paste(grenzen1[i],"-",grenzen1[i+1])
+}
+## Setze die Punkte
+Notengrenze[max_i] <- paste(grenzen1[max_i],"-",0)
+df4grenzen$Notengrenze <-Notengrenze  
+```
+
 
 ### Notenskala und Noten für die Punkte berechnen 
-```{r}
-maxpunkte <- 52 ## erste Zeile MAX enthält die maximal erreichbaren Punkte
-bestgrenze <- 22  ## Bestehensgrenze ist 50% der Gesamtpunktzahl
+
+```{r , notenskala1}
+maxpunkte <- summe[1] ## erste Zeile MAX enthält die maximal erreichbaren Punkte
+bestgrenze <- round(summe[1]/2)  ## Bestehensgrenze ist 50% der Gesamtpunktzahl
 ### Als Notenskala werden die deutschen Noten mit Tendenz verwendet
-notenskala <- c("1","1-","2+","2","2-","3+","3","3-","4+","4","4-","5+","5","5-","6")
-bestindex <- 10 ## Index für Note, mit der man gerade noch bestanden hat. 
+notenskala3 <- c(0.7, 1.0, 1.3, 1.7, 2.0, 2.3, 2.7, 3.0, 3.3, 3.7, 4.0, 4.3, 4.7 , 5.0, 5.3, 6.0)
+bestindex3 <- 11 ## Index für Note, mit der man gerade noch bestanden hat. 
 ### In Index 10 steht "4" als "ausreichend" und mit "4-" hat man nicht mehr bestanden.
 
 # Der Vektor "grenzen" enthält die Punktegrenzen, ab der man die betreffende Note
 # aus der Notenskala erhält. Diese werden in Abhängigkeit von der Bestehensgrenze gewählt.
-grenzen <- notengrenzen_calc(maxpunkte, bestgrenze,bestindex,notenskala)
+grenzen3 <- notengrenzen_calc(maxpunkte, bestgrenze,bestindex3,notenskala3)
 
 ### Noten berechnen
 # Gesamtpunktzahl der Klausur findet man im Vektor "summe"
 # die Summe ist eine Vektor z.B. summe <- c(23,92,33,89,60)
 
-noten <- note_zuordnen(summe, grenzen, notenskala)
-studentdata$noten <- noten
+noten3 <- note_zuordnen(summe, grenzen3, notenskala3)
+studentdata$noten3 <- noten3
 ```
 
 ### Ausgangstabelle mit berechneter Note
@@ -295,7 +358,7 @@ knitr::kable(
 Mit den folgenden Befehlen kann man die Häufigkeit der Noten in einem Balkendiagramm darstellen.
 ```{r}
 # der Vektor mit den Noten hat die folgenden Gestalt
-#noten <- c(4, 3, 5, 4, 3, 5, 4, 3, 5, 4, 3, 5)
+# noten <- c(4, 3, 5, 4, 3, 5, 4, 3, 5, 4, 3, 5,1,2,2,6,6)
 
 # Häufigkeit von Noteneinträgen ermitteln
 haeufigkeit <- table(noten)
