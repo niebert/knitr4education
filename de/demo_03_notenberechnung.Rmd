@@ -213,8 +213,8 @@ knitr::kable(
 
 ### Notenskala und Noten für die Punkte berechnen 
 ```{r}
-maxpunkte <- summe[1] ## erste Zeile MAX enthält die maximal erreichbaren Punkte
-bestgrenze <- summe[1] * 0.5 ## Bestehensgrenze ist 50% der Gesamtpunktzahl
+maxpunkte <- 52 ## erste Zeile MAX enthält die maximal erreichbaren Punkte
+bestgrenze <- 22  ## Bestehensgrenze ist 50% der Gesamtpunktzahl
 ### Als Notenskala werden die deutschen Noten mit Tendenz verwendet
 notenskala <- c("1","1-","2+","2","2-","3+","3","3-","4+","4","4-","5+","5","5-","6")
 bestindex <- 10 ## Index für Note, mit der man gerade noch bestanden hat. 
