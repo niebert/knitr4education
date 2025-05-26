@@ -2,7 +2,7 @@
 title: "HTML Arbeitsblatt 3 - Notengebung zu Punkten"
 author: "Bert Niehaus"
 date: "`r Sys.Date()`"
-output: pdf_document
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
