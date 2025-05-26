@@ -4,12 +4,12 @@ Die Demodateien wurden für Wikiversity-Lernumgebungen erzeugt, die Studierende 
 
 ### Verzeichnisse 
 * **(Daten - `/data`)** Das Verzeichnis [`/data`](data) erhält Demodaten, die man in der Lernresource [KnitR in Wikiversity](https://de.wikiversity.org/wiki/KnitR). Weitere Daten zu Testzwecken findet man in dem Repository https://github.com/guru99-edu/R-Programming von [guru99-edu](https://github.com/guru99-edu).
-* **(Funktionsammlung - Library `/lib`)** in der Programmierung ist es üblich, oft verwendete Funktionen für die erneute Nutzung in Bibliotheken zusammenzufassen. Diese Bibliotheken im Kontext der [KnitR-Lernumgebung](https://de.wikiversity.org/wiki/KnitR) erstellt wurden, werden in dem Unterverzeichnis `lib/` abgespeichert.
-* **(Ausgaben Demo - `/out4knitr`)** Das Verzeichnis `/out4knitr` erhält Ausgabedateien von [KnitR](https://de.wikiversity.org/wiki/KnitR), die man sich hier ansehen kann. 
+* **(Funktionsammlung - Library `/lib`)** In der Programmierung ist es üblich, oft verwendete Funktionen für die erneute Nutzung in Bibliotheken in der zusammenzufassen. Diese findet man in dem Unterverzeichnis [`/lib`](lib) Diese Bibliotheken im Kontext der [KnitR-Lernumgebung](https://de.wikiversity.org/wiki/KnitR) erstellt wurden, werden in dem Unterverzeichnis `lib/` abgespeichert.
+* **(Ausgaben Demo - `/out4knitr`)** Das Verzeichnis [`/out4knitr`](out4knitr) erhält Ausgabedateien von [KnitR](https://de.wikiversity.org/wiki/KnitR), die man sich hier ansehen kann. 
 
 ### Datensätze 
 Beispieldatensätze sind erstellt worden, um mit diesen die Funktionsweise von bestimmten Funktionen in R zu erlernen.
-Diese finden Sie in dem Unterverzeichnis `data/`.
+Diese finden Sie in dem Unterverzeichnis `data/` oder bei [R-Programming](https://github.com/guru99-edu/R-Programming).
 
 ### Funktionssammlungen / Bibliotheken
 Bibliotheken können in R bzw. in KnitR-Code-Chunks mit `source("mylib.R")` eingebunden werden. Durch die Verwendung von Bibliotheken kann man Funktionen für mehrere R-Markdowndateien mit [KnitR](https://de.wikiversity.org/wiki/KnitR) verfügbar machen. 
