@@ -7,7 +7,7 @@ Diese Verzeichnis enthält Output-Dateien für [KnitR](https://de.wikiversity.or
    - `Linux` - ist in Ihrem Packagemanager auf Linux enthalten (starten Sie dazu Ihren Paketmanager auf Ihrem Linux
    - `Windows` - es gibt z.B. die Latex-Installation von [MikTex](https://miktex.org/) und [Tex Live](https://www.tug.org/texlive/)
    - `MacOSX` - es gibt [MacTeX](https://www.tug.org/mactex/) als Installation für den Mac.
-   - Alternativ kann man natürlich auch aus der `odt_document`-Ausgabe ein PDF-Export in LibreOffice durchführen. Das macht insbesondere dann Sinn, wenn ohnehin vorher noch in dem Dokument editiert wird.
+   - Alternativ kann man natürlich auch aus der `odt_document`-Ausgabe ein PDF-Export in [LibreOffice](https://www.libreoffice.org/) durchführen. Das macht insbesondere dann Sinn, wenn ohnehin vorher noch in dem Dokument editiert wird.
 * Im Kopf der R-Markdown-Datei kann man das Ausgabeformat festlegen.
 ```ỳaml
 ---
