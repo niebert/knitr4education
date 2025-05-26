@@ -1,5 +1,5 @@
 ## Output für KnitR
-Diese Verzeichnis enthält Output-Dateien für KnitR. Im Kopf der R-Markdown-Datei kann man das Ausgabeformat festlegen.
+Diese Verzeichnis enthält Output-Dateien für [KnitR](https://de.wikiversity.org/wiki/KnitR). Im Kopf der R-Markdown-Datei kann man das Ausgabeformat festlegen.
 * **(HTML)** `html_document` erzeugt eine HTML-Datei aus dem R-Markdown-Dokument.
 *  **(LibreOffice)** `odt_document` erzeugt eine ODT-Datei aus dem R-Markdown-Dokument, die man mit [LibreOffice-Writer](https://www.libreoffice.org/download/download-libreoffice/)   weiter bearbeiten kann.
 *  **(Latex)** `latex_document` erzeugt eine LaTeX-Datei aus dem R-Markdown-Dokument.
