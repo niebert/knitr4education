@@ -183,9 +183,13 @@ note_zuordnen <- function(pPunkte,pGrenzen,pNotenskala) {
        ## so lange die Note verbessern bis Note jeweilge Notengrenze kleiner als Punkte
        while ((gi > 1) & (pPunkte[i] >= pGrenzen[gi]))  {
           ## Index für die Grenze auf bessere Note setzen
-          gi <- gi - 1 
-          ## Notenbezeichnung setzen
-          note4punkte[i] <- pNotenskala[gi]
+          gi <- gi - 1  
+          ## Index gi kann bei Erreichen der Maximalpunkte auch 0 werden
+          ## daher Ueberpruefung, ob der Index gi >= 1
+          if (gi >= 1) {
+            ## Notenbezeichnung setzen 
+            note4punkte[i] <- pNotenskala[gi]
+          }
        } 
      }
      ### Rückgabewert der Noten fuer alle Punkte
