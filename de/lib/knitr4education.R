@@ -1,4 +1,4 @@
-### knitr4education - v0.0.4
+### knitr4education - v0.0.5
 ### https://www.github.com/niebert/knitr4education
 
 ### Include this file in your KnitR code by placing the following code in your 
@@ -148,5 +148,89 @@ koaktivitaetsmatrix <- function (pVecX,pVecY) {
 
 ### AUFRUF koaktivitaetmatrix()
 # x <- c(1,0,1)
-# y <- c(0,1)
+# y <- c(0,1) 
 # koaktivitaetsmatrix(x,y)
+
+### NOTENBERECHNUNG
+
+notengrenzen_calc <- function(pPunkteMax, pBestGrenze,pBestIndex,pNotenSkala) {
+     ## Parameter
+     ## pPunkteMax: maximale Anzahl der Punkte in der Klausur 
+     ## pBestGrenze: Bestehensgrenze
+     ## pNotenSkala: Vektor mit Noten z.B. c("sehr gut","gut","befriedigend",ausreichend","mangelhaft","ungenügend")
+     ## pBestIndex: Bestehensindex z.B. 4 -> verweist auf "ausreichend als bestanden.
+     ## siehe 
+     grenze = rep(0, length(pNotenSkala))
+     imax <- length(pNotenSkala)
+     schritt <- pBestGrenze/(imax-pBestIndex)
+     ## Index für 6 bis zur 4 berechnen 
+     gi <- imax
+     ## Grenze unterhalb der Bestehensgrenze
+     g <- 0
+     while (gi > pBestIndex) {
+        # Füge die Grenze in den Vektor ein
+        g <- g + schritt
+        grenze[gi] <- g
+     
+        # Vermindere den Index
+        gi <- gi - 1 
+     }
+     ## Grenze oberhalb der Bestehensgrenze
+     schritt <- (pPunkteMax - pBestGrenze)/(pBestIndex)
+     ## Index für 4 und besser 
+     while (gi > 0) {
+        g <- g + schritt
+        grenze[gi] <- g
+        # Vermindere den Index
+        gi <- gi - 1 
+     }
+     grenze <- round(grenze * 10)/10
+     ## Rückgabewert Vektor "grenze"
+     grenze
+}
+
+tabelle4grenzen <- function (pNotenSkala,pGrenzen) {
+  ## Erzeuge einen Dataframe mit der Notenskala in der 1. Spalte 
+  return4df <- data.frame(Notenskala=pNotenSkala)  
+  max_i <- length(pNotenSkala) 
+
+  Notengrenze <- rep("-",max_i)
+  ## Berechne die Notengrenzen z.B. "22-28" 
+  for (i in 1:(max_i-1)) {
+    Notengrenze[i] <- paste(pGrenzen[i],"-",pGrenzen[i+1])
+  }
+  ## Setze die Punktegrenzen für schlechteste Note
+  Notengrenze[max_i] <- paste(pGrenzen[max_i],"-",0)
+  return4df$Notengrenze <-Notengrenze  
+  
+  ## return Dataframe mit Punktegrenzen
+  return4df
+}
+
+note_zuordnen <- function(pPunkte,pGrenzen,pNotenskala) {
+     ## Vektor mit der Länge der Punkte erstellen
+     ## in dem Vektor wird die Note eingetragen
+     anzahl_klausuren <- length(pPunkte)
+     
+     anzahl_noten <- length(pNotenskala)
+     #print(paste("anzahl_noten =",anzahl_noten))
+     
+     note4punkte <- rep(0,anzahl_klausuren)
+     for (i in 1:anzahl_klausuren) {
+       ## Notenindex auf schlechteste Note setzen
+       gi <- anzahl_noten
+       ## Noten auf schlechtesten Index setzen
+       note4punkte[i] <- pNotenskala[gi]
+       ## so lange die Note verbessern bis Note jeweilge Notengrenze kleiner als Punkte
+       while ((gi > 1) & (pPunkte[i] >= pGrenzen[gi]))  {
+          ## Index für die Grenze auf bessere Note setzen
+          gi <- gi - 1 
+          ## Notenbezeichnung setzen
+          if (gi >= 1) {
+             note4punkte[i] <- pNotenskala[gi]
+          }
+       } 
+     }
+     ### Rückgabewert der Noten fuer alle Punkte
+     note4punkte        
+}
