@@ -1,4 +1,4 @@
----
+l---
 title: "HTML Arbeitsblatt 3 - Notengebung zu Punkten"
 author: "Bert Niehaus"
 date: "`r Sys.Date()`"
@@ -415,7 +415,9 @@ aufgabe_niveau <- function(pFuzzyVec,pAufgaben) {
   ### anz: Gesamtzahl der möglichen Aufgaben
   anz <- length(pAufgaben)
   ### AUfgabenzuordnung als Index
-  ind <- floor(pFuzzyVec*anz)
+  ind <- ceiling(pFuzzyVec*anz)
+  ### 0 als Index ausschließen - Maximum von 1 und dem Index wählen
+  ind <- max(1,ind)
   ### tatsächliche Aufgabe als Rückgabevektor
   ret <- pAufgaben[ind]
   ### Rueckgabewert ist die Aufgabenzuordnung
