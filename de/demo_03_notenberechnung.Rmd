@@ -432,10 +432,10 @@ aufgabe_niveau <- function(pFuzzyVec,pAufgaben) {
   ret
 }
 
-aufgaben <- c("Arithm 1: 1+1","Arithm 2","Arithm 3","Arithm 4","Arithm 5","Arithm 6","Arithm 7","Arithm 8","Arithm 9: 9+4","Arithm 10")
+aufgaben_arith <- c("Arithm 1","Arithm 2","Arithm 3","Arithm 4","Arithm 5","Arithm 6","Arithm 7","Arithm 8","Arithm 9","Arithm 10")
 
-aufgabe_niveau(f1test,aufgaben)
+aufgabe_niveau(f1test,aufgaben_arith)
 
 aufgaben <- c("1+1","2+3","4+6","9+6")
-aufgabe_niveau(f1test,aufgaben_arith)
+aufgabe_niveau(f1test,aufgaben)
 ```
