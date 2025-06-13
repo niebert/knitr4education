@@ -403,6 +403,10 @@ write.csv(studentdata, "data/klausurnote.csv", row.names = FALSE)
 
 
 ### Zuordnen von Aufgaben
+In dem folgenden Beispiel wird ein Fuzzy-Vektor in einen Indexvektor umgerechnet, der je nach Fuzzywert eine unterschiedliche Aufgabe zuordnet.
+* `floor(x)` ist die Funktion, die `x` als Treppenfunktion die nächste kleinere ganze Zahl zuordnet
+* `ceiling(x)` ist die Funktion, die `x`  als Treppenfunktion die nächste größere ganze Zahl zuordnet.
+* Ferner wird noch mit `max()` das Maximum von 1 und den Einträgen in einem Vektor berechnet.
 ```{r}
 aa <- 10 
 f1test <- c(0.612,0.2,0.98,0.4)
