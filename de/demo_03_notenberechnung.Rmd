@@ -403,15 +403,19 @@ write.csv(studentdata, "data/klausurnote.csv", row.names = FALSE)
 
 
 ### Zuordnen von Aufgaben
-In dem folgenden Beispiel wird ein Fuzzy-Vektor in einen Indexvektor umgerechnet, der je nach Fuzzywert eine unterschiedliche Aufgabe zuordnet.
+In dem folgenden Beispiel wird ein Fuzzy-Vektor in einen Indexvektor umgerechnet, der je nach Fuzzywert eine unterschiedliche Aufgabe zuordnet. Die Aufgabenschwierigkeit sollte aufsteigend nach Schwierigkeit gewählt werden.
 * `floor(x)` ist die Funktion, die `x` als Treppenfunktion die nächste kleinere ganze Zahl zuordnet
 * `ceiling(x)` ist die Funktion, die `x`  als Treppenfunktion die nächste größere ganze Zahl zuordnet.
 * Ferner wird noch mit `max()` das Maximum von 1 und den Einträgen in einem Vektor berechnet.
+
 ```{r}
-aa <- 10 
+aufgaben <- c("1+1","2+3","4+6","9+6","39+14")
+## anz: Anzahl der Aufgaben - hier 5
+anz <- length(aufgaben) 
+## f1test: Vektor mit Fuzzy-Werten
 f1test <- c(0.612,0.2,0.98,0.4)
-f2test <- floor(f1test*aa)
-f3test <- ceiling(f1test*aa)
+f1floor <- floor(f1test*anz)
+f1ceil  <- ceiling(f1test*anz)
 
 ### Aufgabe mit unterschiedlichem Schwierigkeitsniveau - aufsteigend nach Schwierigkeit
 
@@ -428,10 +432,10 @@ aufgabe_niveau <- function(pFuzzyVec,pAufgaben) {
   ret
 }
 
-aufgaben <- c("Arithm 1: 1+1","Arithm 2","Arithm 3","Arithm 4","Arithm 5","Arithm 6","Arithm 7","Arithm 8","Arithm 9: 9+4","Arithm 10: 9+6")
+aufgaben <- c("Arithm 1: 1+1","Arithm 2","Arithm 3","Arithm 4","Arithm 5","Arithm 6","Arithm 7","Arithm 8","Arithm 9: 9+4","Arithm 10")
 
 aufgabe_niveau(f1test,aufgaben)
 
-aufgaben_arith <- c("1+1","2+3","4+6","9+6")
+aufgaben <- c("1+1","2+3","4+6","9+6")
 aufgabe_niveau(f1test,aufgaben_arith)
 ```
