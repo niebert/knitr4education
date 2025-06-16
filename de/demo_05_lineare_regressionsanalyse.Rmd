@@ -1,0 +1,157 @@
+---
+title: "Lineare Regressionsanalyse in R"
+author: "Bert Niehaus"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Daten generieren
+Zunächst wird ein Vektor mit Namen erzeugt, der mit der Funktion `create_name_list(pAnzahl,pMaxPunkteVec)` generiert. Dabei wird über den Parameter `pAnzahl` festgelegt, wie viele Datensätze generiert werden. Der zweite Paramter `pMaxPunkteVec` legt fest, wie viele Punkte die jeweilige Aufgabe maximal vergeben werden könnnen. Durch die Vektorlänge wird ferner festgelegt, für wie viele Aufgaben Punkte mit einer Gleichverteilung generiert werden. 
+```{r}
+create_name_list <- function (pAnzahl,pMaxPunkteVec) {
+  ## Erste Spalte für Namenliste erzeugen
+  ## Namenliste als String mit pAnzahl+1 Einträgen erzeugen
+  name_list <- rep("",pAnzahl+1)
+  ## Erster Eintrag ist "MAX" als Indikator für die maximal zu erreichenden Punkte
+  name_list[1] <- "MAX"
+  for (i in 1:pAnzahl) {
+    ## Index startet bei i+1, weil erste Datenzeile die Maximalpunktzahl 
+    ## für die Aufgaben enthält
+    name_list[i+1] <-  paste("Person",i,sep="")
+  }
+  retData <- data.frame(name=name_list) 
+  ## Punktespalten für die Aufgaben erzeugen
+  for (a in 1:length(pMaxPunkteVec)) {
+    max_pkt <- pMaxPunkteVec[a]
+    ### Punktevektor mit Länge pAnzahl+1 mit "0" initialisieren 
+    pkt_list <- rep(0,pAnzahl+1)
+    pkt_list[1] <- pMaxPunkteVec[a] 
+    for (i in 1:pAnzahl) {
+      ## Zufallszahl zwischen 0 und max_pkt erzeugen
+      pkt_list[i+1] <- round(runif(1)*max_pkt*2)/2 
+    }
+    retData[[paste("aufgabe",a,sep="")]] <- pkt_list
+  }  
+  retData
+}
+
+random_data <- create_name_list(100,c(14,10,18))
+studentdata <- create_name_list(100,c(14,10,18))
+```
+
+```{r speichern}
+write.csv(studentdata, "data/klausur100.csv", row.names = FALSE)
+```
+
+
+### Generierte Daten anzeigen
+```{r}
+knitr::kable(
+  studentdata, booktabs = TRUE,
+  align=c('l','r','r','r'),
+  caption = 'Erzeugte Daten für klausur100.csv.'
+)
+```
+
+## Bibliothek einbinden 
+```{r}
+source("lib/knitr4assessment.R")
+
+
+a1 <- studentdata$aufgabe1
+a2 <- studentdata$aufgabe2
+a3 <- studentdata$aufgabe3
+summe <- a1 + a2 + a3
+studentdata$summe <- summe
+```
+
+## Linearer Zusammenhang des Resultats der Einzelaufgaben mit der Punktesumme.
+```{r}
+lm(summe~a1+a2+a3)
+```
+
+
+## Noten berechnen
+```{r}
+### Notenskala und Noten für die Punkte berechnen 
+
+maxpunkte <- summe[1] ## erste Zeile MAX enthält die maximal erreichbaren Punkte
+bestgrenze <- summe[1] * 0.5 ## Bestehensgrenze ist 50% der Gesamtpunktzahl
+### Als Notenskala werden die deutschen Noten mit Tendenz verwendet
+notenskala <- c("1+","1","1-","2+","2","2-","3+","3","3-","4+","4","4-","5+","5","5-","6")
+notenskala <- c(0.7,1.0, 1.3, 1.7, 2.0, 2.3, 3.3, 3.7, 4.0, 4.3, 4.7, 5.0, 5.3, 6.0)
+bestindex <- 10 ## Index für Note, mit der man gerade noch bestanden hat. 
+### In Index 10 steht "4" als "ausreichend" und mit "4-" hat man nicht mehr bestanden.
+
+# Der Vektor "grenzen" enthält die Punktegrenzen, ab der man die betreffende Note
+# aus der Notenskala erhält. Diese werden in Abhängigkeit von der Bestehensgrenze gewählt.
+grenzen <- notengrenzen_calc(maxpunkte, bestgrenze,bestindex,notenskala)
+
+### Noten berechnen
+# Gesamtpunktzahl der Klausur findet man im Vektor "summe"
+# die Summe ist eine Vektor z.B. summe <- c(23,92,33,89,60)
+
+noten <- note_zuordnen(summe, grenzen, notenskala)
+studentdata$noten <- noten
+#noten <- round(noten)
+
+# Vektor mit Noten
+#noten <- c(4, 3, 5, 4, 3, 5, 4, 3, 5, 4, 3, 5)
+
+# Häufigkeit von Noteneinträgen ermitteln
+# Das erste Element enthält die maximale Punktzahl in der Klausur,
+# deshalb darf diese Zeile nicht mitgezaehlt werden
+ohne_element1 <- function(pVektor) {
+  len <- length(pVektor)-1
+  ret <- rep(0,len)
+  for (i in 1:len) {
+    ret[i] <- pVektor[i+1]
+  }
+  ## return Vektor ohne 1. Element
+  ret
+}
+
+noten_ohne1 <- ohne_element1(noten)
+haeufigkeit <- table(noten_ohne1)
+
+# Balkendiagramm erstellen
+barplot(
+  haeufigkeit,
+  main = "Häufigkeit von Spalteneinträgen",
+  xlab = "Note",
+  ylab = "Häufigkeit",
+  col = "blue",
+  border = "black"
+)
+```
+
+
+
+## Speichern der Daten
+In der obigen Datenverarbeitung wurde im Dataframe `studentdata` die Spalte `summe`, `bestanden` und `note` ergänzt und diese erweiterte Datentabelle wird nun in einer neuen Datei mit dem Namen `klausurnote.csv` abgespeichert, damit die Ausgangsdatei in diesem Demo nicht überschrieben wird. 
+Wahl eines neuen Dateinamens ist prinzipiell empfehlenswert, damit bei einer fehlerhaften Berechnung nicht die Rohdaten verändert werden.
+```{r speichern4noten}
+write.csv(studentdata, "data/klausur100noten.csv", row.names = FALSE)
+```
+
+
+```{r}
+# Create a dataframe
+df <- data.frame(A = 1:5, B = 6:10)
+
+# Create a vector of column names
+col_names <- c("C", "D", "E")
+
+newcol_names <- paste("fuzzy",3:5,sep="")
+# Add new columns using a for loop
+for (i in seq_along(col_names)) {
+  df[, newcol_names[i]] <- df$A * i * 10  # You can replace this with your own calculation
+}
+  
+# Print the updated dataframe
+print(df)
+```
+

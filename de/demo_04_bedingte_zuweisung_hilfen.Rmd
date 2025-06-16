@@ -1,0 +1,303 @@
+---
+title: "ODT Arbeitsblatt 2 Notenberechnung "
+author: "Bert Niehaus"
+date: "`r Sys.Date()`"
+output: latex_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Einleitung
+In diesem KnitR-Arbeitsblatt werden Funktionen zu Notenberechnung und Funkionen zum Schwierigkeitsniveau erstellt. Die Notenberechnung kann dabei für Klausuren und bepunktete Leistungsüberprüfungen , aber auch für Bewertung einzelner einzelnen Aufgaben verwendet werden.  Die Notengebung für einzelne Aufgaben wird dann verwendet, um entsprechende Folgeaufgaben oder Hilfen zu bestimmen.
+
+## Notenberechnung als Funktion 
+In diesem Abschnitt ist es das Ziel, die obige Notenberechnung als Funktion $ note4bg(ps,bestgrenze) $ zur Verfügung zu stellen, da dies eine einfachere Anwendung ermöglicht und wiederverwertbare Funktion darstellt. 
+
+### Mathematische Definition 
+Zunächst betrachtet man den 
+numerische Funktionen in der Mathematik und übertragen diese dann in die Notation in R und definieren eine Funktion $ f $ mathematisch, die von dem Vektorraum $ \mathbb{R}^{n}  $ in den Vektorraum $ \mathbb{R}^{m} $ abbildet.   
+$$
+    \begin{array}{rccl}
+    f: & \mathbb{R}^{n} & \rightarrow & \mathbb{R}^m \\
+      & (x_1,\ldots x_n) & \mapsto & f(x_1,\ldots ,x_n)  = (y_1,\ldots , y_m) 
+   \end{array} 
+$$
+### Beispiel für eine Funktion
+Für $ n > 1$ und $ m=1 $ kann eine solche Funktion z.B. den Mittelwert ausrechnen.
+$$
+    \begin{array}{rccl}
+    f_1: & \mathbb{R}^{n} & \rightarrow & \mathbb{R} \\
+      & x & \mapsto & f_1(x)  = \frac{1}{n} \cdot \sum_{k=1}^n x_k 
+   \end{array} 
+$$
+Dabei ist $ x = (x_1,\ldots x_n) \in \mathbb{R}^{n} $.
+
+### Implementation in R
+Im folgende Beispiel definieren wir eine solche Funktion als eine Funktion in R und ignorieren, dass diese Funktion bereits in R mit `mean(x)` definiert ist.
+```{r  f1definition,  echo=TRUE}
+f1 <- function (x) {
+  s <- sum(x)
+  n <- length(x)
+  ## Rueckgabewert arithmetisches Mittel 
+  s/n
+}
+```
+Nun nutzen wir diese Funktion und bilden den Mittelwert mit Daten.
+```{r}
+x <- c(12,4,13,77)
+f1(x)
+### pruefen mit mean(x), ob die obige Definition ein korrektes Ergebnis liefert. 
+mean(x)
+```
+
+### Notenberechnung als Funktion
+Im folgenden Beispiel erzeugen wird ganzzahlige Noten $ G := \{1,2,3,4,5,6\} $ und erzeugen zu prozentualen Klausurergebnissen aus der Mengen  $ K := [0,100] $. Insgesamt gibt es $ n $ Klausuren und damit $ n $ prozentuale Klausurergebnisse $ ps \in K^n $. Ferner wird an die Funktion zur Notenberechnung auch eine Bestehensgrenze $ b \in K$ übergeben, die festlegt, ab wann die Klausur mit der Note 4 bestanden wurde. 
+Allgemein kann man die Notenberechnung als mehrdimensionale Funktion definieren.
+$$
+    \begin{array}{rccl}
+    note4bg: & K^{n} \times  K & \rightarrow & G^n \\
+      & (ps, b) & \mapsto & f(ps,b)  = (y_1,\ldots , y_n) 
+   \end{array} 
+$$
+Das folgende Beispiel zeigt die Definition der Funktion $ note4bg $ in R.
+```{r}
+## Bezeichnung: DIe folgende Funktion "note4bg" liefert 
+## eine Note für die Bestehensgrenze
+note4bg <- function (ps,b) {
+  # Parameter ps: ist eine prozentuale Punktesumme in der Klausur zwischen 0 und 100
+  # Parameter b: ist die Bestehensgrenze von der Klausur, die zwischen 0 und 100 liegt
+  # g5 ist die Grenze, ab der man noch eine 5 bekommt
+  g5 <- b/2
+  # g4 ist die Bestehensrenze, ab der man noch eine 4 bekommt
+  g4 <- b
+  # pschritt ist die prozentuale Schrittweite, ab der man eine besser Note bekommt
+  pschritt <- (100 - b)/4
+  # man muss durch 4 teilen, weil wir die Noten oberhalb der Bestehensgrenze 
+  # zwischen 4 und 1 festlegen muessen. 
+  g3 <- b + 1 * pschritt
+  # g3 ist die Bestehensrenze, ab der man noch eine 3 bekommt
+  g2 <- b + 2 * pschritt
+  # g2 ist die Bestehensrenze, ab der man noch eine 2 bekommt
+  g1 <- b + 3 * pschritt
+  # g1 ist die Bestehensrenze, ab der man noch eine 1 bekommt
+  # y ist der Notenvektor rep repliziert die Zahl 0
+  # in einen Vektor mit length(ps) Kompenten
+  y <- rep(0, length(ps))
+  pos <- 1 
+  ## Falls die erste Zeile in der Klausurtabelle die maximale Punktzahl der jeweiligen 
+  ## Aufgabe angibt, muss pos auf 2 setzen. 
+  while (pos <= length(ps)) {
+    y[pos] <- if (ps[pos] < g5)  {
+        6  
+      } else {
+        if (ps[pos] < g4) {
+          5
+        } else {
+          if (ps[pos] < g3) {
+            4
+          } else {
+            if (ps[pos] < g2) {
+              3
+            } else {
+              if (ps[pos] < g1) {
+                2
+              } else {
+                1
+              }
+            }
+          }
+        }
+      }
+      pos <- pos +1
+  }
+
+  ## Rueckgabewert Notenvektor y 
+  y
+}
+
+x <- c(93,56,34)
+note4bg(x,50)
+x2 <- c(13,16,54,23,69)
+
+note4bg(x2,15)
+```
+
+## Niveauberechnung für prozentuale Aufgabenlösungen
+
+```{r}
+sniveau <- function (ps,sn) {
+    ## sn ist die Anzahl der Schwierigkeitsniveaus 
+    ## sn <- 5 bedeutet, dass 100% in 5 Schwierigkeitsniveaus 
+    ## aequidistant zerlegt werden, d.h. [0,20),[20,40), [40,60), [80,100]
+  
+    niv4p <- rep(0, length(ps))
+
+    pschritt <- 100 /sn
+
+    pos <- 1
+
+    while (pos <= length(ps)) {
+      niv4p[pos] = 1;
+      niv  <- 1
+      while (niv <= sn) {
+        ### Hier folgt die Niveauberechnung
+        niv4oben  <- 100 - (niv-1) * pschritt
+        niv4unten <- 100 -  niv    * pschritt
+        if ((ps[pos] >= niv4unten) & (ps[pos] < niv4oben)) {
+          niv4p[pos] <- niv
+          print(paste("Punkte:",ps[pos]," Niveau: ",niv4unten,"-",niv4oben,"  niv4p[",pos,"]=",niv4p[pos]))
+        }
+        ### nächstes Niveau testen
+        niv  <- niv + 1
+      }
+      if ((niv4p[pos] == 1) & (ps[pos] >= 100)) {
+          print(paste("Punkte:",ps[pos],"Niveau: >=100  niv4p[",pos,"]=",niv4p[pos]))
+      };
+      # naechste Klausur
+      pos <- pos + 1
+
+    }
+    ### Rückgabewert: Niveauvektor y
+    niv4p
+}
+
+x3 <- c(23,15,99,79,62,12) # Prozent der Gesamtpunktzahl
+
+sniveau(x3,5)
+```
+
+```{r}
+  A <- matrix(c(1,2,7, 4,5,6, 2,6,12), ncol=3)
+    x <- c(0.8,0.1,0.9)
+    b = A %*% x
+    A
+    #x
+    #b
+nv1 <- 1/( sum(A[,1]) ) * A[,1]
+nv2 <- 1/( sum(A[,2]) ) * A[,2]
+nv3 <- 1/( sum(A[,3]) ) * A[,3]
+
+normA <- A
+normA[,1] <- nv1  
+normA[,2] <- nv2
+normA[,3] <- nv3  
+
+A
+normA
+
+#nv
+#sum(nv)
+
+#A[,2] <- nv
+#A
+
+
+```
+
+### Absolute Häufigkeiten und relative Häufigkeiten
+```{r}
+# Manzahl  <- matrix(c(1,2,7, 4,5,6, 2,6,12), ncol=3)
+# Mrichtig <- matrix(c(0,2,3, 4,1,2, 2,2,5), ncol=3)
+# Mrelativ <- Mrichtig/Manzahl 
+
+Aanzahl  <- c(2,5,9)
+Arichtig <- c(2,1,8)
+Afalsch <- Aanzahl - Arichtig
+Afalsch
+Arelativ <- Arichtig/Aanzahl
+
+```
+### Von Aufgabenniveau zu Aufgabetext
+
+```{r}
+aniveau <- c(1,3,2,2,3,1)
+aufgaben4niv <- c("Dies ist der Text für Niveau 1","Diese Aufgabe ist mittelschwer","Diese Aufgabe gibt die meisten und explizitesten Hilfen")
+folgeaufgabe <- aniveau
+pos <-1 
+while (pos <= length(aniveau)) { 
+  folgeaufgabe[pos] <- aufgaben4niv[aniveau[pos]]
+  pos <- pos + 1
+}
+aniveau
+folgeaufgabe
+
+# Aufgabe für Schüler 3
+folgeaufgabe[3]
+```
+
+## Zufallszahlen und bedingte Zuweisung
+```{r}
+# Versuchanzahl n
+n <- 300
+pos <- 3
+# Theoretische Wahrscheinlichkeit p
+tp <- 1/3
+# Erzeugen eines Vektors mit vordefinierte Werten 
+vr <- 5
+## Vektor mit den Versuchszahlen erzeugen als x-Achse
+versuchszahl <- 1:n
+# versuchszahl
+for (versuchsreihe in 1:vr) {
+  vec_zz <- runif(n) 
+  vec01   <- ifelse(vec_zz < tp, 1, 0)
+  ## Nullvektoren für absolute und relative Häufigkeit initialisieren
+  absh <- rep(0, n) 
+  relh <- rep(0, n)
+  # Vektor aus Zufallszahlen
+  vectext <- ifelse(vec_zz < tp, "Treffer", "Niete")
+  for (versuche in 1:n) {
+    for (v in 1:versuche) {
+        absh[versuche] <- absh[versuche] + vec01[v] 
+    }
+    ### relative Häufigkeit berechnen
+    relh[versuche] <- absh[versuche]/versuche
+  }
+  plot(versuchszahl, relh, pch = 19, col = "red")
+}
+vec01
+absh
+relh
+vectext
+```
+Wir haben im `r pos`. Versuch als Ergebnis `r vectext[pos]` erzielt.
+
+## Bedingte Schüler:innen-Rückmeldung 
+```{r}
+n <- 10
+punkte_prozentual <- round(runif(n)*100) 
+punkte_prozentual <- runif(n)*100 
+feedbacksuper <- ifelse(
+                   (punkte_prozentual > 80) & 
+                   (punkte_prozentual <= 100), "super gemacht","")
+feedbackgut <- ifelse(
+                   ((punkte_prozentual > 50) & 
+                   (punkte_prozentual <= 80)), "gut gemacht", "")
+feedback <- paste(feedbacksuper,feedbackgut,sep="")
+
+punkte_prozentual
+feedback
+```
+
+## Würfeln bis zu ersten 6
+In dem folgenden Experiment sollen Zufallszahlen generiert werden, die das Würfeln bis zur ersten 6 simulieren. Dabei soll die Zahl $ n\in \mathbb{N} $ angeben, dass im $n$-ten Versuch die erste Sechs gewürfelt wurde. Gleichzeitig will man für ein speziellen Versuch mit $n$ notwendigen Wiederholung die Würfelergebnisse konkret ausgeben.
+```{r}
+a <- c(1,2,3,4,5)
+a
+b<-append(a,6)
+b
+
+## Erzeugen eines leeren Vektors, der die Würfelsequenz enthält
+wurfsequenz <- numeric()
+
+wuerfelwurf <- 0
+while (wuerfelwurf < 6) {
+  wuerfelwurf <- floor(6*runif(1)) + 1
+  if (wuerfelwurf <= 6) {
+    wurfsequenz <- append(wurfsequenz,wuerfelwurf) 
+  }
+} 
+wurfsequenz
+```
+
