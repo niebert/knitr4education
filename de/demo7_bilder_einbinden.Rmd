@@ -1,0 +1,43 @@
+---
+title: "Bilder einbinden"
+author: "Bert Niehaus - knitr4education"
+date: "2024-07-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Bild in einem Unterverzeichnis
+
+Mit dem folgenden Befehl wird ein Bild in dem Unterverzeichnis `img/` mit dem Dateinamen `schlossgarten.jpg` in das Textdokument eingeladen
+
+![Gartenbild in KnitR](./img/schlossgarten.jpg)
+
+## Bild skalieren für die Ausgabe 
+Mit den folgenden Befehlen wird die Bildgröße verändert.
+
+### Breite und Höhe festlegen
+In dem folgenden Bild wurde die Breite und Höhe des Bildes mit 120 Pixeln für Breite und Höhe in eine quadratische Bilddarstellung überführt.
+
+![Bild mit Größenangabe für Breite und Höhe](./img/schlossgarten.jpg){#id .class width=120px height=120px}
+
+
+### Nur Breite festlegen
+In dem folgenden Bild wird nur die Breite auf 320 Pixel festgelegt. Die Höhe ändert sich proportional zur Veränderung der Breite.
+
+![Bild mit Größenangabe für Breite und Höhe](./img/schlossgarten.jpg){#id .class width=320px}
+
+### Nur Höhe festlegen
+In dem folgenden Bild wird nur die Höhe auf 320 Pixel festgelegt. Die Breite ändert sich proportional zur Veränderung der Höhe.
+
+![Bild mit Größenangabe für Breite und Höhe](./img/schlossgarten.jpg){#id .class height=320px}
+
+
+### Prozentuale Veränderung der Bildgröße
+
+In dem folgenden Bild hat die Originalbreite und Originalhöhe um 50% verkleinert 
+
+![halbe Bildgröße zum Original](./img/schlossgarten.jpg){#id .class width=50% height=50%}
+
