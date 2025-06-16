@@ -13,3 +13,4 @@ Diese finden Sie in dem Unterverzeichnis [`data/`](data) oder bei [`R-Programmin
 
 ### Funktionssammlungen / Bibliotheken
 Bibliotheken können in R bzw. in KnitR-Code-Chunks mit `source("mylib.R")` eingebunden werden. Durch die Verwendung von Bibliotheken kann man Funktionen für mehrere R-Markdowndateien mit [KnitR](https://de.wikiversity.org/wiki/KnitR) verfügbar machen. 
+* `[knitr4education.R](lib/knitr4education.R)` ist ein Bibliothek, die die wesentlichen im dem Kurs behandelten Funktionen enthält. Einbindung erfolgt mit `source("lib/knitr4education.R")`  
