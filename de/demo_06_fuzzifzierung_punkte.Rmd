@@ -1,0 +1,173 @@
+---
+title: "Fuzzifizierung von Punkten"
+author: "KnitR4Education - Bert Niehaus"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Einführung und Ziel
+
+Das Ziel dieses Tutorials ist es, eine Funktion in R zu definieren, die eine CSV-Datei mit den Daten der Klausur lädt, die einzelnen Aufgaben als Fuzzywerte darstellt und damit fuzzylogische Operation auf den Bearbeitungsgrad und in eine neue CSV-Datei speichert. Die Verarbeitung erfolgt unter Berücksichtigung des Anwendungsfalls "Fuzzify Data", bei dem die Daten für jede Aufgabe in einem bestimmten Bereich gefuzzifiziert werden.
+
+### Ausgabeformate
+`output: html_document`, wenn Sie HTML-Dokumente erstellen wollen.
+`output: odt_document`, wenn Sie Textverarbeitungsdokumente erstellen wollen.
+
+
+## Implementation in R
+
+Das Tutorial beginnt damit, dass wir die benötigten Bibliotheken laden und eine CSV-Datei mit den Daten der Klausur laden.
+
+```{r , echo=TRUE }
+studentdata <- read.csv("data/data.csv", header=TRUE, stringsAsFactors=FALSE)
+```
+
+Weiter unten wird diese Befehl mit einer Funktion definiert, die später mit sich wiederholenden Zusatzaufgabe erweitert wird. Dies hat den Vorteil, dass sich wiederholende Aufgaben nicht in jeder Datenauswertung erneut implementiert werden müssen.
+
+## Definition der Funktionen
+
+-   `fuzzify_points(pData,pColNames)`: Diese Funktion erweitert die Daten aus `pData` für jede Aufgabe in einem bestimmten Bereich.
+-   `load_csv(pFilename)`: Diese Funktion lädt die Date aus eine CSV-Datei mit Namen `pFilename` und liefert die Daten als Tabelle (`Dateframe`) zurück.
+-   `save_csv(pFilename, pData)`: Diese Funktion speichert die verarbeiteten Daten in `pData` in eine neue CSV-Datei mit Namen `pFilename`, die z.B. in LibreOffice weiter verarbeitet werden können.
+
+### Fuzzifizieren von Rohdata - Erläuterung
+
+Die Funktion bekommt Daten in pData (Tabelle/Dataframe) und erzeugt für jede Spalte für jede Aufgabe in einer Spalte fuzzifizierte Spalte für das graduelle Eintreten des Ereignisses ''"Aufgabe korrekt bearbeitet"''. Der Fuzzywert 1 bedeutet, dass die Aufgabe vollständig korrekt ohne Punktabzug bearbeitet wurde. Der Fuzzywert 0 bedeutet, dass die Aufgabe keine positiv mit Punkte bewertbare Leistung enthält. Die Fuzzifizierung der Aufgabendaten hat die Funktion mit fuzzylogischen Operation damit adäquate individuelle Unterstützung für einzelne Lernenden anbieten zu können.
+
+### Fuzzifizieren von Rohdaten - Erläuterung
+
+Die Fuzzyfizierungsfunktion erhält einen Dataframe (Tabelle) mit einem Vektor `pColNames`, der die Spaltennamen der zu fuzzifizierenden Spalte enthält. Der Vektor `pColNames` könnte z.B. die folgenden Spaltenbezeichung als Vektor enhalten
+
+:   `c("aufgabe1", "aufgabe2", "aufgabe3")` Die Funktion fügt dann für jede Spalte in `pColNames` eine neue Spalte mit den Fuzzywerten hinzu. Als Konvention enhält die Tabelle in der ersten Zeile enthält die Maximalzahl, der erreichbaren Punkte. Nach der Fuzzifzierung der Rohdaten in den Spalten, enthält der Dataframe zusätzlich folgende Tabellenspalten:
+
+:   `c("fuzzy1", "fuzzy2", "fuzzy3")`
+
+### Fuzzifizieren von Rohdata - Code
+
+```{r , echo=TRUE }
+fuzzify_points <- function(pData,pColNames) {
+  spaltenzahl <- length(pColNames)
+  for (i in 1:spaltenzahl) {
+      ### colname1 ist die Bezeichnung der Spalte
+      ### mit den Rohdaten z.B. "aufgabe1"
+      colname1 <- pColNames[i]
+      ### colvec1 wird als numerischer Vektor gelesen
+      colvec1  <- as.numeric(pData[[colname1]])
+
+      ### colname2 ist die Bezeichnung der Spalte
+      ### mit den fuzzifzierten Rohdaten z.B. "fuzzy1"
+      colname2 <- paste("fuzzy",i,sep="")
+      ### Fuzzyspalte berechnen
+      colvec2 <- colvec1 * 1/colvec1[1]
+      ### pData um Fuzzyspalte erweitern
+      pData[,colname2] <- colvec2
+  }
+  ### Rueckgabe der erweiterten Daten
+  return(pData)
+}
+```
+
+### Veränderung der Bezeichnung der Fuzzyspalten (optional)
+
+Wenn die Spaltenbezeichung der Fuzzyspalte anders definiert werden sollte (z.B. durch Anhängen von "fuzzy" an die Spaltenbezeichnung der Rohdaten, muss man den Befehl für die Definition des Spaltennames `colname2` ändern.
+
+```
+    colname2 <- paste(colname1,"fuzzy",sep="")
+```
+
+Die obige Befehlszeile erzeugt für die Spaltenbezeichung "`aufgabe1`" die Spaltenbezeichnung "aufgabe1fuzzy" für die fuzzifizierten Daten. Mit dieser Veränderung enthält der Dataframe nach der Fuzzifzierung zusätzlich folgende Tabellenspalten:
+
+:   `c("aufgabe1fuzzy", "aufgabe2fuzzy", "aufgabe3fuzzy")`
+
+### Laden von CSV-Dateien - Funktionsdefinition
+
+Funktion, die die Daten aus einer CSV-Datei in einen Dataframe (Tabelle) lädt.
+
+```{r , echo=TRUE }
+
+load_csv <- function(pFilename, pData) {
+   retData <- read.csv(pFilename, header=TRUE, stringsAsFactors=FALSE)
+   ### Rückgabe retData ist ein Dataframe (Tabelle)
+   return(retData)
+}
+```
+
+### Laden von CSV-Dateien - Aufruf der Funktion
+
+In dem folgenden Beispiel befinden sich Daten in der CSV-Datei mit der Bezeichnung `klausur.csv"`. Nach dem Ladevorgang befinden sich die Daten in dem Dataframe (Tabelle) mit Namen `studentdata"`
+
+```{r , echo=TRUE }
+studentdata <- load_csv("data/klausur.csv")
+```
+
+### Geladene Daten als Tabelle ausgeben
+```{r}
+knitr::kable(
+  studentdata, booktabs = TRUE,
+  caption = 'Geladene Daten  data/klausur.csv.'
+)
+```
+
+### Spalten mit Fuzzy-Werten ergänzen
+
+```{r}
+colnames <- c("aufgabe1","aufgabe2","aufgabe3")
+# Ausführen der Funktion fuzzify_data()
+studentdata <- fuzzify_points(studentdata,colnames)
+```
+### Erweiterte Daten als Tabelle ausgeben
+```{r}
+knitr::kable(
+  studentdata, booktabs = TRUE,
+  caption = 'Geladene Daten  data/klausur.csv.'
+)
+```
+
+### Speichern von CSV-Dateien - Funktionsdefinition
+
+Funktion, die die Daten aus einem Dataframe in einer CSV-Datei speichert.
+
+```{r , echo=TRUE }
+save_csv <- function(pFilename, pData) {
+  write.csv(pData, pFilename, row.names = FALSE)
+}
+```
+
+### Speichern von CSV-Dateien - Aufruf
+
+In dem folgenden Beispiel befinden sich Daten in dem Dataframe (Tabelle) mit Namen `studentdata"`, die um weitere Spalten mit Fuzzywerten erweitert wurden. Danach soll eine neue CSV-Datei erzeugt werden mit der Bezeichnung `fuzzydata.csv"`. Nach dem Speichervorgang enthält die Datei die Daten aus dem Dataframe
+
+```
+save_csv("data/fuzzydata.csv",studentdata)
+```
+
+## Erläuterung zum Code
+
+Die Funktion `fuzzify_data()` beginnt damit, dass sie die Spaltennamen ermittelt und diese verwendet, um die Summenspalte für jede Aufgabe zu erstellen. Diese Summe wird in der Spalte "summe" gespeichert. Dann werden für jede Spalte aus den `pColNames`-Spaltennewe Spalten mit Namen "fuzzy1", "fuzzy2", ... erstellt, die den ersten numerischen Wert durch die Spaltenwerte teilen. Die Summe dieser neuen Spalte wird in der Spalte "fuzzysumme" gespeichert. Die Funktion `save_data()` speichert die verarbeiteten Daten in eine neue CSV-Datei unter dem Namen "data/processed_klausur.csv".
+
+## Anwendung des Beispiel
+
+Um dieses Tutorial zu testen, können Sie die folgenden Schritte ausführen:
+
+```{r , echo=TRUE }
+studentdata <- load_csv("data/klausur.csv")
+colnames <- c("aufgabe1","aufgabe2","aufgabe3")
+# Ausführen der Funktion fuzzify_data()
+studentdata <- fuzzify_points(studentdata,colnames)
+save_csv("data/klausur2fuzzy.csv",studentdata)
+```
+
+Das Ergebnis ist eine neue CSV-Datei "data/processed_klausur.csv", die die verarbeiteten Daten enthält.
+
+## Siehe auch
+
+Für weitere Informationen zu R und OpenSource können Sie folgende Links besuchen: 
+
+* [KnitR](https://de.wikiversity.org/wiki/KnitR) 
+* [Kurs:Maschinelles Lernen](https://de.wikiversity.org/wiki/Kurs:Maschinelles_Lernen)
+* [Fuzzifizierung von Punkten](https://de.wikiversity.org/wiki/Kurs:Didaktik_der_Stochastik_f%C3%BCr_Lernumgebungen/Technische_Umsetzung/Fuzzylogik_f%C3%BCr_Aufgaben)
