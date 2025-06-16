@@ -19,6 +19,20 @@ In diesem Dokument werden Dateien geladen und gespeichert. Dabei wird eine CSV-D
 * (Spalte 4) `aufgabe3` enthält die Punkte für die Aufgabe 3 aus der Klausur.
 Danach werden die Punktesumme der Aufgaben 1 bis 3 berechnet und eine weitere Spalte `summe` in dem dem Dataframe `studentdata` ergänzt.
 
+## Funktionen definieren
+Im Folgenden Codechunk werden zwei Funktionen für das Laden und Speichern definiert. Diese können jeweils mit weiteren Aufgaben für die Vor- Nachverarbeitung von Daten erweitert werden, die Funktionen können dann auf mehrer Lade- bzw. Speichervorgänge von Daten angewendet werden 
+```{r , echo=FALSE}
+
+load_csv <- function(pFilename, pData) {
+   retData <- read.csv(pFilename, header=TRUE, stringsAsFactors=FALSE)
+   ### Rückgabe retData ist ein Dataframe (Tabelle)
+   return(retData)
+}
+
+save_csv <- function(pFilename, pData) {
+  write.csv(pData, pFilename, row.names = FALSE)
+}
+```
 
 ## Laden der Daten in eine Dataframe
 Mit dem folgenden Code wird die CSV-Datei geladen.
