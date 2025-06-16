@@ -1,6 +1,7 @@
 ## Erläuterung zu den Demo-Dateien
 Die Demodateien wurden für Wikiversity-Lernumgebungen erzeugt, die Studierende dabei unterstützen sollen mit Daten und [dynamischer Textgenerierung](https://de.wikiversity.org/wiki/KnitR) in [R]([https://GNU_R](https://de.wikibooks.org/wiki/GNU_R)) (Python, Octave, ...) zu arbeiten. KnitR ist dabei das R-Paket, das die Realisation von dynamischer Dokumentengenerierung ermöglicht.
-* **Demo 1:** Zeigt die prinzipielle Verwendung von Codechunks, mathematischen Formeln und der Verwendnug von Variableninhalten im Text.
+* **Demo 1 (Code Chunks, math Formeln):** Zeigt die prinzipielle Verwendung von Codechunks, mathematischen Formeln und der Verwendnug von Variableninhalten im Text.
+* **Demo 2 (Laden und Speichern von CSV-Dateien):** Zeigt das Laden und Speichern von CSV-Dateien in [Dataframes](https://de.wikibooks.org/wiki/GNU_R:_data.frame) (R-Tabellen).
 
 ### Verzeichnisse 
 * **(Daten - `/data`)** Das Verzeichnis [`/data`](data) erhält Demodaten, die man in der Lernresource [KnitR in Wikiversity](https://de.wikiversity.org/wiki/KnitR). Weitere Daten zu Testzwecken findet man in dem Repository https://github.com/guru99-edu/R-Programming von [guru99-edu](https://github.com/guru99-edu).
