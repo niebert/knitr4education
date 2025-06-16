@@ -150,6 +150,51 @@ fuzzy2_implication <- function (pf1,pf2) {
   return
 }
 
+fuzzy2_implication <- function (pf1,pf2) {
+  notf1 <-  fuzzy2_not(pf1)
+  return <- fuzzy2_or(notf1,pf2)
+  ### Rückgabewert ist das komponentenweise "Oder" der beiden Vektoren pf1 und pf2
+  return
+}
+
+
+fuzzy_indicator <- function(pf1,pgrenze,pvalue0,pvalue1) {
+  ret <- rep(pvalue0,length(pf1))
+  for (i in 1:length(pf1)) {
+    if (pf1[i] >= pgrenze) {
+      ret[i] <- pvalue1 
+    }
+  }
+  ### Rückgabewert ist ein Vektor, der komponentenweise als Indikator funktioniert
+  ####  pvalue0 wenn die Grenze pgrenze NICHT überschritten wird
+  ####  pvalue1 wenn die Grenze pgrenze überschritten wird
+  ret
+}
+
+fuzzify_points <- function(pData,pColNames) {
+  spaltenzahl <- length(pColNames)
+  for (i in 1:spaltenzahl) {
+      ### colname1 ist die Bezeichnung der Spalte
+      ### mit den Rohdaten z.B. "aufgabe1"
+      colname1 <- pColName[i]
+      ### colvec1 wird als numerischer Vektor gelesen
+      colvec1  <- as.numeric(pData[[colname1]])
+      
+      ### colname2 ist die Bezeichnung der Spalte
+      ### mit den fuzzifzierten Rohdaten z.B. "fuzzy1"
+      colname2 <- paste("fuzzy",i,sep="")
+      ### Alter colname2-Definition
+      # colname2 <- paste(colname1,"fuzzy",sep="")
+      ### Fuzzyspalte berechnen
+      colvec2 <- colvec1 * 1/colvec[1]
+      ### pData um Fuzzyspalte erweitern
+      pData[,colname2] <- colvec2
+  }
+  ### Rueckgabe der erweiterten Daten 
+  return(pData)
+}
+
+
 koaktivitaetsmatrix <- function (pVecX,pVecY) {
   colx <- length(pVecX)
   mat <- matrix(pVecY , ncol=1) %*% matrix(pVecX,ncol=colx) 
@@ -245,25 +290,4 @@ note_zuordnen <- function(pPunkte,pGrenzen,pNotenskala) {
      }
      ### Rückgabewert der Noten fuer alle Punkte
      note4punkte        
-}
-
-fuzzify_points <- function(pData,pColNames) {
-  spaltenzahl <- length(pColNames)
-  for (i in 1:spaltenzahl) {
-      ### colname1 ist die Bezeichnung der Spalte
-      ### mit den Rohdaten z.B. "aufgabe1"
-      colname1 <- pColName[i]
-      ### colvec1 wird als numerischer Vektor gelesen
-      colvec1  <- as.numeric(pData[[colname1]])
-      
-      ### colname2 ist die Bezeichnung der Spalte
-      ### mit den fuzzifzierten Rohdaten z.B. "fuzzy1"
-      colname2 <- paste("fuzzy",i,sep="")
-      ### Fuzzyspalte berechnen
-      colvec2 <- colvec1 * 1/colvec[1]
-      ### pData um Fuzzyspalte erweitern
-      pData[,colname2] <- colvec2
-  }
-  ### Rueckgabe der erweiterten Daten 
-  return(pData)
 }
