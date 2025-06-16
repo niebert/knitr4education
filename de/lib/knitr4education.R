@@ -7,6 +7,18 @@
 ### If you store the library in a subdirectory 'lib/' use the following comamnd
 # source("lib/knitr4education.R")
 
+
+
+load_csv <- function(pFilename) {
+   retData <- read.csv(pFilename, header=TRUE, stringsAsFactors=FALSE)
+   ### Rückgabe retData ist ein Dataframe (Tabelle)
+   return(retData)
+}
+
+save_csv <- function(pFilename, pData) {
+  write.csv(pData, pFilename, row.names = FALSE)
+}
+
 copy4vec <- function (pVec) {
   return <- rep(0,length(pVec))
   for (i in length(pVec)) {
