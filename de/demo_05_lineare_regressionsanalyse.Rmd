@@ -1,6 +1,6 @@
 ---
 title: "Lineare Regressionsanalyse in R"
-author: "Bert Niehaus"
+author: "Bert Niehaus - knitr4education"
 date: "`r Sys.Date()`"
 output: html_document
 ---
@@ -8,150 +8,116 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-## Daten generieren
-Zunächst wird ein Vektor mit Namen erzeugt, der mit der Funktion `create_name_list(pAnzahl,pMaxPunkteVec)` generiert. Dabei wird über den Parameter `pAnzahl` festgelegt, wie viele Datensätze generiert werden. Der zweite Paramter `pMaxPunkteVec` legt fest, wie viele Punkte die jeweilige Aufgabe maximal vergeben werden könnnen. Durch die Vektorlänge wird ferner festgelegt, für wie viele Aufgaben Punkte mit einer Gleichverteilung generiert werden. 
-```{r}
-create_name_list <- function (pAnzahl,pMaxPunkteVec) {
-  ## Erste Spalte für Namenliste erzeugen
-  ## Namenliste als String mit pAnzahl+1 Einträgen erzeugen
-  name_list <- rep("",pAnzahl+1)
-  ## Erster Eintrag ist "MAX" als Indikator für die maximal zu erreichenden Punkte
-  name_list[1] <- "MAX"
-  for (i in 1:pAnzahl) {
-    ## Index startet bei i+1, weil erste Datenzeile die Maximalpunktzahl 
-    ## für die Aufgaben enthält
-    name_list[i+1] <-  paste("Person",i,sep="")
-  }
-  retData <- data.frame(name=name_list) 
-  ## Punktespalten für die Aufgaben erzeugen
-  for (a in 1:length(pMaxPunkteVec)) {
-    max_pkt <- pMaxPunkteVec[a]
-    ### Punktevektor mit Länge pAnzahl+1 mit "0" initialisieren 
-    pkt_list <- rep(0,pAnzahl+1)
-    pkt_list[1] <- pMaxPunkteVec[a] 
-    for (i in 1:pAnzahl) {
-      ## Zufallszahl zwischen 0 und max_pkt erzeugen
-      pkt_list[i+1] <- round(runif(1)*max_pkt*2)/2 
-    }
-    retData[[paste("aufgabe",a,sep="")]] <- pkt_list
-  }  
-  retData
-}
 
-random_data <- create_name_list(100,c(14,10,18))
-studentdata <- create_name_list(100,c(14,10,18))
-```
+##  Einführung
+Der Lerneinheit gliedert sich in die folgenden Schritte
+* Einführung in die [[mehrdimensionale lineare Regression]]
+* Implementierung in R
+* Interpretation der Ergebnisse
+* Praktische Übung
 
-```{r speichern}
-write.csv(studentdata, "data/klausur100.csv", row.names = FALSE)
-```
+Hier ist eine Lerneinheit für die Implementierung der mehrdimensionalen linearen Regression in R:
 
+##  Aufgabe - Mehrdimensionale lineare Regression in R
+* Machen Sie sich zunächst mit dem prinzipiellen Vorgehen bei der [[mehrdimensionale lineare Regression|mehrdimensionalen linearen Regression]] vertraut.
+* Betrachten Sie den Begriff der [[w:de:Assoziation|Assoziation]], [[Assoziative Netze|assoziative Netze]] und die [[Maschinelles Lernen/Hebbsche Lernregel|Hebbschen Lernregel]], mit der man die Koaktivität von Nervenzellen in der Ein- und Ausgabeschicht [[Kurs:Mathematische Modellbildung|mathematisch modellieren]] kann.
 
-### Generierte Daten anzeigen
-```{r}
-knitr::kable(
-  studentdata, booktabs = TRUE,
-  align=c('l','r','r','r'),
-  caption = 'Erzeugte Daten für klausur100.csv.'
-)
-```
+##  Ziel
+In dieser Lerneinheit lernen Sie, wie Sie eine mehrdimensionale lineare Regression in R und [KnitR](https://de.wikiversity.org/wiki/KnitR) implementieren können und die hilfreichen Rahmenbedingungen, für die Unter.
 
-## Bibliothek einbinden 
-```{r}
-source("lib/knitr4assessment.R")
+##  Voraussetzungen
 
+* Grundkenntnisse in R
+* Verständnis von linearen Regressionen
 
-a1 <- studentdata$aufgabe1
-a2 <- studentdata$aufgabe2
-a3 <- studentdata$aufgabe3
-summe <- a1 + a2 + a3
-studentdata$summe <- summe
-```
+##  Inhalte
 
-## Linearer Zusammenhang des Resultats der Einzelaufgaben mit der Punktesumme.
-```{r}
-lm(summe~a1+a2+a3)
-```
+###  1 Einführung in die mehrdimensionale lineare Regression
+* Definition und Beispiel
+* Vorteile der mehrdimensionalen linearen Regression
 
+###  2 Implementierung in R
+* Installation der erforderlichen Bibliotheken
+* Erstellung eines Beispiel-Datensatzes
+* Implementierung der mehrdimensionalen linearen Regression.
 
-## Noten berechnen
-```{r}
-### Notenskala und Noten für die Punkte berechnen 
+###  3 Interpretation der Ergebnisse
+* Auswertung der Modellparameter
+* Interpretation der Kovarianzmatrix
 
-maxpunkte <- summe[1] ## erste Zeile MAX enthält die maximal erreichbaren Punkte
-bestgrenze <- summe[1] * 0.5 ## Bestehensgrenze ist 50% der Gesamtpunktzahl
-### Als Notenskala werden die deutschen Noten mit Tendenz verwendet
-notenskala <- c("1+","1","1-","2+","2","2-","3+","3","3-","4+","4","4-","5+","5","5-","6")
-notenskala <- c(0.7,1.0, 1.3, 1.7, 2.0, 2.3, 3.3, 3.7, 4.0, 4.3, 4.7, 5.0, 5.3, 6.0)
-bestindex <- 10 ## Index für Note, mit der man gerade noch bestanden hat. 
-### In Index 10 steht "4" als "ausreichend" und mit "4-" hat man nicht mehr bestanden.
+###  4 Praktische Übung
+* Implementierung einer mehrdimensionalen linearen Regression anhand eines Beispiel-Datensatzes
+* Auswertung der Ergebnisse
 
-# Der Vektor "grenzen" enthält die Punktegrenzen, ab der man die betreffende Note
-# aus der Notenskala erhält. Diese werden in Abhängigkeit von der Bestehensgrenze gewählt.
-grenzen <- notengrenzen_calc(maxpunkte, bestgrenze,bestindex,notenskala)
+##  Schritte
+Zunächst betrachtet man die notwendigen Bibliotheken, die man für die Umsetzung in R bzw. KnitR für die Textgenerierung in Abhängigkeit von den Ergebnissen der [[mehrdimensionale lineare Regression|mehrdimensionalen linearen Regression]] verwenden möchte.
 
-### Noten berechnen
-# Gesamtpunktzahl der Klausur findet man im Vektor "summe"
-# die Summe ist eine Vektor z.B. summe <- c(23,92,33,89,60)
-
-noten <- note_zuordnen(summe, grenzen, notenskala)
-studentdata$noten <- noten
-#noten <- round(noten)
-
-# Vektor mit Noten
-#noten <- c(4, 3, 5, 4, 3, 5, 4, 3, 5, 4, 3, 5)
-
-# Häufigkeit von Noteneinträgen ermitteln
-# Das erste Element enthält die maximale Punktzahl in der Klausur,
-# deshalb darf diese Zeile nicht mitgezaehlt werden
-ohne_element1 <- function(pVektor) {
-  len <- length(pVektor)-1
-  ret <- rep(0,len)
-  for (i in 1:len) {
-    ret[i] <- pVektor[i+1]
-  }
-  ## return Vektor ohne 1. Element
-  ret
-}
-
-noten_ohne1 <- ohne_element1(noten)
-haeufigkeit <- table(noten_ohne1)
-
-# Balkendiagramm erstellen
-barplot(
-  haeufigkeit,
-  main = "Häufigkeit von Spalteneinträgen",
-  xlab = "Note",
-  ylab = "Häufigkeit",
-  col = "blue",
-  border = "black"
-)
-```
-
-
-
-## Speichern der Daten
-In der obigen Datenverarbeitung wurde im Dataframe `studentdata` die Spalte `summe`, `bestanden` und `note` ergänzt und diese erweiterte Datentabelle wird nun in einer neuen Datei mit dem Namen `klausurnote.csv` abgespeichert, damit die Ausgangsdatei in diesem Demo nicht überschrieben wird. 
-Wahl eines neuen Dateinamens ist prinzipiell empfehlenswert, damit bei einer fehlerhaften Berechnung nicht die Rohdaten verändert werden.
-```{r speichern4noten}
-write.csv(studentdata, "data/klausur100noten.csv", row.names = FALSE)
-```
-
+###  Schritt 1 - Installation der erforderlichen Bibliotheken
+Wenn Sie in [KnitR](https://de.wikiversity.org/wiki/KnitR) oder in einem R-Skript die Installation eines bestimmten Pakets benötigen, so können Sie anderen Nutzerinnen und Nutzer das Leben vereinfachen, wenn Sie den Installationbefehl für die erforderlichen Paketn in den ersten [[KnitR/Code-Chunk|Code-Chunk]] in [KnitR](https://de.wikiversity.org/wiki/KnitR) oder zu Beginn des R-Skriptes ergänzen, damit im Sinne von [[Open Educational Resources]] die erforderlich Skript bei Bedarf einfach nachinstalliert werden, sofern dies noch nicht von den Nutzern installiert wurden. Für lineare Modelle kann das mit dem folgenden Befehl erfolgen:
 
 ```{r}
-# Create a dataframe
-df <- data.frame(A = 1:5, B = 6:10)
-
-# Create a vector of column names
-col_names <- c("C", "D", "E")
-
-newcol_names <- paste("fuzzy",3:5,sep="")
-# Add new columns using a for loop
-for (i in seq_along(col_names)) {
-  df[, newcol_names[i]] <- df$A * i * 10  # You can replace this with your own calculation
-}
-  
-# Print the updated dataframe
-print(df)
+install.packages("lm")
 ```
+
+###  Schritt 2 - Erstellung eines Beispiel-Datensatzes
+Der folgende Beispieldatensatz erzeugt zunächst normalverteilte Daten für eine zweidimensionale Eingabeschicht.
+```{r , echo=TRUE}
+# Beispiel-Datensatz für eine lineare Abbildung
+# Defintionsbereich (x1,x2) aus dem IR^2
+# Wertebereich y aus IR
+
+### Anzahl der Datensätze festlegen
+datenanzahl <- 100
+x1 <- rnorm(datenanzahl, mean = 0, sd = 1)
+x2 <- rnorm(datenanzahl, mean = 0, sd = 1)
+
+### Unbekannte Abbildung
+###  f(x1,x2) = 2 + 3*x1 + 4*x2
+### y-Vektor wird verwendet und mit einem normalverteilten Rauschen versehen
+### Rauschen: Mittelwert 0 und Standardabweichung 1
+y <- 2 + 3*x1 + 4*x2 + rnorm(datenanzahl, mean = 0, sd = 1)
+
+# Datenframe erstellen mit den Datenspalten x1,x2 und y erstellen
+df <- data.frame(x1, x2, y)
+```
+
+###  Schritt 3 - Implementierung der mehrdimensionalen linearen Regression
+
+```{r , echo=TRUE}
+# Modell erstellen
+model <- lm(y ~ x1 + x2, data = df)
+
+# Ausgabe der Modellparameter
+summary(model)
+```
+
+##  Schritt 4: Interpretation der Ergebnisse
+
+* Auswertung der Modellparameter:
+** Koefizienten für x1 und x2
+** Konstante
+* Interpretation der Kovarianzmatrix:
+** Kovarianz zwischen x1 und x2
+** Kovarianz zwischen y und x1/x2
+
+##  Praktische Übung
+
+* Implementieren Sie eine mehrdimensionale lineare Regression anhand eines Beispiel-Datensatzes.
+* Auswerten Sie die Ergebnisse und interpretieren Sie die Modellparameter und die Kovarianzmatrix.
+
+##  Ressourcen
+
+* R-Bibliothek: `lm()`
+* R-Bibliothek: `summary()`
+* R-Bibliothek: `data.frame()`
+
+##  Fazit
+
+In dieser Lerneinheit haben Sie gelernt, wie Sie eine mehrdimensionale lineare Regression in R implementieren können. Sie haben gesehen, wie Sie einen Beispiel-Datensatz erstellen, ein Modell erstellen und die Ergebnisse interpretieren können. Mit dieser Kenntnis können Sie nun komplexe Datenanalysen durchführen und fundierte Entscheidungen treffen.
+
+##  Siehe auch
+* [mehrdimensionale lineare Regression](https://de.wikiversity.org/wiki/mehrdimensionale_lineare_Regression)
+* [Kurs:Maschinelles Lernen](https://de.wikiversity.org/wiki/Kurs:Maschinelles_Lernen)
+* [Digitale Lernumgebungen](https://de.wikiversity.org/wiki/Digitale_Lernumgebungen)
+* [KnitR](https://de.wikiversity.org/wiki/KnitR)
 
