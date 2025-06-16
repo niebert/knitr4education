@@ -246,3 +246,24 @@ note_zuordnen <- function(pPunkte,pGrenzen,pNotenskala) {
      ### Rückgabewert der Noten fuer alle Punkte
      note4punkte        
 }
+
+fuzzify_points <- function(pData,pColNames) {
+  spaltenzahl <- length(pColNames)
+  for (i in 1:spaltenzahl) {
+      ### colname1 ist die Bezeichnung der Spalte
+      ### mit den Rohdaten z.B. "aufgabe1"
+      colname1 <- pColName[i]
+      ### colvec1 wird als numerischer Vektor gelesen
+      colvec1  <- as.numeric(pData[[colname1]])
+      
+      ### colname2 ist die Bezeichnung der Spalte
+      ### mit den fuzzifzierten Rohdaten z.B. "fuzzy1"
+      colname2 <- paste("fuzzy",i,sep="")
+      ### Fuzzyspalte berechnen
+      colvec2 <- colvec1 * 1/colvec[1]
+      ### pData um Fuzzyspalte erweitern
+      pData[,colname2] <- colvec2
+  }
+  ### Rueckgabe der erweiterten Daten 
+  return(pData)
+}
