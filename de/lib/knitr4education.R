@@ -1,4 +1,4 @@
-### knitr4education - v0.0.5
+### knitr4education - v0.0.6
 ### https://www.github.com/niebert/knitr4education
 
 ### Include this file in your KnitR code by placing the following code in your 
