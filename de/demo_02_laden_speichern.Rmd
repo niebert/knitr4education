@@ -23,7 +23,7 @@ Danach werden die Punktesumme der Aufgaben 1 bis 3 berechnet und eine weitere Sp
 Im Folgenden Codechunk werden zwei Funktionen für das Laden und Speichern definiert. Diese können jeweils mit weiteren Aufgaben für die Vor- Nachverarbeitung von Daten erweitert werden, die Funktionen können dann auf mehrer Lade- bzw. Speichervorgänge von Daten angewendet werden 
 ```{r , echo=FALSE}
 
-load_csv <- function(pFilename, pData) {
+load_csv <- function(pFilename) {
    retData <- read.csv(pFilename, header=TRUE, stringsAsFactors=FALSE)
    ### Rückgabe retData ist ein Dataframe (Tabelle)
    return(retData)
