@@ -37,7 +37,9 @@ save_csv <- function(pFilename, pData) {
 ## Laden der Daten in eine Dataframe
 Mit dem folgenden Code wird die CSV-Datei geladen.
 ```{r laden}
-studentdata <- read.csv("data/data.csv", header=TRUE, stringsAsFactors=FALSE)
+studentdata <- load_csv("data/data.csv");
+## alternativ:  
+## studentdata <- read.csv("data/data.csv", header=TRUE, stringsAsFactors=FALSE)
 ```
 Der Dateframe `studentdata` enthält nun die Daten aus der Datei `data.csv`.
 
