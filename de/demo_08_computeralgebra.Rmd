@@ -1,5 +1,5 @@
 ---
-title: "Demo 1 - Code Chunks und mathematische Formeln"
+title: "Demo 8 - Code Chunks mit Computeralgebrasystem YACAS"
 author: "Bert Niehaus"
 date: "`r Sys.Date()`"
 output: odt_document
