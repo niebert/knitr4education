@@ -14,5 +14,9 @@ Beispieldatensätze sind erstellt worden, um mit diesen die Funktionsweise von b
 Diese finden Sie in dem Unterverzeichnis [`data/`](data) oder bei [`R-Programming`](https://github.com/guru99-edu/R-Programming).
 
 ### Funktionssammlungen / Bibliotheken
-Bibliotheken können in R bzw. in KnitR-Code-Chunks mit `source("mylib.R")` eingebunden werden. Durch die Verwendung von Bibliotheken kann man Funktionen für mehrere R-Markdowndateien mit [KnitR](https://de.wikiversity.org/wiki/KnitR) verfügbar machen. 
-* `[knitr4education.R](lib/knitr4education.R)` ist ein Bibliothek, die die wesentlichen im dem Kurs behandelten Funktionen enthält. Einbindung erfolgt mit `source("lib/knitr4education.R")`  
+Bibliotheken können in R bzw. in KnitR-Code-Chunks mit `source("mylib.R")` eingebunden werden. 
+```r
+source("./lib/knitr4education.R", local = knitr::knit_global())
+```
+Durch die Verwendung von Bibliotheken kann man Funktionen für mehrere R-Markdowndateien mit [KnitR](https://de.wikiversity.org/wiki/KnitR) verfügbar machen. 
+* [`knitr4education.R`](lib/knitr4education.R) ist ein Bibliothek, die die wesentlichen im dem Kurs behandelten Funktionen enthält. Einbindung erfolgt mit `source("lib/knitr4education.R")`  
