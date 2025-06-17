@@ -115,11 +115,14 @@ if (ki >= length(summe)) {
 In der obigen Datenverarbeitung wurde im Dataframe `studentdata` die Spalte `summe` ergänzt und diese erweiterte Datentabelle wird nun in einer neuen Datei mit dem Namen `datasumme.csv` abgespeichert, damit die Ausgangsdatei in diesem Demo nicht überschrieben wird. 
 Wahl eines neuen Dateinamens ist prinzipiell empfehlenswert, damit bei einer fehlerhaften Berechnung nicht die Rohdaten verändert werden.
 ```{r speichern}
+
 save_csv("data/datasumme.csv",studentdata)
+
 ## Alternativ
-# write.csv(studentdata, "datasumme.csv", row.names = FALSE)
-## wenn man nicht in dem Unterverzeichnis "data/", 
+# write.csv(studentdata, "data/datasumme.csv", row.names = FALSE)
+## Wenn man nicht in dem Unterverzeichnis "data/", 
 ## sondern im gleichen Verzeichnis, wie die R-Markdown-Datei die Daten speichern möchte
 # save_csv("datasumme.csv",studentdata)
+# write.csv(studentdata, "datasumme.csv", row.names = FALSE)
 ```
 
