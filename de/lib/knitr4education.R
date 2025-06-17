@@ -6,6 +6,7 @@
 # source("knitr4education.R")
 ### If you store the library in a subdirectory 'lib/' use the following comamnd
 # source("lib/knitr4education.R")
+# source("./lib/knitr4education.R", local = knitr::knit_global())
 
 
 
