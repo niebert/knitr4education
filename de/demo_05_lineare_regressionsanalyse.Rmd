@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ##  Einführung
 Der Lerneinheit gliedert sich in die folgenden Schritte
-* Einführung in die [mehrdimensionale lineare Regression]
+* Einführung in die [mehrdimensionale lineare Regression](https://de.wikiversity.org/wiki/mehrdimensionale_lineare_Regression)
 * Implementierung in R
 * Interpretation der Ergebnisse
 * Praktische Übung
