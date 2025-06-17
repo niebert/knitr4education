@@ -20,12 +20,12 @@ save_csv <- function(pFilename, pData) {
 }
 
 copy4vec <- function (pVec) {
-  return <- rep(0,length(pVec))
+  ret <- rep(0,length(pVec))
   for (i in length(pVec)) {
-    return[i] <- pVec[i]
+    ret[i] <- pVec[i]
   }
   ## return cloned vector
-  return
+  ret
 }
 
 echo4vec <- function (pVarname,pVec) {
@@ -50,9 +50,9 @@ find_min4error <- function (pError, pGrad, pa, px_D, py_D, alpha=1, evalcount=10
   ## pGrad:  Gradient der Fehlerfunktion
   ## px_D: x-Vektoren der Daten für den Definitionsbereich
   ## py_D: y-Sollwerte für die Fehlerfunktion
-  return <- rep(0,2) ### return <- c(0,0);
-  ## erste Komponente von return ist der minimale lambda-Wert
-  ## zweite Komponente von return ist der minimale Fehler
+  ret <- rep(0,2) ### ret <- c(0,0);
+  ## erste Komponente von ret ist der minimale lambda-Wert
+  ## zweite Komponente von ret ist der minimale Fehler
   s4a <- (-evalcount:evalcount)/evalcount
   #s4a <- 2*runif(2*evalcount+1,-1,1)
   E4a <-  rep(0,2*evalcount+1) ## +1 wegen x4a=0
@@ -75,87 +75,89 @@ find_min4error <- function (pError, pGrad, pa, px_D, py_D, alpha=1, evalcount=10
     }
   }
   # plot(s4a,E4a)
-  return <- c(scalar4min,error4min)
+  ret <- c(scalar4min,error4min)
   ## Rückgabewert des Skalars für den Gradienten und dem minimalen Fehler
-  return
+  ret
 }
 
 fuzzy_nand <- function (pf1,pf2) {
-  return <- rep(0,length(pf1))
+  ret <- rep(0,length(pf1))
   for (i in 1:length(pf1)) {
-    return[i] <- 1 - min(pf1[i],pf2[2])
+    ret[i] <- 1 - min(pf1[i],pf2[2])
   }
   ### Rückgabewert ist das komponentenweise Minimum der beiden Vektoren pf1 und pf2
-  return
+  ret
 }
 
 fuzzy_and <- function (pf1,pf2) {
-  return <- rep(0,length(pf1))
+  ret <- rep(0,length(pf1))
   for (i in 1:length(pf1)) {
-    return[i] <- min(pf1[i],pf2[2])
+    ret[i] <- min(pf1[i],pf2[2])
   }
   ### Rückgabewert ist das komponentenweise Minimum der beiden Vektoren pf1 und pf2
-  return
+  ret
 }
 
 fuzzy_or <- function (pf1,pf2) {
-  return <- rep(0,length(pf1))
+  ret <- rep(0,length(pf1))
   for (i in 1:length(pf1)) {
-    return[i] <- max(pf1[i],pf2[i])
+    ret[i] <- max(pf1[i],pf2[i])
   }
   ### Rückgabewert ist das komponentenweise Maximum der beiden Vektoren pf1 und pf2
-  return
+  ret
 }
 
 fuzzy_not <- function (pf1) {
-  return <- rep(0,length(pf1))
+  ret <- rep(0,length(pf1))
   for (i in 1:length(pf1)) {
-    return[i] <- 1 - pf1[i]
+    ret[i] <- 1 - pf1[i]
   }
   ### Rückgabewert ist das komponentenweise Minimum der beiden Vektoren pf1 und pf2
-  return
+  ret
+}
+
+
+fuzzy_implication <- function (pf1,pf2) {
+  notf1 <-  fuzzy1_not(pf1)
+  ret <- fuzzy1_or(notf1,pf2)
+  ### Rückgabewert ist das komponentenweise "Oder" der beiden Vektoren pf1 und pf2
+  ret
 }
 
 fuzzy2_nand <- function (pf1,pf2) {
-  return <- rep(0,length(pf1))
+  ret <- rep(0,length(pf1))
   for (i in 1:length(pf1)) {
-    return[i] <- 1-(pf1[i] * pf2[i])
+    ret[i] <- 1-(pf1[i] * pf2[i])
   }
-  ### Rückgabewert ist das komponentenweise Minimum der beiden Vektoren pf1 und pf2
-  return
+  ### Rückgabewert ist die Negation der multiplikative UND-Verknüpfung "NAND" der beiden Vektoren pf1 und pf2
+  ret
 }
 
 fuzzy2_and <- function (pf1,pf2) {
-  return <- rep(0,length(pf1))
+  ret <- rep(0,length(pf1))
   for (i in 1:length(pf1)) {
-    return[i] <- pf1[i] * pf2[i]
+    ret[i] <- pf1[i] * pf2[i]
   }
   ### Rückgabewert ist das komponentenweise Minimum der beiden Vektoren pf1 und pf2
-  return
+  ret
 }
 
 fuzzy2_or <- function (pf1,pf2) {
-  return <- rep(0,length(pf1))
+  ret <- rep(0,length(pf1))
   for (i in 1:length(pf1)) {
-    return[i] <- 1 - (1-pf1[i]) * (1-pf2[i])
+    ret[i] <- 1 - (1-pf1[i]) * (1-pf2[i])
   }
   ### Rückgabewert ist das komponentenweise "Oder" der beiden Vektoren pf1 und pf2
-  return
+  ret
 }
 
 fuzzy2_implication <- function (pf1,pf2) {
   notf1 <-  fuzzy2_not(pf1)
-  return <- fuzzy2_or(notf1,pf2)
+  ret <- fuzzy2_or(notf1,pf2)
   ### Rückgabewert ist das komponentenweise "Oder" der beiden Vektoren pf1 und pf2
-  return
+  ret
 }
 
-fuzzy2_implication <- function (pf1,pf2) {
-  notf1 <-  fuzzy2_not(pf1)
-  return <- fuzzy2_or(notf1,pf2)
-  ### Rückgabewert ist das komponentenweise "Oder" der beiden Vektoren pf1 und pf2
-  return
-}
 
 
 fuzzy_indicator <- function(pf1,pgrenze,pvalue0,pvalue1) {
