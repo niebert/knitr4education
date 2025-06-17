@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ##  Einführung
 Der Lerneinheit gliedert sich in die folgenden Schritte
-* Einführung in die [[mehrdimensionale lineare Regression]]
+* Einführung in die [mehrdimensionale lineare Regression]
 * Implementierung in R
 * Interpretation der Ergebnisse
 * Praktische Übung
@@ -19,8 +19,8 @@ Der Lerneinheit gliedert sich in die folgenden Schritte
 Hier ist eine Lerneinheit für die Implementierung der mehrdimensionalen linearen Regression in R:
 
 ##  Aufgabe - Mehrdimensionale lineare Regression in R
-* Machen Sie sich zunächst mit dem prinzipiellen Vorgehen bei der [[mehrdimensionale lineare Regression|mehrdimensionalen linearen Regression]] vertraut.
-* Betrachten Sie den Begriff der [[w:de:Assoziation|Assoziation]], [[Assoziative Netze|assoziative Netze]] und die [[Maschinelles Lernen/Hebbsche Lernregel|Hebbschen Lernregel]], mit der man die Koaktivität von Nervenzellen in der Ein- und Ausgabeschicht [[Kurs:Mathematische Modellbildung|mathematisch modellieren]] kann.
+* Machen Sie sich zunächst mit dem prinzipiellen Vorgehen bei der [mehrdimensionale lineare Regression](https://de.wikiversity.org/wiki/mehrdimensionale_lineare_Regression) vertraut.
+* Betrachten Sie den Begriff der [[w:de:Assoziation|Assoziation]], [Assoziative Netze](https://de.wikiversity.org/wiki/assoziative_Netze) und die [Hebbsche Lernregel](https://de.wikiversity.org/wiki/Maschinelles_Lernen/Hebbsche:Lernregel), mit der man die Koaktivität von Nervenzellen in der Ein- und Ausgabeschicht [mathematisch modellieren](https://de.wikiversity.org/wiki/Kurs:Mathematische_Modellbildung) kann.
 
 ##  Ziel
 In dieser Lerneinheit lernen Sie, wie Sie eine mehrdimensionale lineare Regression in R und [KnitR](https://de.wikiversity.org/wiki/KnitR) implementieren können und die hilfreichen Rahmenbedingungen, für die Unter.
