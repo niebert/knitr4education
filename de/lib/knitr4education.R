@@ -43,43 +43,6 @@ loesung_ausgeben <- function(hilfe,name,solution) {
   hilfe_ausgabe
 }
 
-
-find_min4error <- function (pError, pGrad, pa, px_D, py_D, alpha=1, evalcount=100) {
-  ## Parameter
-  ## pError: Fehlerfunktion
-  ## pGrad:  Gradient der Fehlerfunktion
-  ## px_D: x-Vektoren der Daten für den Definitionsbereich
-  ## py_D: y-Sollwerte für die Fehlerfunktion
-  ret <- rep(0,2) ### ret <- c(0,0);
-  ## erste Komponente von ret ist der minimale lambda-Wert
-  ## zweite Komponente von ret ist der minimale Fehler
-  s4a <- (-evalcount:evalcount)/evalcount
-  #s4a <- 2*runif(2*evalcount+1,-1,1)
-  E4a <-  rep(0,2*evalcount+1) ## +1 wegen x4a=0
-  ## smin - Skalar für Gradient für das Minimum der berechneten Fehler
-  scalar4min <- s4a[1] ### ersten smin-Wert setzen - hier -1
-  ### Fehler in pa berechnen als Startwert
-  error4min <- pError( pa, px_D, py_D )
-  grad4a      <- alpha * pGrad( pa, px_D, py_D )
-  ## in Gradientenrichtung auswerten zwischen -1*pGrad und +1*Grad
-  ## die Fehlerfunktion auswerten und über die x4a-Liste iterieren
-  for (k in 1:length(s4a)) {
-    ## Fehler für den um x4a[k] skalierten Gradienten pGrad
-    ## und die Daten px_D, py_D berechnen
-    E4a[k] <- pError(pa + s4a[k]*grad4a, px_D, py_D)
-    ## Überprüfen, ob der Fehler kleiner ist als der
-    ## bisher berechnete minimale Fehler errormin
-    if (E4a[k] < error4min) {
-      error4min  <-E4a[k]
-      scalar4min <-s4a[k]
-    }
-  }
-  # plot(s4a,E4a)
-  ret <- c(scalar4min,error4min)
-  ## Rückgabewert des Skalars für den Gradienten und dem minimalen Fehler
-  ret
-}
-
 fuzzy_nand <- function (pf1,pf2) {
   ret <- rep(0,length(pf1))
   for (i in 1:length(pf1)) {
@@ -292,4 +255,42 @@ note_zuordnen <- function(pPunkte,pGrenzen,pNotenskala) {
      }
      ### Rückgabewert der Noten fuer alle Punkte
      note4punkte        
+}
+
+
+
+find_min4error <- function (pError, pGrad, pa, px_D, py_D, alpha=1, evalcount=100) {
+  ## Parameter
+  ## pError: Fehlerfunktion
+  ## pGrad:  Gradient der Fehlerfunktion
+  ## px_D: x-Vektoren der Daten für den Definitionsbereich
+  ## py_D: y-Sollwerte für die Fehlerfunktion
+  ret <- rep(0,2) ### ret <- c(0,0);
+  ## erste Komponente von ret ist der minimale lambda-Wert
+  ## zweite Komponente von ret ist der minimale Fehler
+  s4a <- (-evalcount:evalcount)/evalcount
+  #s4a <- 2*runif(2*evalcount+1,-1,1)
+  E4a <-  rep(0,2*evalcount+1) ## +1 wegen x4a=0
+  ## smin - Skalar für Gradient für das Minimum der berechneten Fehler
+  scalar4min <- s4a[1] ### ersten smin-Wert setzen - hier -1
+  ### Fehler in pa berechnen als Startwert
+  error4min <- pError( pa, px_D, py_D )
+  grad4a      <- alpha * pGrad( pa, px_D, py_D )
+  ## in Gradientenrichtung auswerten zwischen -1*pGrad und +1*Grad
+  ## die Fehlerfunktion auswerten und über die x4a-Liste iterieren
+  for (k in 1:length(s4a)) {
+    ## Fehler für den um x4a[k] skalierten Gradienten pGrad
+    ## und die Daten px_D, py_D berechnen
+    E4a[k] <- pError(pa + s4a[k]*grad4a, px_D, py_D)
+    ## Überprüfen, ob der Fehler kleiner ist als der
+    ## bisher berechnete minimale Fehler errormin
+    if (E4a[k] < error4min) {
+      error4min  <-E4a[k]
+      scalar4min <-s4a[k]
+    }
+  }
+  # plot(s4a,E4a)
+  ret <- c(scalar4min,error4min)
+  ## Rückgabewert des Skalars für den Gradienten und dem minimalen Fehler
+  ret
 }
