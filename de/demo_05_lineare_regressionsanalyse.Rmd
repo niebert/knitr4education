@@ -53,10 +53,13 @@ In dieser Lerneinheit lernen Sie, wie Sie eine mehrdimensionale lineare Regressi
 Zunächst betrachtet man die notwendigen Bibliotheken, die man für die Umsetzung in R bzw. KnitR für die Textgenerierung in Abhängigkeit von den Ergebnissen der [[mehrdimensionale lineare Regression|mehrdimensionalen linearen Regression]] verwenden möchte.
 
 ###  Schritt 1 - Installation der erforderlichen Bibliotheken
-Wenn Sie in [KnitR](https://de.wikiversity.org/wiki/KnitR) oder in einem R-Skript die Installation eines bestimmten Pakets benötigen, so können Sie anderen Nutzerinnen und Nutzer das Leben vereinfachen, wenn Sie den Installationbefehl für die erforderlichen Paketn in den ersten [[KnitR/Code-Chunk|Code-Chunk]] in [KnitR](https://de.wikiversity.org/wiki/KnitR) oder zu Beginn des R-Skriptes ergänzen, damit im Sinne von [[Open Educational Resources]] die erforderlich Skript bei Bedarf einfach nachinstalliert werden, sofern dies noch nicht von den Nutzern installiert wurden. Für lineare Modelle kann das mit dem folgenden Befehl erfolgen:
+Wenn Sie in [KnitR](https://de.wikiversity.org/wiki/KnitR) oder in einem R-Skript die Installation eines bestimmten Pakets benötigen, so können Sie anderen Nutzerinnen und Nutzer das Leben vereinfachen, wenn Sie den Installationbefehl für die erforderlichen Paketn in den ersten [[KnitR/Code-Chunk|Code-Chunk]] in [KnitR](https://de.wikiversity.org/wiki/KnitR) oder zu Beginn des R-Skriptes ergänzen, damit im Sinne von [[Open Educational Resources]] die erforderlich Skript bei Bedarf einfach nachinstalliert werden, sofern diese noch nicht von den Nutzern installiert wurden. Für die Visualisierung von linearen Modellen erfolgt das in einem Codechunk folgenden Befehl erfolgen:
 
-```{r}
-install.packages("lm")
+```{r , echo=FALSE}
+### ggf. nachinstallieren, falls noch nicht erfolgt.
+install.packages("rgl")
+### Bibliothek laden für 3D-Plots
+library(rgl)
 ```
 
 ###  Schritt 2 - Erstellung eines Beispiel-Datensatzes
