@@ -208,24 +208,29 @@ Auch für die Gesamtfehlerfunktion \(E_{MLR}\) benötigt man den Gradienten. Da 
 ```{r , echo=TRUE }
 GradE_MLR <- function (pA,px_D,py_D) {
     ## pA : Matrix A, für die der Fehler berechnet wurde
-    ## px_D : Dataframe - Liste von x-Vektoren
+    ## px_D : Dataframe - Liste von x-Vektoren   
     ## py_D : Dataframe - Liste von y-Werten
-
+    
+    ## Rückgabewert retA ist eine m x n-Matrix analog zu pA
+    ## Initialisierung mit Nullmatrix 
+    retGrad <- 0 * pA
+    ### retGrad hat die gleiche Zeilen- und Spaltenzahl wie pA
     ## Dimension des Gradienten
-    cols4x <- ncols(px_D)
-    grad <- rep(0,cols4x)
-    ## cols4y Anzahl der Komponentenfunktionen
+    cols4x <- ncols(px_D) 
+    grad <- rep(0,cols4x) 
+    ## cols4y Anzahl der Komponentenfunktionen 
     ##        enspricht der Spaltenanzahl von py_D
-    cols4y <- ncols(py_D)
-    ## Fehler für alle y-Spalten
+    cols4y <- ncols(py_D) 
+    ## Fehler für alle y-Spalten 
     for (i in 1:cols4y) {
       ## Gradient für alle Komponentenfunktion von E_LR addieren
-      a <- pA[i, ]
+      a <- pA[i, ] 
       y1_D <- py_D[ ,i]
-      grad <- grad + GradE_LR(a,px_D,y1_D)
-     }
+      ### i-te Zeile der Gradientenmatrix retA definieren
+      retGrad[i, ] <- GradE_LR(a,px_D,y1_D) 
+     } 
     ## Rückgabewert: grad Gradient von E_MLR
-    return(grad)
+    return(retGrad)
  }
 ```
 
