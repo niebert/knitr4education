@@ -100,6 +100,213 @@ anwenden.
 floor(runif(10, 5, 99))
 ```
 
-## Zufällige Aufgaben mit Lösung 
-Es zufällig ein Polynom 2. Grades mit ganzzahligen Koeffizienten generiert werden und dann soll die entsprechende Lösung ebenfalls in  
+## Berechnungen im Text
+
+### Linearfaktoren
+Die folgende Funktion erstellt für eine Nullstelle $x_0 \in \mathbb{R}$ den Linearfaktor $x-x_0$. Für $x_0 = 0$ wird der Linearfaktor $x$ zurückgegeben und 
+für $x_{0}\not= 0$ with der geklammerte Ausdruck $(x-x_0)$ generiert.
+```{r}
+lin_fak <- function (pNullstelle) {
+  lf <- "x"
+  if (pNullstelle > 0) {
+    lf <- paste("(x",-pNullstelle,")",sep="")
+  } else {
+    if (pNullstelle < 0) {
+      lf <- paste("(x+",-pNullstelle,")",sep="")
+    }
+  }
+  # return Linearfaktor
+  lf
+}
+
+## Test
+print(paste(lin_fak(-5),lin_fak(0),lin_fak(5),sep="  "))
+
+```
+
+## Computer Algebra System YACAS in R vewenden
+```{r}
+library(Ryacas)
+## 
+## Attaching package: 'Ryacas'
+## The following object is masked from 'package:stats':
+## 
+##     deriv
+## The following objects are masked from 'package:base':
+## 
+##     %*%, determinant, diag, diag<-, I, lower.tri, upper.tri
+# simplify expressions
+as_r(yac_str("Simplify(a*b*a^2/b-a^3)"))
+as_r(yac_str("Solve(x/(1+x) == a, x)"))
+prod4linfakt <- paste(lin_fak(-5),lin_fak(0),lin_fak(5),sep="*")
+prod4linfakt
+cmd4yacas <- paste("Simplify(",prod4linfakt,")")
+cmd4yacas
+term <- yac_str(cmd4yacas)
+```
+
+Bestimmen Sie alle Nullstellen von dem Polynom $p(x)=`r term`$
+
+
+```{r , echo=FALSE}
+integral_best <- function (pTerm,pVariable,pUnten,pOben) {
+   # Erzeugen des YACAS Befehls z.B. Integrate(x,a,b) Cos(x)
+   # mit pTerm="Cos(x)", pVariable="x", pUnten="a" und pOben="b" 
+   yacasbefehl <- paste("Integrate(",pVariable,",",pUnten,",",pOben,")",pTerm,sep="")
+   # Absenden des YACAS-Befehl als YACAS
+   ergebnis <- yac_str(yacasbefehl)
+   # return: Bestimmtes Integral von pTerm bzgl. der Integralgrenzen
+   ergebnis
+}
+
+integral_best4latex <- function (pTerm,pVariable,pUnten,pOben) {
+   # Erzeugen des YACAS Befehls z.B. Integrate(x,a,b) Cos(x)
+   # mit pTerm="Cos(x)", pVariable="x", pUnten="a" und pOben="b" 
+   yacasbefehl <- paste("Integrate(",pVariable,",",pUnten,",",pOben,")",pTerm,sep="")
+   yacas4latex <- paste("TexForm(",yacasbefehl,")")
+   # Absenden des YACAS-Befehl als YACAS
+   ergebnis <- yac_str(yacas4latex)
+   # return: Bestimmtes Integral von pTerm bzgl. der Integralgrenzen
+   ergebnis
+}
+
+integral_unbest <- function (pTerm,pVariable) {
+  # ergebnis <- "undefiniert"
+  yacasbefehl <- paste("Integrate(",pVariable,")",pTerm,"",sep="")
+  ergebnis <- yac_str(yacasbefehl)
+  # return Ableitung des Funktionsterms pTerm nach der Variable pVariable 
+  ergebnis
+}
+
+polynom <- "5*x^3-x*y+5"
+variable="x";
+differenziere <- function(pTerm,pVariable) {
+  yacasbefehl <- paste("D(",pVariable,")",pTerm,sep="")
+  ableitung <- yac_str(yacasbefehl)
+  ## Rückgabe der Ableitung
+  ableitung
+}
+# yacasbefehl <- paste("D(x)",polynom,sep="")
+# ableitung <- yac_str(yacasbefehl)
+ableitung <- differenziere(polynom,variable)
+
+integral_best(polynom, variable, 3,6)
+integral_best4latex(polynom, variable, 3,6)
+integral_unbest(polynom, variable)
+```
+
+### Berechnung der Ableitung als Aufgabe
+* Polynomterm $f(x)=`r polynom`$ ist gegeben. Formel in Latex $\sum_{k=0}^{\infty} \frac{1}{k^2}$
+* Die Ableitung ist $f'(x)=`r ableitung`$. 
+* Alternativ kann man die Funktion auch direkt berechnen lassen $`r diff(polynom,variable)`$ 
+
+```{r}
+# Stammfunktionen in YACAS für  bestimmtes und unbestimmtes Integral berechnen
+yac_str("Integrate(x) x*Sin(x)");     # Nur Stammfunktion 
+yac_str("Integrate(x,3,4) x*Sin(x)"); # bestimmtes Integral in den Grenzen [3,4] 
+sol <- yac_str("Solve(x^2-9 == 0, x)")
+```
+
+### Zufällige Parameter für die Aufgabe
+Nun werden zunächst zufällige Parameter für eine Aufgabe erstellt.
+Die Aufgabenstellung soll eine Polynom abgeleitet werden und die Nullstellen bestimmt werden. Zugleich soll ein Lösungsblatt erstellt werden.
+```{r nullstellen, echo=TRUE}
+low <- 1
+high <- 6
+n <- 3 # 3 Nullstellen 
+nullstelle <- floor(runif(n,low,high+1))
+polynom1 <- paste(lin_fak(nullstelle[1]),lin_fak(nullstelle[2]),lin_fak(nullstelle[3]),sep=" \\cdot ") 
+## Test 
+print(polynom1)
+```
+Das faktorisierte Polynom lautet $$f(x)=`r polynom1`$$. Nun berechnen man das Polynom für die Aufgabenstellung der Schüler.  
+
+### Maxima zur Berechnung des allgemeinen Polynoms
+Das Polynom ist ausmultipliziert mit `wxMaxima` berechnen mit 
+* Term definieren `(x-n1)*(x-n2)*(x-n3);`
+* Term ausmultiplizieren `expand(%);` der Befehl liefert in Maxima liefert: `x^3-n3*x^2-n2*x^2-n1*x^2+n2*n3*x+n1*n3*x+n1*n2*x-n1*n2*n3`
+* Koeffizienten ausklammern: `ratsimp( (x-n1)*(x-n2)*(x-n3) );` - der Befehl liefert `x^3+(-n3-n2-n1)*x^2+((n2+n1)*n3+n1*n2)*x-n1*n2*n3`
+```{r}
+koeff <- numeric(3);
+## Koeffizient fuer x^0
+koeff[1] <- -nullstelle[1]*nullstelle[2]*nullstelle[3]
+## Koeffizient fuer x^1
+koeff[2] <- (nullstelle[2]+nullstelle[1])*nullstelle[3]+nullstelle[1]*nullstelle[2]
+## Koeffizient fuer x^2
+koeff[3] <- -nullstelle[1]-nullstelle[2]-nullstelle[3]
+
+## Test
+print(koeff[1])
+print(koeff[2])
+print(koeff[3])
+
+```
+Darstellung des Koeffizienten muss in einer Summe mit Polynom immer ein Vorzeichen haben
+```{r}
+koeff_poly <- function(pKoeff) {
+  k <- ""
+  if (pKoeff == 1) {
+    k <- "+"
+  } else {
+    if (pKoeff >= 0) {
+      k <- paste("+",pKoeff, sep="")
+    } else {
+      k <- paste(pKoeff,sep="")
+    }
+  }
+  ## return Koeffizient mit Vorzeichen
+  k
+}
+
+## Test
+# print(koeff_poly(-5))
+print(koeff_poly(1))
+print(koeff_poly(5))
+print(koeff_poly(0))
+
+
+```
+### Polynom 3. Grades
+Nun wird aus den berechneten Koeffizienten das Polynom 3. Grades aus den Koeffizienten berechnet.
+```{r}
+
+poly_grad3 <- function (pKoeff) {
+  pg3 <- "x^3"
+  pg3 <- paste(pg3,koeff_poly(pKoeff[3]),"x^2",sep="")
+  pg3 <- paste(pg3,koeff_poly(pKoeff[2]),"x",sep="")
+  pg3 <- paste(pg3,koeff_poly(pKoeff[1]),"",sep="")
+  # return term fuer das Polynom 3. Grades
+  pg3
+}
+
+# Test des Polynomterms
+poly_grad3(koeff)
+```
+
+Die Ausgabe im Text für das Polynom ist dann
+$$f(x)=`r poly_grad3(koeff)`$$
+Die Ableitung der Funktion ist ein Polynom zweiten Grades. Dazu erzeugt man wieder eine Funktion, die ein Polynom zweiten Grades darstellt.
+
+### Polynom 3. Grades
+Nun wird aus den berechneten Koeffizienten das Polynom 3. Grades aus den Koeffizienten berechnet.
+```{r}
+
+poly_grad2 <- function (pKoeff) {
+  pg2 <- "3x^2"
+  pg2 <- paste(pg2,koeff_poly(pKoeff[2]),"x",sep="")
+  pg2 <- paste(pg2,koeff_poly(pKoeff[1]),"",sep="")
+  # return term fuer das Polynom 2. Grades
+  pg2
+}
+
+koeff_diff <- numeric(2)
+koeff_diff[2] <- 2*koeff[3] ## Koeffizient von x^1
+koeff_diff[1] <- 1*koeff[2] ## Koeffizient von x^0
+# Test des Polynomterms
+poly_grad2(koeff_diff)
+```
+Die automatisch berechnete Ableitung des Polynoms 
+$$ f(x) = `r poly_grad3(koeff)`$$
+ist dann 
+$$ f'(x) = `r poly_grad2(koeff_diff)` $$
 
