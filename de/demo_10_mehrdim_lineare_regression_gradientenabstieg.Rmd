@@ -258,15 +258,17 @@ mdimLR <- function (pA, px_D, py_D, alpha=1, max_iteration=10, evalcount=100)  {
   minwert <- c(0,alterfehler)
   print(paste("Error 0: ",alterfehler,sep=""))
   for (i in 1:max_iteration) {
-    ### minimalen Fehler in Gradientenrichtung suchen
-    minwert <- find_min4error(E_LR, normGradE_LR, pa, px_D, py_D, alpha, evalcount)
+    ### minimalen Fehler in Gradientenrichtung suchen 
+    minwert <- find_min4error(E_MLR, normGradE_MLR, pa, px_D, py_D, alpha, evalcount)
     print(paste("Iteration ",i," (",paste(minwert[1]*alpha,minwert[2],sep=","),")",sep=""))
-    #print(minwert)
-    pa + minwert[1]*normGradE_LR(pa, px_D, py_D)
-
+    #print(minwert) 
+    ### normierten Gradienten berechnen
+    normgrad <- normGradE_MLR(pA, px_D, py_D)
+    ### Matrix in Richtung des normierten Gradienten mit der Schrittweite minwert[1] verändern
+    pA + minwert[1]* normgrad
+    
     if (alterfehler > minwert[2]) {
-      pa <- pa + minwert[1]*normGradE_LR(pa, px_D, py_D)
-      print(paste("a=(",paste(pa[1],pa[2],pa[3],sep=","),")",sep=""))
+      pA <- pA + minwert[1]*normgrad
       print(paste("Gradient",i," alpha=",alpha,sep=""))
       print(paste("Error ",i,": ",minwert[2],sep=""))
       alterfehler > minwert[2]
@@ -274,9 +276,8 @@ mdimLR <- function (pA, px_D, py_D, alpha=1, max_iteration=10, evalcount=100)  {
       print("Fehler wird größer")
     }
   }
-  return <- a
-  ### Rückgabewert
-  return
+  ### Rückgabewert ist die Matrix mit kleinerem MLR-Fehler
+  return(pA)
 }
 ```
 
