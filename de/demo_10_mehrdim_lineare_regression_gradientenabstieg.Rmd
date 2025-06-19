@@ -1,0 +1,314 @@
+---
+title: "Mehrdimensional lineare Regressionsanalyse in R"
+author: "Bert Niehaus - knitr4education"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+
+##  Einleitung 
+Diese Seite zum Thema ''Kurs:Mehrdimensionale lineare Regression/Umsetzung in R'' kann als '''[https://niebert.github.io/Wiki2Reveal/wiki2reveal.html?domain=wikiversity&title=Mehrdimensionale%20lineare%20Regression/Umsetzung%20in%20R&author=Mehrdimensionale%20lineare%20Regression&language=de&audioslide=yes&shorttitle=Umsetzung%20in%20R&coursetitle=Mehrdimensionale%20lineare%20Regression Wiki2Reveal Folien]''' angezeigt werden.
+Einzelne Abschnitte werden als Folien betrachtet und Änderungen an den Folien wirken sich sofort auf den Inhalt der Folien aus.
+Dabei werden die folgenden Teilaspekte im Detail behandelt:
+* (1) Laden der Daten
+* (2) Iterationen zur Fehlerminimierung
+* (3) Ausgabe der Matrix und des mittleren Fehlers pro Datum
+
+##  Zielsetzung 
+Diese Lernressource hat das Ziel, die ''mehrdimensionale lineare Regression'' in R umzusetzen und die wesentlichen Schritte in Analogie zur mathematischen Herleitung zu implementieren.
+
+
+##  Lernvoraussetzungen 
+Die Lernressource zum Thema  ''Kurs:Mehrdimensionale lineare Regression/Umsetzung in R'' hat die folgenden Lernvoraussetzungen, die zum Verständnis der nachfolgenden Ausführungen hilfreich bzw. notwendig sind.
+* '''(Mathematische Grundlagen)''' Die mathematischen Grundlagen sind wesentlich, um die Einsatzmöglichkeiten der Verfahren abschätzen zu kennen.
+* '''(Grundlagen in GNU R)''' Die Grundlagen der Implementierung und [[b:de:GNU R|GNU R]] sind hilfreich, um die Implementationsschritte zu verstehen und den Code auf anderen Datenquellen ggf. anpassen zu können.
+
+##  Aufgaben Studierende 
+Bitten erzeugen Sie ein KnitR-Markdown-Dokument, indem Sie die Teilschritte als Codefragement / Codechunks einbauen und testen. Gehen Sie schrittweise vor bis Sie mit den angegeben Codezeilen ein vollständiges Verfahren zur ''mehrdimensionalen lineare Regression in R'' umgesetzt haben. Demodatei in [[KnitR]] finden Sie für diese Lerneinheit in [https://github.com/niebert/knitr4education/tree/main/de knitr4education]<ref>Bert Niehaus (2025) knitr4education - Demodateien für KnitR für Wikiversity - u.a. lineare Regression - URL: https://github.com/niebert/knitr4education/tree/main/de  </ref>
+
+##  Laden der Daten 
+Als einführenden Schritt eines überwachten Lernverfahrens muss man aus den gegebenen Daten festlegen, welche Datenspalten die Eingabespalten und welche Datenspalten die Ausgabespalten der Traininfsdaten darstellen.  ''Kurs:Mehrdimensionale lineare Regression/Umsetzung in R'' dient dabei
+Speichen Sie zunächst die obige [https://raw.githubusercontent.com/niebert/knitr4education/main/de/data/multlinreg.csv Beispieldatei] `multlinreg.csv`<ref name="multlinreg">Bert Niehaus (2024) GitHub-Repository KnitR for Education https://github.com/niebert/knitr4education für eine Wikiversity-Lernressource - Datei: [https://raw.githubusercontent.com/niebert/knitr4education/main/de/data/multlinreg.csv multilinreg.csv]</ref> in Ihr Verzeichnis mit dem [[KnitR]]-Dokument. Das [[Kurs:KnitR/Laden und Speichern|Laden von Dateien in R]] und [[KnitR]] kann bzgl. der obigen [https://raw.githubusercontent.com/niebert/knitr4education/main/de/data/multlinreg1.csv Beispieldatei]<ref name="multlinreg"/> wie folgt geschehen:
+```{r , echo=TRUE }
+  data <- read.csv("multlinreg.csv", header=TRUE, stringsAsFactors=FALSE)
+```
+
+###  CSV-Datei 
+<syntaxhighlight lang="CSV">
+"x1","x2","x3","y1","y2"
+1,2,3,16.05071,1.92142
+2,3,1,22.06779,0.08923
+7,0,4,24.96846,10.98239
+7,6,5,56.06086,6.02315
+```
+
+###  Tabelle für die Daten 
+In der folgenden Tabelle sind <tt>x1,x2,x3</tt> die Komponenten der Eingabevektoren und <tt>y1,y2</tt> die Komponenten der Ausgabevektoren.
+
+{| class="wikitable"
+|+ Tabellarische Darstellung
+|-
+! x1 !! x2 !! x3 !! y1 !! y2
+|-
+| 1 || 2 || 3 || 16.05071 || 1.92142
+|-
+| 2 || 3 || 1 || 22.06779 || 0.08923
+|-
+| 7 || 0 || 4 || 24.96846 || 10.98239
+|-
+| 7 || 6 || 5 || 56.06086 || 6.02315
+|}
+
+###  Bemerkung - Matrixdimension 
+Die gesuchte lineare Abbildung \( A \) für die mehrdimensionale lineare Regression ist also eine  \(2 \times 3\)-Matrix. [
+
+  A:=  \begin{pmatrix}
+  a_{1,1} & a_{1,2} & a_{1,3} \\
+  a_{2,1} & a_{2,2} & a_{2,3} \\
+ \end{pmatrix}  ]
+
+
+###  Dataframes für die Ein-/Ausgabe 
+Oft enthalten die Rohdaten auch weitere Spalten, die für die [[mehrdimensionale lineare Regression]] keine Rolle spielen. Daher muss man die Ein- und Ausgabevektor aus den Rohdaten auswählen und in ein Eingabe-Dataframe und ein Ausgabe-Dataframe zusammenfassen.
+
+###  Selektieren der Daten für x- und y-Werte 
+Die obige verwendete Tabelle `multlinreg.csv`<ref name="multlinreg"/>. enthält in diesem Fall nur Spalten, die für die mehrdimensionale lineare Regression notwendig sind. Die Zuordnung der relevanten Datenspalten für die x- und y-Werte der linearen Regression wird nun gezeigt.
+```{r , echo=TRUE }
+  data <- read.csv("data/multlinreg.csv", header=TRUE, stringsAsFactors=FALSE)
+  ## Spalten extrahieren für x_D
+  x1 <- data[,1]
+  x2 <- data[,2]
+  x3 <- data[,3]
+  ## Spalten extrahieren für y_D
+  y1 <- data[,4]
+  y2 <- data[,5]
+  ## Dataframes für die Fehlerfunktion
+  x_D <- data.frame(x1,x2,x3)
+  y_D <- data.frame(y1,y2)
+```
+
+###  Bemerkung - Pfad zu Daten 
+In dem Verzeichnis, in dem die R-Markdown-Dateien (Endung <tt>.Rmd</tt>) liegen, ist empfehlenswert, [[KnitR/Pfade|Unterverzeichnisse]] zu erzeugen:
+* <tt>data/</tt> - Verzeichnis in dem alle CSV-Dateien bzw. Tabellenkalkulationsdateien liegen oder in das erzeugt Tabellen abgespeichert werden.
+* <tt>lib/</tt> - Verzeichnis im dem R-Skripte und R-Bibliotheken liegen, die Sie für mehr als eine R-Markdown-Datei benötigen (z.B. <tt>knitr4education.R</tt>)
+
+###  Ladefunktion definieren 
+Für die mehrdimensionale lineare Regression muss man die relevanten Eingabespalten für die Eingabevektoren `pInCols` und relevanten Ausgabespalten für die Ausgabevektoren `pInCols` benennen. Diese werden als Vektoren der Spaltenbezeichnungen definiert:
+```{r , echo=TRUE }
+ ## Ladefunktion für
+ load_inout_csv <- function(pFilename,pInCols,pOutCols) {
+    data <- read.csv(pFilename, header=TRUE, stringsAsFactors=FALSE)
+    ### Spalten mit den Bezeichnung pColNames extrahieren
+    data4cols <-  list(
+       xin  = data[pInCols],
+       yout = data[pOutCols]
+    )
+
+    ### Rueckgabe der extrahierten Spalten
+    return(data4cols)
+ }
+```
+
+Mit der obigen Ladefunktion kann man die relevanten Datenspalten aus der CSV-Datei auch wie folgt in die Eingabedaten `x_ID` bzw. in die Ausgabedaten `y_ID` laden.
+
+```{r , echo=TRUE }
+ ## Spaltenbezeichnungen: Eingabevektoren IR^3
+ incolnames  <- c("x1","x2","x3")
+ ## Spaltenbezeichnungen: Ausgabevektoren IR^2
+ outcolnames <- c("y1","y2")
+
+ ### Input- und Outputdaten aus Datei laden
+ df <- load_inout_csv("data/multlinreg.csv",incolnames,outcolnames)
+
+ x_ID <- df$xin
+ y_ID <- df$yout
+```
+
+##  MLR-Fehlerfunktion
+Die LR-Fehlerfunktion \(E_{LR}(a,x_{_D},y)\) habe den Fehler für die Komponentenfunktionen berechnet, die nur einen eindimensionalen Werterbereich besitzen.
+
+###  Zerlegung in Fehler der Komponentenfunktionen 
+Die MLR-Fehlerfunktion \(E_{MLR}(A,x_{_D},y_{_D})\) zerlegt die Matrix \(A\) in Zeilenvektoren \(a_i\) und ruft die Fehlerfunktion \(E_{LR}(a_i,,x_{_D},y^{(i)}) \) für die \(i\)-te Spalte \( y^{(i)}\) des Ausgabevektors in \(y_{\mathbb{D}}\) auf.
+
+###  Aggregation der Fehler aus Komponentenfunktionen 
+MLR-Fehlerfunktion \(E_{MLR}(A,x_{_D},y_{_D})\) aggregiert dann die Fehler der Komponentenfunktionen (siehe [[Mehrdimensionale lineare Regression/Zerlegung|Zerlegung in Komponentenfunktionen]] für die [[Mehrdimensionale_lineare_Regression/Gesamtfehler_aller_Fehlerfunktionen#Aggregierter_Gesamtfehler_der_Komponentenfunktionen|Berechnung des Gesamtfehlers]]).
+
+
+###  LR-Fehlerfunktion für Komponentenfunktionen 
+Die Bezeichnung LR-Fehlerfunktion wird verwendet, wenn man den Fehler für eine [[Mehrdimensionale lineare Regression/Komponentenfunktionen|Komponentenfunktion]] berechnet, dessen Wertebereich \(\mathbb{R}\).
+```{r , echo=TRUE }
+E_LR <- function (pa,px_D,py_D) {
+    ## px_D : Dataframe - Liste von x-Vektoren
+    ## py_D : Dataframe - Spaltenvektor von y-Werten
+    ## pa : darstellender Vektor von f_a
+
+    ## Fehler pro Datenpunkt
+    datenanzahl <- nrow(px_D)
+    e_D <- rep(0,datenanzahl)
+    ## Fehler für alle Datenpunkte berechnen
+    for (i in 1:datenanzahl) {
+      ## quadratische Einfehler mit Funktion e
+      e_D[i] <- (sum(pa*px_D[i, ]) - py_D[i, ])^2
+    }
+    ## Rückgabewert als aufsummierte Einzelfehler setzen
+    return <-  sum(e_D) ## datenanzahl
+    ## Rückgabewert: return  Gesamtfehler quadratisch
+    return
+  }
+
+```
+
+###  Gradient der LR-Fehlerfunktion für Komponenten 
+Von der obigen Fehlerfunktion für einzelne [[Mehrdimensionale lineare Regression/Komponentenfunktionen|Komponentenfunktionen]] muss man nun noch den Gradienten implementieren, um die [[Gradientenabstiegsverfahren|Fehler zu minimieren]].
+```{r , echo=TRUE }
+  GradE_LR <- function (pa,px_D,py_D) {
+    ## px_D : Dataframe - Liste von x-Vektoren
+    ## py_D : Dataframe - Liste von y-Werten
+    ## pa : darstellender Vektor von f_a
+
+    ## Fehler pro Datenpunkt
+    datenanzahl <- nrow(px_D)
+    return <- rep(0,length(pa))
+    ## Fehler für alle Datenpunkte berechnen
+    for (i in 1:datenanzahl) {
+      ## Gradient der Summanden der Fehlerfunktion E_LR addieren
+      ret <- ret + (sum(pa*px_D[i, ]) - py_D[i, ]) * px_D[i, ]
+    }
+    ## Rückgabewert: ret Gradient des quadratischen  Gesamtfehler
+    ret
+  }
+```
+
+###  MLR-Gesamtfehlerfunktion 
+Die Gesamtfehlerfunktion \(E_{MLR}\) aggregiert alle \(m\) Fehler \(E_{LR}\) für die [[Mehrdimensionale lineare Regression/Komponentenfunktionen|Komponentenfunktionen]] mit eindimensionalem Wertebereich \(\mathbb{R}\). Der Fehler wird in \(E_{MLR}\) für einen Matrix \(A \in Mat(m\times n,\mathbb{R}) \) berechnet, während \(E_{LR}\) den Fehler jeweils für einen Zeilenvektor aus der Matrix \(A\) berechnet.
+```{r , echo=TRUE }
+E_MLR <- function (pA,px_D,py_D) {
+    ## pA : Matrix A, für die der Fehler berechnet wurde
+    ## px_D : Dataframe - Liste von x-Vektoren
+    ## py_D : Dataframe - Liste von y-Werten
+
+    ## Fehler pro Datenpunkt
+    cols4y <- ncols(py_D) ## Anzahl der Spalten von y_D
+    fehler <- 0
+    ## Fehler für alle y-Spalten
+    for (i in 1:cols4y) {
+      ## Fehler für Komponentenfunktion f_a berechnen
+      a <- pA[i, ]
+      y1_D <- py_D[ ,i]
+      fehler <- fehler + E_LR(a,px_D,y1_D)
+     }
+    return <-  fehler ## datenanzahl
+    ## Rückgabewert: fehler  quadratisch
+    return
+ }
+```
+
+###  Gradient der MLR-Gesamtfehlerfunktion 
+Auch für die Gesamtfehlerfunktion \(E_{MLR}\) benötigt man den Gradienten. Da sich der Gesamtfehler \(E_{MLR}\) aus den Komponentenfunktionsfehlern \(E_{LR}\) additiv zusammensetzt, kann man mit Ableitungsregeln den Gradienten über die Gradienten von  \(E_{LR}\) berechnen.
+```{r , echo=TRUE }
+GradE_MLR <- function (pA,px_D,py_D) {
+    ## pA : Matrix A, für die der Fehler berechnet wurde
+    ## px_D : Dataframe - Liste von x-Vektoren
+    ## py_D : Dataframe - Liste von y-Werten
+
+    ## Dimension des Gradienten
+    cols4x <- ncols(px_D)
+    grad <- rep(0,cols4x)
+    ## cols4y Anzahl der Komponentenfunktionen
+    ##        enspricht der Spaltenanzahl von py_D
+    cols4y <- ncols(py_D)
+    ## Fehler für alle y-Spalten
+    for (i in 1:cols4y) {
+      ## Gradient für alle Komponentenfunktion von E_LR addieren
+      a <- pA[i, ]
+      y1_D <- py_D[ ,i]
+      grad <- grad + GradE_LR(a,px_D,y1_D)
+     }
+    ## Rückgabewert: grad Gradient von E_MLR
+    return(grad)
+ }
+```
+
+###  Normierter MLR-Gradient 
+Um mit der Lernrate  \(\alpha > 0 \) die Schrittweite im Parameter \(a\in \mathbb{R}^n \) kontrollieren zu können, verwendet man ein normierten Gradienten, der die Vektorlänge \(\| \mathtt{normgrad} \| = 1 \), wenn der Gradient nicht der Nullvektor ist (siehe auch [[Mehrdimensionale_lineare_Regression/Fehlerminimierung_und_Lernrate#Normierter_LR-Gradient|normiert LR-Gradient]]).
+```{r , echo=TRUE }
+normGradE_MLR <- function (pa,px_D,py_D) {
+ g_LR <- GradE_MLR(pa,px_D,py_D)
+ ## Länge des Gradientenvektors bestimmen als euklidische 2-Norm
+ norm4g <- norm(g_LR,"2")
+ normgrad <- g_LR
+ if (norm4g > 0) {
+    ### Normierung des Gradienten
+    normgrad <- g_LR / norm4g
+ } else {
+   print("MLR-Gradient ist Nullvektor")
+ }
+ ## Rückgabewert: normierter Gradient, wenn kein Nullvektor
+ ##               Sonst Nullvektor als Rückgabewert
+ return(normgrad)
+}
+```
+
+###  Definition der mehrdimensionalen lineare Regression 
+```{r , echo=TRUE }
+mdimLR <- function (pA, px_D, py_D, alpha=1, max_iteration=10, evalcount=100)  {
+  ## max_iteration  maximale Anzahl der  Iterationszyklen
+  ## max_iteration <- 25
+  alterfehler <- E_MLR(pA,px_D,py_D)
+  minwert <- c(0,alterfehler)
+  print(paste("Error 0: ",alterfehler,sep=""))
+  for (i in 1:max_iteration) {
+    ### minimalen Fehler in Gradientenrichtung suchen
+    minwert <- find_min4error(E_LR, normGradE_LR, pa, px_D, py_D, alpha, evalcount)
+    print(paste("Iteration ",i," (",paste(minwert[1]*alpha,minwert[2],sep=","),")",sep=""))
+    #print(minwert)
+    pa + minwert[1]*normGradE_LR(pa, px_D, py_D)
+
+    if (alterfehler > minwert[2]) {
+      pa <- pa + minwert[1]*normGradE_LR(pa, px_D, py_D)
+      print(paste("a=(",paste(pa[1],pa[2],pa[3],sep=","),")",sep=""))
+      print(paste("Gradient",i," alpha=",alpha,sep=""))
+      print(paste("Error ",i,": ",minwert[2],sep=""))
+      alterfehler > minwert[2]
+    } else {
+      print("Fehler wird größer")
+    }
+  }
+  return <- a
+  ### Rückgabewert
+  return
+}
+```
+
+###  Interative Berechnung der mehrdimesionalen linearen Regression 
+```{r , echo=TRUE }
+## Spaltenbezeichnungen: Eingabevektoren IR^3
+ incolnames  <- c("x1","x2","x3")
+ ## Spaltenbezeichnungen: Ausgabevektoren IR^2
+ outcolnames <- c("y1","y2")
+
+ ### Input- und Outputdaten aus Datei "multlinreg.csv" laden
+ ### Datei befindet sich im Unterverzeichnis "data/"
+ df <- load_inout_csv("data/multlinreg.csv",incolnames,outcolnames)
+
+ x_ID <- df$xin
+ y_ID <- df$yout
+
+ ## Startmatrix für die mehrdim. lin Regression setzen
+ A <- matrix(c(1,2,3,4,5,6), ncol=3)
+ ## mehrdim lin. Regression starten
+mdimLReg(A,x_D,y_D)
+```
+
+##  Literatur/Quellennachweise 
+<references/>
+
+
+##  Siehe auch 
+* [[Gradientenabstiegsverfahren]]
+* [[KnitR/Vorlagen|Vorlagen in KnitR]]
+* [[Wiki2Reveal]]
+* [[Mehrdimensionale lineare Regression/Zerlegung|Zerlegung in Komponentenfunktionen]]
+* [[Mehrdimensionale_lineare_Regression/Gesamtfehler_aller_Fehlerfunktionen#Aggregierter_Gesamtfehler_der_Komponentenfunktionen|Gesamtfehler der Komponentenfunktionen]]
+* [[Open Educational Resources]]
+
