@@ -311,10 +311,9 @@ mdimLReg(A,x_D,y_D)
 
 
 ##  Siehe auch 
-* [[Gradientenabstiegsverfahren]]
-* [[KnitR/Vorlagen|Vorlagen in KnitR]]
-* [[Wiki2Reveal]]
-* [[Mehrdimensionale lineare Regression/Zerlegung|Zerlegung in Komponentenfunktionen]]
-* [[Mehrdimensionale_lineare_Regression/Gesamtfehler_aller_Fehlerfunktionen#Aggregierter_Gesamtfehler_der_Komponentenfunktionen|Gesamtfehler der Komponentenfunktionen]]
-* [[Open Educational Resources]]
+* [Gradientenabstiegsverfahren](https://de.wikiversity.org/wiki/Gradientenabstiegsverfahren)
+* [Vorlagen in KnitR](https://de.wikiversity.org/wiki/KnitR/Vorlagen)
+* [Zerlegung in Komponentenfunktionen](https://de.wikiversity.org/wiki/Mehrdimensionale_lineare_Regression/Zerlegung)
+* [Gesamtfehler der Komponentenfunktionen](https://de.wikiversity.org/wiki/Mehrdimensionale_lineare_Regression/MLR-Gesamtfehlerfunktion)
+* [Open Educational Resources](https://de.wikiversity.org/wiki/Open_Educational_Resources)
 
