@@ -20,6 +20,26 @@ save_csv <- function(pFilename, pData) {
   write.csv(pData, pFilename, row.names = FALSE)
 }
 
+ ## Ladefunktion für die Auswahl von bestimmten Ein- und Ausgabespalten definieren
+ ## die eine CSV-Datei laedt
+ load_inout_csv <- function(pFilename,pInCols,pOutCols) {
+    data <- read.csv(pFilename, header=TRUE, stringsAsFactors=FALSE)
+    ### Spalten für Eingabe bzw. Ausgabe in numerische Werte konvertieren 
+    for (i in 1:length(pInCols)) {
+      data[pInCols[i]] <- as.numeric(data[pInCols[i]])
+    }
+    for (i in 1:length(pOutCols)) {
+      data[pOutCols[i]] <- as.numeric(data[pOutCols[i]])
+    }
+    ### Spalten mit den Bezeichnung pColNames extrahieren
+    data4cols <-  list(
+       xin  = data[pInCols],
+       yout = data[pOutCols]
+    )
+    ### Rueckgabe der extrahieren numerischen Datenspalten
+    return(data4cols)
+  }
+
 copy4vec <- function (pVec) {
   ret <- rep(0,length(pVec))
   for (i in length(pVec)) {
