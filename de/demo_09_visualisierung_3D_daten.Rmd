@@ -10,6 +10,16 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 ```{r , echo=FALSE}
 
+load_csv <- function(pFilename) {
+  retData <- read.csv(pFilename, header=TRUE, stringsAsFactors=FALSE)
+  ### Rückgabe retData ist ein Dataframe (Tabelle)
+  return(retData)
+}
+
+save_csv <- function(pFilename, pData) {
+  write.csv(pData, pFilename, row.names = FALSE)
+}
+
 ```
 
 ## Visualisierung von 3D-Daten
