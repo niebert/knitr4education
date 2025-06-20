@@ -1,8 +1,8 @@
 ## R Bibliotheken 
 Dies Verzeichnis enthält R-Bibliotheken für die Intergration in KnitR-Dateien. 
 Dabei wird Code und definierte R-Funktionen in eine externe Datei ausgelagert, damit diese 
-in mehreren R-Markdown-Dateien wieder verwendet werden kann und gleichzeitig jede Erweiterung in allen R-Markdown-Dateien 
-sofort verfügbar ist.
+in mehreren R-Markdown-Dateien wieder verwendet werden kann und gleichzeitig jede Erweiterung in allen R-Markdown-Dateien sofort verfügbar ist.
+Die Bibliothek kann über den Befehl `library(knit4education)` 
 
 ### Version 0.6
 Fuzzylogik mit Indikatoroperator auf Fuzzywerten erweitert und die `load_csv()` bzw. `save_csv()` als Funktion ergänzt. 
