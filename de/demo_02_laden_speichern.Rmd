@@ -43,6 +43,15 @@ studentdata <- load_csv("data/data.csv");
 ```
 Der Dateframe `studentdata` enthält nun die Daten aus der Datei `data.csv`.
 
+### Ausgangstabelle der Daten
+Die folgende Tabelle enthält die geladenen Daten 
+```{r}
+knitr::kable(
+  studentdata, booktabs = TRUE,
+  caption = 'Geladene Daten mit Summespalte für data.csv.'
+)
+```
+
 ## Punktesumme berechnen
 Mit dem folgenden Code werden einzelne Spalten aus dem Dataframe extrahiert und in den Variablen `a1`, `a2` und `a3` gespeichert. Mit diesen Vektoren wird die Vektorsumme berechnet und in dem Vektor `summe` .
 
@@ -57,6 +66,15 @@ summe <- a1 + a2 + a3
 
 ### Spalte "summe" im Dataframe "studentdata" ergänzen
 studentdata$summe <- summe
+```
+
+### Ausgangstabelle mit berechneter Summe
+Die folgende Tabelle enthält die geladenen Daten mit der Summespalte.
+```{r}
+knitr::kable(
+  studentdata, booktabs = TRUE,
+  caption = 'Geladene Daten mit Summespalte für data.csv.'
+)
 ```
 
 ## Bestandenvektor berechnen
