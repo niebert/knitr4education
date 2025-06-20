@@ -95,9 +95,17 @@ In dem Verzeichnis, in dem die R-Markdown-Dateien (Endung <tt>.Rmd</tt>) liegen,
 ###  Ladefunktion definieren 
 Für die mehrdimensionale lineare Regression muss man die relevanten Eingabespalten für die Eingabevektoren `pInCols` und relevanten Ausgabespalten für die Ausgabevektoren `pInCols` benennen. Diese werden als Vektoren der Spaltenbezeichnungen definiert:
 ```{r , echo=TRUE }
- ## Ladefunktion für
+ ## Ladefunktion für die Auswahl von bestimmten Ein- und Ausgabespalten definieren
+ ## die eine CSV-Datei laedt
  load_inout_csv <- function(pFilename,pInCols,pOutCols) {
     data <- read.csv(pFilename, header=TRUE, stringsAsFactors=FALSE)
+    ### Spalten für Eingabe bzw. Ausgabe in numerische Werte konvertieren 
+    for (i in 1:length(pInCols)) {
+      data[pInCols[i]] <- as.numeric(data[pInCols[i]])
+    }
+    for (i in 1:length(pOutCols)) {
+      data[pOutCols[i]] <- as.numeric(data[pOutCols[i]])
+    }
     ### Spalten mit den Bezeichnung pColNames extrahieren
     data4cols <-  list(
        xin  = data[pInCols],
