@@ -1,4 +1,4 @@
-### knitr4education - v0.0.6
+### knitr4education - v0.0.7
 ### https://www.github.com/niebert/knitr4education
 
 ### Include this file in your KnitR code by placing the following code in your 
@@ -295,3 +295,53 @@ find_min4error <- function (pError, pGrad, pa, px_D, py_D, alpha=1, evalcount=10
   ## Rückgabewert des Skalars für den Gradienten und dem minimalen Fehler
   ret
 }
+
+
+### Matrix als LaTeX
+### Eine Matrix in R ist eine Datenstruktur. Mathematische Ausdrücke werden 
+### sowohl im Mediawiki als auch R-Markdown in der LaTeX-Syntax definiert. 
+### Die folgende Funktion erzeugt eine Matrix als Zeichenkette (String), 
+## die man in KnitR in mathematischen Formeln verwenden kann und dann 
+## die Zahlenwert der mit R berechneten Matrix enthält.
+
+matrix2latex <- function(pA) {
+  # Überprüfe, ob pA eine Matrix ist
+  if (!is.matrix(pA)) {
+    stop("pA muss eine Matrix sein")
+  }
+  
+  ### Schliesse die pmatrix-Umgebung 
+  latex_string <- "\\begin{pmatrix} \n"
+  #### Fuege die Zeilen der Matrix hinzu
+  for (i in 1:nrow(pA)) {
+    for (j in 1:ncol(pA)) {
+      latex_string <- paste0(latex_string, " ", pA[i, j], " ")
+      if (j < ncol(pA)) {
+        latex_string <- paste0(latex_string, " & ")
+      }
+    }
+    latex_string <- paste0(latex_string, "\\\\ \n")
+  }
+  
+  ### Schliesse die pmatrix-Umgebung 
+  latex_string <- paste0(latex_string, "\\end{pmatrix}")
+  
+  return(latex_string)
+}
+
+### Nun kann man die Ausgabe der Matrix in LaTeX testen.
+# Erstelle eine Matrix
+# A <- matrix(c(1, 2, 3, 4, 5, 6), nrow = 2, ncol = 3)
+# x <- matrix(c(-1, 1, -2), nrow = 3, ncol = 1)
+# Matrixmultiplikation berechnen
+# y <- A %*% x
+# Konvertiere die Matrix A in einen LaTeX-String
+# latex4A <- matrix2latex(A)
+# latex4x <- matrix2latex(x)
+# latex4y <- matrix2latex(y)
+# Nun wird die Berechnung einer Matrixmultiplikation in Latex ausgegeben.
+# $$
+#  A \cdot x = `r latex4A` \cdot `r latex4x` = `r latex4y` 
+# $$
+  
+  
