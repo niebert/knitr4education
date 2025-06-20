@@ -20,6 +20,11 @@ save_csv <- function(pFilename, pData) {
   write.csv(pData, pFilename, row.names = FALSE)
 }
 
+
+### Diese Funktion "komma2punkt()" ersetzt ein deutsches Komma ","
+### in einer reellen Zahl (z.B. "3,5") durch einen Dezimalpunkt, 
+### damit man mit den Werten in R rechnen kann (z.B. mit 3.5 ).
+
 komma2punkt <- function(pWert) {
   pWert <- as.character(pWert)
   pWert <- gsub(",", ".", pWert)
