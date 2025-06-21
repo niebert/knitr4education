@@ -12,7 +12,17 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Einleitung
 Das ist ein R Markdown-Dokument. Markdown ist eine einfache Formatierungs-Syntax für die Erzeugung von LibreOffice-Dokumenten verwendet wird. Weitere Details zur Verwendung von R Markdown siehe <http://rmarkdown.rstudio.com>.
 
-Wenn Sie auf die Schaltfläche **Knit*** klicken, wird ein Dokument generiert, das sowohl statischen Textinhalte als auch die Ausgabe von dynamisch berechnete Variableninhalten durch eingebettete R-Code-Chunks beinhaltet. Sie können einen R-Code so einbetten:
+### KnitR-Dokumentenerstellung
+Wenn Sie auf die Schaltfläche **Knit*** klicken, wird ein Dokument generiert, das sowohl statischen Textinhalte als auch die Ausgabe von dynamisch berechnete Variableninhalten durch eingebettete R-Code-Chunks beinhaltet. 
+
+### KnitR Ziel
+Ziel von [KnitR](https://de.wikiversity.org/wiki/KnitR) ist es, Berechnungen in R mit Texterzeugung zu verbinden, um Ergebnisse aus Berechnungen in den Text einbauen zu können. Dies ist insbesondere für individualisierte Lernumgebungen hilfreich, wenn Aufgaben unterschiedlich für verschiedene Lernende gewählt werden und damit Lösungshilfen an die individuellen Aufgaben angepasst werden müssen.
+
+### Ziel des Einsatzes von Computeralgebrasystemen
+Nicht alle Aufgaben von mathematischen Übungsaufgaben kann man mit den verfügbaren Funktionen in R erledigen. Dazu gehören u.a. die Funktionalität von symbolischen Berechnungen. R ist für die Auswertung von Daten gedacht. Pakete wie YACAS können diese Funktionalität von Computeralgebrasystemen (CAS) in R und KnitR nutzbar machen. Dies wird in diesem KnitR-Dokument gezeigt. Man beginnt mit Aufgaben, die sowohl R als auch ein CAS erledigen kann. In solchen Fällen verwendet man direkt R. Weiter unten werden Aufgaben dann von YACAS als Computeralgebrasystem erledigt. Dazu gehört z.B. das Differenzieren oder Integrieren von Termen.
+
+## Elementare Rechenoperationen und deren Ergebnisdarstellung im Text.
+Sie können einen R-Code so einbetten:
 
 ```{r berechnung, echo=FALSE}
 vSumme <- 4+13
