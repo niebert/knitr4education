@@ -43,15 +43,124 @@ studentdata <- load_csv("data/data.csv");
 ```
 Der Dateframe `studentdata` enthält nun die Daten aus der Datei `data.csv`.
 
-### Ausgangstabelle der Daten
-Die folgende Tabelle enthält die geladenen Daten 
-```{r}
+## Daten in Tabelle
+Mit `kable()` kann man die Daten als Tabelle anzeigen.
+```{r echo=FALSE}
 knitr::kable(
   studentdata, booktabs = TRUE,
-  caption = 'Geladene Daten mit Summespalte für data.csv.'
+  align=c('l','r','r','r'),
+  caption = 'geladene Daten aus data/data.csv.'
 )
 ```
 
+## Laden von LibreOffice CSV-Dateien 
+Daten werden hier von LibreOffice exportiert als CSV-Daten 
+
+### Komma bzw. Punkt Dezimalzahlen
+In der Lerneinheit werden Zahlen in Tabellen verarbeitet. Vor- und Nachkommastellen werden in der deutschen Notation durch ein Komma "," getrennt, während in der englischen Notation ein Dezimalpunkt "." vewendet wird.
+
+Je nach Spracheinstellung der Tabellenkalkulation wird daher ein Dezimalpunkt oder Komma für die Kennzeichnung der Nachkommastellen verwendet. Die folgende Funktion dient dazu ein Komma in Zahlen durch einen Dezimalpunkt zu ersetzen, damit R damit rechnen kann und man dennoch wie gewohnt die Daten in der Tabellenkalkulation eingeben kann. 
+
+### Eingabe der Daten in LibreOffice
+In dieser Lerneinheit gehen wir davon aus, dass die Daten in LibreOffice mit deutschen Spalteinstellungen eingegeben wurden und dann als CSV-Datei exportiert wurden.
+
+### Komma-Punkt-Erstetzung
+Man benötigt eine Funktion, die Daten von der Kommanotation von Dezimalzahlen in die Punktnotation als Zeichenkette transformiert und dann die Zeichenkette in eine Zahl konvertiert, mit der R rechnen kann.
+```{r}
+
+komma2punkt <- function(pWert) {
+  pWert <- as.character(pWert)
+  pWert <- gsub(",", ".", pWert)
+  pWert <- as.numeric(pWert)
+  return(pWert)
+}
+
+```
+Test der Funktion `komma2punkt()` mit einigen Beispielen:
+```{r}
+
+komma2punkt("3,7")
+komma2punkt("13,723")
+### Beispiel in dem keine Ersetzung notwendig ist
+komma2punkt("3.7")
+## Mit Variablen die Zahlen als Text enthalten
+zahl <- "4,9"
+komma2punkt(zahl)
+## Zeichenkette "4,9" in Zahl 4.9 konvertieren mitd der R rechnen kann
+zahl <- komma2punkt(zahl)
+zahl + 1
+### Konvertieren von Vektoren
+vektor <- c("1,3","7,5","123,342")
+komma2punkt(vektor)
+
+```
+
+
+### Auswahl von Ein- Ausgabedaten aus Tabelle
+Mit der folgenden Funktion kann man eine Auswahl von Spalten von Eingabe- und Ausgabespalten aus eine CSV-Datei geladen werden.
+```{r}
+
+load_inout_csv <- function(pFilename,pInCols,pOutCols) {
+  data <- read.csv(pFilename, header=TRUE, stringsAsFactors=FALSE)
+  ### Spalten für Eingabe bzw. Ausgabe in Zeichen konvertieren,
+  ### ggf. deutsches Komma in Dezimalzahlen durch Punkt
+  for (i in 1:length(pInCols)) {
+    col4str <- unlist(data[pInCols[i]])
+    data[pInCols[i]] <- komma2punkt(col4str)
+  }
+  for (i in 1:length(pOutCols)) {
+    col4str <- unlist(data[pOutCols[i]])
+    data[pOutCols[i]] <- komma2punkt(col4str)
+  }
+  ### Spalten mit den Bezeichnung pColNames extrahieren
+  data4cols <-  list(
+    xin  = data[pInCols],
+    yout = data[pOutCols]
+  )
+  ### Rueckgabe der extrahieren numerischen Datenspalten
+  return(data4cols)
+}
+
+``` 
+
+### Laden mit Spaltenauswahl und Kommakonvertierung
+Die Demonstation lädt zunächst die Rohdaten mit Komma statt Punkt und einer zusätzlichen Spalte, die für die weitere Datenverarbeitung nicht verwendet wird.
+* `data/data4libreoffice.csv` ist der Dateiname, der Rohdaten mit Komma und Zusatzspalte
+* `location` ist die Bezeichnung der nicht benötigten Spalte 
+* `x1,x2,x3` sind die Bezeichnungen der 3 Eingabedatenspalten 
+* `y1,y2` sind die Bezeichnungen der 2 Ausgabedatenspalten 
+
+#### Laden der Rohdaten und Darstellung 
+```{r}
+rohdaten <- load_csv("data/data4libreoffice.csv")
+```
+
+Mit `kable()` kann man die Rohdaten als Tabelle anzeigen.
+```{r echo=FALSE}
+knitr::kable(
+  rohdaten, booktabs = TRUE,
+  align=c('l','r','r','r','r','r'),
+  caption = 'Rohdaten aus data/data4libreoffice.csv.'
+)
+```
+
+#### Laden der Spaltenauswahl und Darstellung 
+```{r}
+### Eingabespalten auswählen
+incols <- c("x1","x2","x3")
+### Ausgabespalten auswählen
+outcols <- c("y1","y2")
+### Ein-Ausgabespalten selektieren
+seldaten <- load_inout_csv("data/data4libreoffice.csv",incols,outcols)
+```
+Mit `kable()` kann man die selektierten Datenspalte in einer Tabelle anzeigen.
+```{r echo=FALSE}
+knitr::kable(
+  seldaten, booktabs = TRUE,
+  align=c('l','r','r','r','r','r'),
+  caption = 'Rohdaten aus data/data4libreoffice.csv.'
+)
+```
 ## Punktesumme berechnen
 Mit dem folgenden Code werden einzelne Spalten aus dem Dataframe extrahiert und in den Variablen `a1`, `a2` und `a3` gespeichert. Mit diesen Vektoren wird die Vektorsumme berechnet und in dem Vektor `summe` .
 
@@ -70,7 +179,7 @@ studentdata$summe <- summe
 
 ### Ausgangstabelle mit berechneter Summe
 Die folgende Tabelle enthält die geladenen Daten mit der Summespalte.
-```{r}
+```{r echo=FALSE}
 knitr::kable(
   studentdata, booktabs = TRUE,
   caption = 'Geladene Daten mit Summespalte für data.csv.'
@@ -86,6 +195,7 @@ bestanden_vektor <- function(pPointVec,pBestGrenze) {
   # pPointVec <- c(23,42,12,44,30)
   ### Der bestandenvektor soll nachher als Textausgabe für die Übungsblätter verwendet werden.
   bestvektor <- rep("-",length(pPointVec))
+  #print(bestvektor)
   for (i in 1:length(pPointVec)) {
       if (pPointVec[i] >= pBestGrenze) {
          bestvektor[i] <- "bestanden"  
@@ -98,10 +208,22 @@ bestanden_vektor <- function(pPointVec,pBestGrenze) {
   bestvektor 
 }
 
-best <- bestanden_vektor(summe,2.0);
-studentdata$bestanden <- best 
+# Bestehensgrenze festlegen
+bestgrenze <- 20.0
+bestvec <- bestanden_vektor(summe,bestgrenze)
+studentdata$bestanden <- bestvec 
+
 ```
 
+## Tabelle mit bestanden-Spalte
+Mit `kable()` kann man die Daten als Tabelle anzeigen, die nun eine weitere Spalte mit "bestanden" bzw. "nicht bestanden" enthält. Die Bestehensgrenze lag bei `r bestgrenze` Punkten in der Klausur.
+```{r echo=FALSE}
+knitr::kable(
+  studentdata, booktabs = TRUE,
+  align=c('l','r','r','r'),
+  caption = 'geladene Daten aus data/data.csv.'
+)
+```
 
 ## Informationen aus den Dataframe im Text
 In dem folgenden Abschnitt wird gezeigt, wie man die Daten aus dem Dataframe dynamisch im Text einfügen kann. Dabei werden folgende Aspekte behandelt.
@@ -111,14 +233,19 @@ In dem folgenden Abschnitt wird gezeigt, wie man die Daten aus dem Dataframe dyn
 
 ### Informaiionen aus Variable direkt im Text
 In dem folgenden Satz werden Information aus den geladenen Vektoren verwendet. 
-Die Person `r name[2]`  Punktzahl von Aufgabe 1 ist `r a1[2]` Punkte erreicht. Insgesamt hat `r name[2]`  in der Klausur insgesamt `r summe[2]` Punkte erreicht.
+Die Person `r studentdata$name[2]`  Punktzahl von Aufgabe 1 ist `r studentdata$aufgabe1[2]` Punkte erreicht. Insgesamt hat `r studentdata$name[2]`  in der Klausur insgesamt `r studentdata$summe[2]` Punkte erreicht.
 
 ### Textinformation für einen einzelnen Datensatz
 In dem folgenden Codechunk wird ein Klausurindex `ki` festgelegt. Dies bestimmt, welche Datensatz auf dem Dataframe. Dieser Klausurindex legt fest, welche Zeile im Dataframe für die Ausgabe verwendet wird.
 ```{r klausurindex}
 ki <- 2 ## zweite Zeile aus den Daten verwenden. 
 ```
-Nun kann man anolog zum ersten Beispiel den K
+Nun kann man die geladenen Daten für die 2. Person aus der Klausurbewertung ausgeben.
+
+### Indexabhängige Ausgabe von Informationen aus geladenen Daten
+* Der Klausurindex ist `r ki`. Daher werden nun die Daten der `r ki`. Klausur ausgegeben.
+* Die Person mit Namen `r studentdata$name[ki]` hat insgesamt `r studentdata$summe[ki]` erreicht.
+* `r studentdata$name[ki]` hat die Klausur `r studentdata$bestanden[ki]` 
 
 ### Überprüfen des Klausurindex 
 Wenn man die Anzahl der Datensätze nicht kennt, kann man noch überprüfen, ob die Tabelle im Dataframe `studentdata` auch genügend Zeile enthält, dass die Zeile mit dem Index `ki` auch dargestellt werden kann. Man die Anzahl der Datensätze z.B. an der Lönge des Vektors `a1` oder des Vektors `summe` überprüfen. Dies erfolgt im nachstehenden Code als Vergleich von dem Klausurindex `ki` mit der Länge des Vektors `summe`:
@@ -130,7 +257,7 @@ if (ki >= length(summe)) {
 ```
 
 ## Speichern der Daten
-In der obigen Datenverarbeitung wurde im Dataframe `studentdata` die Spalte `summe` ergänzt und diese erweiterte Datentabelle wird nun in einer neuen Datei mit dem Namen `datasumme.csv` abgespeichert, damit die Ausgangsdatei in diesem Demo nicht überschrieben wird. 
+In der obigen Datenverarbeitung wurde im Dataframe `studentdata` die Spalten `summe` und `bestanden`  ergänzt und diese erweiterte Datentabelle wird nun in einer neuen Datei mit dem Namen `datasumme.csv` abgespeichert, damit die Ausgangsdatei in diesem Demo nicht überschrieben wird. 
 Wahl eines neuen Dateinamens ist prinzipiell empfehlenswert, damit bei einer fehlerhaften Berechnung nicht die Rohdaten verändert werden.
 ```{r speichern}
 
