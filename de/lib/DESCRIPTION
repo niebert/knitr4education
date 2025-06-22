@@ -1,0 +1,12 @@
+Package: knitr4education
+Version: 0.8.0
+Title: knitr4education Library for Wikiversity Learning Resource
+Author: Bert Niehaus
+Maintainer: niebert <niebert@github.com>
+Description: The library contains all functions used and implemented in the Wikiversity Learning resource about KnitR.
+   Additional information can be found on https://de.wikiversity.org/wiki/KnitR
+License: GPL (>= 2)
+URL: https://www.github.com/niebert/knitr4education
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
