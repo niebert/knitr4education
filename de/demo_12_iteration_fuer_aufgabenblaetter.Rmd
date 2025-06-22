@@ -1,0 +1,135 @@
+---
+title: "Interation über Aufgabenblätter"
+author: "Bert Niehaus"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+##  Iteration für Aufgabenblätter 
+Eine Iteration wird bei der Erstellung von individualisierten Aufgabenblättern verwendet, um bei wiederholter Durchführung der Aufgabenblatterzeugung für jede Schüler:in eine eigenes Aufgabenblatt zu erzeugen (d.h. in einem KnitR-Prozess z.B. 32 unterschiedliche Aufgabenblätter auf der Basis von 32 Schülerdatensätzen erzeugt. Die Ausgabe soll in LibreOffice erfolgen. Daher steht im YAML-Header in `odt_document`. In einer FOR-Schleife über alle Klausuren wird für alle Klausurteilnehmer ein Übungsblatt erstellt. Die Übungsblätter werden durch ein `\newpage`-Befehl getrennt, damit jedes Übungsblatt für jede Schülerin und jeden Schüler auf einer eigenen Seite steht im LibreOffice-Dokument generiert wird.
+
+
+### Laden und Speichern von Daten
+Die folgenden Funktionen werden für das Laden und Speichern von CSV-Dateien verwendet.
+```{r}
+load_csv <- function(pFilename) {
+  retData <- read.csv(pFilename, header=TRUE, stringsAsFactors=FALSE)
+  ### Rückgabe retData ist ein Dataframe (Tabelle)
+  return(retData)
+}
+
+save_csv <- function(pFilename, pData) {
+  write.csv(pData, pFilename, row.names = FALSE)
+}
+
+load_inout_csv <- function(pFilename,pInCols,pOutCols) {
+  data <- read.csv(pFilename, header=TRUE, stringsAsFactors=FALSE)
+  ### Spalten für Eingabe bzw. Ausgabe in Zeichen konvertieren,
+  ### ggf. deutsches Komma in Dezimalzahlen durch Punkt
+  for (i in 1:length(pInCols)) {
+    col4str <- unlist(data[pInCols[i]])
+    data[pInCols[i]] <- komma2punkt(col4str)
+  }
+  for (i in 1:length(pOutCols)) {
+    col4str <- unlist(data[pOutCols[i]])
+    data[pOutCols[i]] <- komma2punkt(col4str)
+  }
+  ### Spalten mit den Bezeichnung pColNames extrahieren
+  data4cols <-  list(
+    xin  = data[pInCols],
+    yout = data[pOutCols]
+  )
+  ### Rueckgabe der extrahieren numerischen Datenspalten
+  return(data4cols)
+}
+
+
+
+```
+## Erstellen einer R-Markdowndatei für die Übungsblätter
+Beim KnitR'n dieser Datei wird eine Datei mit der Liste der Übungsblättern erstellt, die man noch weiter verarbeiten kann. Diese besteht i.d.R. aus einem einleitenden Text über die Auswertung der Klausurergebnisse gefolgt von den einzelnen Übungsblättern.  
+
+### Hilfsfunktionen für die Erstellung individueller Übungen
+Die folgenden Hilfsfunktionen werden für die Erstellung individueller Übungen verwendet:
+
+* Mit der Funktion `header4knitr(pTitle,pAuthor)` wird der Titel und der Autorenname für die erzeugte Datei festgelegt. 
+* Mit der Funktion `uebungsblatt_erstellen(pData4Student)` wird ein einzelnes Übungsblatt für eine Person erstellt. `pData4Student` ist der Datensatz für eine einzelne Person mit den individuellen Informationen für die Übungsblatterstellung. 
+
+```{r , echo=TRUE }
+header4knitr <- function (pTitle,pAuthor) {
+  if (!is.character(pTitle)) {
+    stop("1. Parameter muss den Titel der individuellen Aufgabenblätter enthalten")
+  }
+  if (!is.character(pAuthor)) {
+    stop("2. Parameter muss den Namen der/des Autorin/Autors enthalten")
+  }
+  # R-Markdown Header 
+  vFormat <- "pdf"
+  out4odt <- "---\n"
+  out4odt <- paste(out4odt, "title: \"",pTitle,"\"\n",sep="")
+  out4odt <- paste(out4odt, "author: \"",pAuthor,"\"\n",sep="")
+  out4odt <- paste(out4odt, "date: \"`r Sys.Date()`\"\n",sep="")
+  out4odt <- paste(out4odt, "output: \"",vFormat,"_document\"\n",sep="")
+  out4odt <- paste(out4odt, "---\n\n",sep="")
+  return (out4odt)
+}
+
+auswertung_klausur <- function(pTitle,pStudentData) {
+  ### Anzahl der Uebungen aus pStudentData ermitteln
+  anzahl <- nrow(pStudentData)
+  out4ret <- ""
+  out4ret <- paste(out4ret, "\n## Auswertung - ",pTitle,"\n",sep="")
+  out4ret <- paste(out4ret, "\nEs werden Übungsblätter für ",anzahl," Personen erstellt.\n\n" ,sep="")
+  out4rmd <- readLines("tpl/auswertung4knit.Rmd")
+  ## Rueckgabe der Klausurauswertung
+  return(out4ret)
+}
+
+uebung_erstellen <- function(pTitle,pData4Student) {
+   uebblatt <- paste("\n### ",pTitle,"\nÜbungsblatt für ",pData4Student$name,"\n",sep="")
+   ### Rueckgabe des erstellten Übungsblattes
+   return(uebblatt)
+}
+```
+
+###  FOR-Schleife über alle Klausuren 
+In einer FOR-Schleife über alle Klausuren wird für jeden Klausurteilnehmer ein Übungsblatt erstellt. Die Übungsblätter werden durch ein `\newpage`-Befehl getrennt, damit jedes Übungsblatt für jede Schüler:in auf eine eigenen Seite steht. 
+
+```{r , echo=TRUE }
+# Definiere die Schülerdatensätze
+studentdata <- load_csv("data/klausur.csv")
+
+# Definiere die Anzahl der Klausuren
+# über die Anzahl der Datenreihen in studentdata 
+anzahl <- nrow(studentdata)
+
+# FOR-Schleife über alle Klausuren
+titel4ueb <- "Übungen Integralrechnung"
+## Dateikopf berech
+output <- header4knitr(titel4ueb,"Max Mustermann")
+auswert <- auswertung_klausur(titel4ueb,studentdata)
+output <- paste(output, auswert ,sep="")
+for (i in 1:anzahl) {
+  # Erstelle ein neues Übungsblatt
+  print(paste("Klausur ",i," - Name: ",studentdata[i,"name"],sep=" "))  
+  data4student <- studentdata[i, ]
+  
+  uebungsblatt <- uebung_erstellen(titel4ueb,data4student)
+
+  # Füge das Übungsblatt zur Ausgabe hinzu und trennen die Seiten mit \newpage
+  output <- paste(output, "\n\n \\newpage \n\n", uebungsblatt )
+}
+
+## Dateiname für die erzeugte Liste individueller Uebungen
+## Dateiname der Ausgabedatei: "uebungsaufgaben_knitr.Rmd"
+filename4out <- "uebungsaufgaben_knitr.Rmd" 
+writeLines(output,filename4out)
+```
+
+###  Ausgabe in LibreOffice und PDF 
+Die Ausgabe soll einerseits direkt beim knitr'n als PDF ausgegeben werden und gleichzeitig eine R-Markdowndatei erstellt werden, die man dann noch nachbearbeiten kann, um dann erst eine Ausgabe für LibreOffice, PDF, LaTeX zu erstellen. Öffnen Sie dazu die Datei ` `r filename4out` `, um die erzeugten Aufgaben mit KnitR weiter zu bearbeiten. 
+
+

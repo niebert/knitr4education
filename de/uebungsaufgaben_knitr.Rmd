@@ -1,0 +1,55 @@
+---
+title: "Übungen Integralrechnung"
+author: "Max Mustermann"
+date: "`r Sys.Date()`"
+output: "pdf_document"
+---
+
+
+## Auswertung - Übungen Integralrechnung
+
+Es werden Übungsblätter für 6 Personen erstellt.
+
+ 
+
+ \newpage 
+
+ 
+### Übungen Integralrechnung
+Übungsblatt für MAX 
+ 
+
+ \newpage 
+
+ 
+### Übungen Integralrechnung
+Übungsblatt für Anna 
+ 
+
+ \newpage 
+
+ 
+### Übungen Integralrechnung
+Übungsblatt für Bert 
+ 
+
+ \newpage 
+
+ 
+### Übungen Integralrechnung
+Übungsblatt für Camilla 
+ 
+
+ \newpage 
+
+ 
+### Übungen Integralrechnung
+Übungsblatt für Dieter 
+ 
+
+ \newpage 
+
+ 
+### Übungen Integralrechnung
+Übungsblatt für Emilia 
+
