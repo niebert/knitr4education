@@ -25,6 +25,18 @@ save_csv <- function(pFilename, pData) {
   write.csv(pData, pFilename, row.names = FALSE)
 }
 
+komma2punkt <- function(pWert) {
+  ### deutsche Bezeichnung von Dezimalzahlen mit Komma ","
+  ### durch englischen Dezimalpunkt "." ersetzen.
+  ### "3,45" wird nach 3.45 konvertiert.
+  pWert <- as.character(pWert)
+  pWert <- gsub(",", ".", pWert)
+  pWert <- as.numeric(pWert)
+  return(pWert)
+}
+
+
+
 load_inout_csv <- function(pFilename,pInCols,pOutCols) {
   data <- read.csv(pFilename, header=TRUE, stringsAsFactors=FALSE)
   ### Spalten für Eingabe bzw. Ausgabe in Zeichen konvertieren,
@@ -76,23 +88,58 @@ header4knitr <- function (pTitle,pAuthor) {
   out4odt <- paste(out4odt, "---\n\n",sep="")
   return (out4odt)
 }
+```
 
-auswertung_klausur <- function(pTitle,pStudentData) {
+```{r , echo=TRUE }
+auswertung_klausur <-  function(pData,pColNames) {
+  ### pColNames ist z.B. c("aufgabe1","aufgabe2","aufgabe3")
+  for (i in 1:length(pColNames)) {
+    col4str <- unlist(pData[pColNames[i]])
+    pData[pColNames[i]] <- komma2punkt(col4str)
+  }
+  ### pColNames ist z.B. c("aufgabe1","aufgabe2","aufgabe3")
+  for (i in 1:length(pColNames)) {
+    col4str <- unlist(pData[pColNames[i]])
+    pData[pColNames[i]] <- komma2punkt(col4str)
+  }
+  ### Spaltensummen berechnen
+  summe <- pData[pColNames[i]]
+  for (i in 2:length(pColNames)) {
+    col4str <- unlist(pData[pColNames[i]])
+    summe <- summe + pData[pColNames[i]] 
+  }
+  pData$summe <- summe
+  return(pData)
+}
+```
+
+```{r , echo=TRUE }
+auswertung_deckblatt <- function(pTitle,pData,pColNames) {
   ### Anzahl der Uebungen aus pStudentData ermitteln
-  anzahl <- nrow(pStudentData)
+  anzahl <- nrow(pData)
+  summe <- pData[["summe"]]
+  summemax <- max(summe)
+  summemin <- min(summe)
   out4ret <- ""
   out4ret <- paste(out4ret, "\n## Auswertung - ",pTitle,"\n",sep="")
-  out4ret <- paste(out4ret, "\nEs werden Übungsblätter für ",anzahl," Personen erstellt.\n\n" ,sep="")
-  out4rmd <- readLines("tpl/auswertung4knit.Rmd")
+  out4ret <- paste(out4ret, "\nEs werden Übungsblätter für ",anzahl," Personen erstellt.\n" ,sep="")
+  out4ret <- paste(out4ret, "\nMaximale Anzahl der Punkte in der Klausur war ",summemax," Punkte." ,sep="")
+  out4ret <- paste(out4ret, "\nMimimale Anzahl der Punkte in der Klausur war ",summemin," Punkte." ,sep="")
+  out4ret <- paste(out4ret, "\n\nFolgende Spalten wurden für die Punktesumme verwendet: ",paste(pColNames,collapse=", "),sep="")
+  #out4rmd <- readLines("tpl/auswertung4knit.Rmd")
   ## Rueckgabe der Klausurauswertung
   return(out4ret)
 }
+```
 
-uebung_erstellen <- function(pTitle,pData4Student) {
-   uebblatt <- paste("\n### ",pTitle,"\nÜbungsblatt für ",pData4Student$name,"\n",sep="")
+```{r , echo=TRUE }
+uebung_erstellen <- function(pTitle,pData1) {
+   ### pData1 ist der Datensatz für eine Person 
+   uebblatt <- paste("\n### ",pTitle,"\nÜbungsblatt für ",pData1$name,"\n",sep="")
    ### Rueckgabe des erstellten Übungsblattes
    return(uebblatt)
 }
+
 ```
 
 ###  FOR-Schleife über alle Klausuren 
@@ -110,7 +157,13 @@ anzahl <- nrow(studentdata)
 titel4ueb <- "Übungen Integralrechnung"
 ## Dateikopf berech
 output <- header4knitr(titel4ueb,"Max Mustermann")
-auswert <- auswertung_klausur(titel4ueb,studentdata)
+### Spalten mit Punkten für Aufgaben
+col4aufgaben <- c("aufgabe1","aufgabe2","aufgabe3")
+### Klausur auswerten - hier nur Punktesumme
+studentdata <- auswertung_klausur(studentdata,col4aufgaben)
+### Auswertung der Klausur
+auswert <- auswertung_deckblatt(titel4ueb,studentdata,col4aufgaben)
+
 output <- paste(output, auswert ,sep="")
 for (i in 1:anzahl) {
   # Erstelle ein neues Übungsblatt

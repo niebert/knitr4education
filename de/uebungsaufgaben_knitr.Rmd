@@ -10,7 +10,10 @@ output: "pdf_document"
 
 Es werden Übungsblätter für 6 Personen erstellt.
 
- 
+Maximale Anzahl der Punkte in der Klausur war 52 Punkte.
+Mimimale Anzahl der Punkte in der Klausur war 13 Punkte.
+
+Folgende Spalten wurden für die Punktesumme verwendet: aufgabe1, aufgabe2, aufgabe3 
 
  \newpage 
 
