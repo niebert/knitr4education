@@ -1,5 +1,8 @@
 # knitr4education
-KnitR Examples used for a seminar at the University RPTU to create tailored individual worksheet according to the prerequisites of the learners.
+KnitR examples used for a seminar at the [University RPTU](https://www.rptu.de) to create tailored individual worksheet according to the prerequisites of the learners. For privacy reasons the processing is performed with OpenSource software locally on your computer.
+
+## Package knitr4education
+Main reusable functions will be bundled in an R-package that can be imported with `library(knitr4education)` in R and `knitr`.
 
 ## Lanuage of R-Markdown Documents
 The primary language for the seminar is German at the RPTU but the code chunks can be used in other languages as well. To be able to translate and separate the course material in other languages subdirectory are created 
