@@ -1,0 +1,44 @@
+---
+title: "Einbindung der knitr4education-Bibliothek"
+author: "Bert Niehaus"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load External R Code 
+The following code chunk loads the R code from `lib/knitr4education.R` and return the result of the calculations as the variable `knitr4education`.
+```{r echo=TRUE}
+### Load the knitr4education library in the folder lib/
+knitr::read_chunk('./lib/knitr4education.R')
+```
+
+## Einbinden der Bibliotheken
+Die R-Code in der Bibliothek wird nun mit `<<knitr4education>>` eingebunden und steht danach im dem KnitR-Dokument zur Verfügung. In dem folgenden Code-Chunk wurde `echo=FALSE`, damit nicht der gesamte R-Code aus der Bibliohtek `lib/knitr4education.R` hier angezeigt wird. 
+```{r echo=FALSE}
+### Execute the commands in the library knitr4education.R
+<<knitr4education>>
+```
+
+## Nutzen der Funktionen aus knitr4education 
+Einzelne Funktionen aus der Bibliothek `lib/knitr4education.R` werden nun verwendet, um bestimmte Aufgabe aus den Daten zu berechnen.
+
+### Laden der Daten
+Die Funktion `load_csv()` ist in der Bibliothek `lib/knitr4education.R` definiert. Dies kann nun in dem Codechunk aufgerufen werden.
+```{r}
+data <- load_csv("data/klausur.csv")
+```
+
+## Summenspalte der Aufgaben ergänzen
+In dem Vektor `col4aufgabe` werden die Spaltenbezeichnungen aus der CSV-Datei angegeben, in der die Punkte der Aufgaben stehen.
+```{r}
+cols4aufgabe <- c("aufgabe1","aufgabe2","aufgabe2")
+### Der Name der neuen Summespalte soll "summe" sein
+#data <- sum4cols(data,"summe",cols4aufgabe)
+```
+
+
+
