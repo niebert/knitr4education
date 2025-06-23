@@ -131,8 +131,8 @@ lin_fak <- function (pNullstelle) {
 ```
 
 ## Test der Erzeugung von Linear
-print(paste(lin_fak(-5),lin_fak(0),lin_fak(5),sep=" * "))
-
+paste(lin_fak(-5),lin_fak(0),lin_fak(5),sep=" * ")
+## Ausgabe: (x+5) * x * (x-5)
 ```
 
 ## Computer Algebra System YACAS in R vewenden
@@ -155,6 +155,28 @@ cmd4yacas <- paste("Simplify(",prod4linfakt,")")
 cmd4yacas
 term <- yac_str(cmd4yacas)
 ```
+
+## Yacas Ausgabe als Latex 
+Yacas als Computeralgebrasystem behandelt mathematische Ausdrücke, die in YACAS z.B. als Term für symbolische Berechnung (z.B. Ableitungen) verwendet werden können. Für die Aussgabe benötigt man z.B. in R-Markdown mit [KnitR}(https://de.wikiversity.org/wiki/KnitR) oder als mathematische Formel in Wikiversity/Wikipedia die mathematische Formel allerdings in Latex. Daher wird die folgende Funktion `yacas2latex(pString)` für KnitR definiert.
+```{r , echo=TRUE}
+yacas2latex <- function(pTerm) {
+   ### YACAS-Befehl zu Latex-Erzeugung "TexForm( 5 * x^6 )"
+   cmd4latex <- paste("TexForm(",yacasbefehl,")")
+   ### Absenden des YACAS-Befehl zur Latex-Konvertierung an YACAS
+   ### Ergebnis wird als String ausgegeben 
+   ergebnis <- yac_str(yacas4latex)
+   # return: Bestimmtes Integral von pTerm bzgl. der Integralgrenzen
+   return(ergebnis)
+}
+
+### Text yacas2latex()
+term <- "(x+2) * (x-5) * x^6"
+latexterm <- yacas2latex(term)
+```
+Berechneter Latex-Term im Text \( 'r latexterm ` \) ausgeben oder in einer abgesetzten Formel nutzen.
+$$
+  f(x) = 'r latexterm `
+$$
 
 ### Bestimmung von Nullstellen
 Bestimmen Sie alle Nullstellen von dem Polynom $p(x)=`r term`$
