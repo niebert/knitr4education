@@ -126,12 +126,12 @@ lin_fak <- function (pNullstelle) {
     }
   }
   # return Linearfaktor
-  lf
+  return(lf)
 }
 ```
 
-## Test
-print(paste(lin_fak(-5),lin_fak(0),lin_fak(5),sep="  "))
+## Test der Erzeugung von Linear
+print(paste(lin_fak(-5),lin_fak(0),lin_fak(5),sep=" * "))
 
 ```
 
@@ -288,10 +288,11 @@ poly_grad3 <- function (pKoeff) {
   pg3 <- paste(pg3,koeff_poly(pKoeff[2]),"x",sep="")
   pg3 <- paste(pg3,koeff_poly(pKoeff[1]),"",sep="")
   # return term fuer das Polynom 3. Grades
-  pg3
+  return(pg3)
 }
 
 # Test des Polynomterms
+koeff <- c
 poly_grad3(koeff)
 ```
 
