@@ -128,6 +128,7 @@ lin_fak <- function (pNullstelle) {
   # return Linearfaktor
   lf
 }
+```
 
 ## Test
 print(paste(lin_fak(-5),lin_fak(0),lin_fak(5),sep="  "))
@@ -155,6 +156,7 @@ cmd4yacas
 term <- yac_str(cmd4yacas)
 ```
 
+### Bestimmung von Nullstellen
 Bestimmen Sie alle Nullstellen von dem Polynom $p(x)=`r term`$
 
 
