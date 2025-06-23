@@ -1,5 +1,5 @@
 ---
-title: "Mehrdimensional lineare Regressionsanalyse in R"
+title: "Mehrdimensional lineare Regressionsanalyse in R mit Gradientenabstieg"
 author: "Bert Niehaus - knitr4education"
 date: "`r Sys.Date()`"
 output: html_document
@@ -7,7 +7,7 @@ output: html_document
 
 
 ##  Einleitung 
-Diese Seite zum Thema ''Kurs:Mehrdimensionale lineare Regression/Umsetzung in R'' kann als '''[https://niebert.github.io/Wiki2Reveal/wiki2reveal.html?domain=wikiversity&title=Mehrdimensionale%20lineare%20Regression/Umsetzung%20in%20R&author=Mehrdimensionale%20lineare%20Regression&language=de&audioslide=yes&shorttitle=Umsetzung%20in%20R&coursetitle=Mehrdimensionale%20lineare%20Regression Wiki2Reveal Folien]''' angezeigt werden.
+Diese Seite zum Thema ''Kurs:Mehrdimensionale lineare Regression/Umsetzung in R'' kann als in unterschiedlichen Formaten angegeben werden (`html`, `odt`, `pdf` oder als Präsentation). Im Dateikopf kann man das Format durch die `ouptut`-Variable festlegen.
 Einzelne Abschnitte werden als Folien betrachtet und Änderungen an den Folien wirken sich sofort auf den Inhalt der Folien aus.
 Dabei werden die folgenden Teilaspekte im Detail behandelt:
 * (1) Laden der Daten
@@ -24,7 +24,7 @@ Die Lernressource zum Thema  ''Kurs:Mehrdimensionale lineare Regression/Umsetzun
 * '''(Grundlagen in GNU R)''' Die Grundlagen der Implementierung und [[b:de:GNU R|GNU R]] sind hilfreich, um die Implementationsschritte zu verstehen und den Code auf anderen Datenquellen ggf. anpassen zu können.
 
 ##  Aufgaben Studierende 
-Bitten erzeugen Sie ein KnitR-Markdown-Dokument, indem Sie die Teilschritte als Codefragement / Codechunks einbauen und testen. Gehen Sie schrittweise vor bis Sie mit den angegeben Codezeilen ein vollständiges Verfahren zur ''mehrdimensionalen lineare Regression in R'' umgesetzt haben. Demodatei in [[KnitR]] finden Sie für diese Lerneinheit in [https://github.com/niebert/knitr4education/tree/main/de knitr4education]<ref>Bert Niehaus (2025) knitr4education - Demodateien für KnitR für Wikiversity - u.a. lineare Regression - URL: https://github.com/niebert/knitr4education/tree/main/de  </ref>
+Bitten erzeugen Sie ein KnitR-Markdown-Dokument, indem Sie die Teilschritte als Codefragement / Codechunks einbauen und testen. Gehen Sie schrittweise vor bis Sie mit den angegeben Codezeilen ein vollständiges Verfahren zur ''mehrdimensionalen lineare Regression in R'' umgesetzt haben. Demodatei in [KnitR](https://de.wikiversity.org/wiki/KnitR) inden Sie für diese Lerneinheit in [knitr4education](https://github.com/niebert/knitr4education/tree/main/de).
 
 ##  Laden der Daten 
 Als einführenden Schritt eines überwachten Lernverfahrens muss man aus den gegebenen Daten festlegen, welche Datenspalten die Eingabespalten und welche Datenspalten die Ausgabespalten der Traininfsdaten darstellen.  ''Kurs:Mehrdimensionale lineare Regression/Umsetzung in R'' dient dabei
@@ -125,7 +125,7 @@ Mit der obigen Ladefunktion kann man die relevanten Datenspalten aus der CSV-Dat
 Die LR-Fehlerfunktion \(E_{LR}(a,x_{_D},y)\) habe den Fehler für die Komponentenfunktionen berechnet, die nur einen eindimensionalen Werterbereich besitzen.
 
 ###  Zerlegung in Fehler der Komponentenfunktionen 
-Die MLR-Fehlerfunktion \(E_{MLR}(A,x_{_D},y_{_D})\) zerlegt die Matrix \(A\) in Zeilenvektoren \(a_i\) und ruft die Fehlerfunktion \(E_{LR}(a_i,,x_{_D},y^{(i)}) \) für die \(i\)-te Spalte \( y^{(i)}\) des Ausgabevektors in \(y_{\mathbb{D}}\) auf.
+Die MLR-Fehlerfunktion \(E_{MLR}(A,x_{_D},y_{_D})\) zerlegt die Matrix \(A\) in Zeilenvektoren \(a_i\) und ruft die Fehlerfunktion \(E_{LR}(a_i,x_{_D},y^{(i)}) \) für die \(i\)-te Spalte \( y^{(i)}\) des Ausgabevektors in \(y_{\mathbb{D}}\) auf.
 
 ###  Aggregation der Fehler aus Komponentenfunktionen 
 MLR-Fehlerfunktion \(E_{MLR}(A,x_{_D},y_{_D})\) aggregiert dann die Fehler der Komponentenfunktionen (siehe [[Mehrdimensionale lineare Regression/Zerlegung|Zerlegung in Komponentenfunktionen]] für die [[Mehrdimensionale_lineare_Regression/Gesamtfehler_aller_Fehlerfunktionen#Aggregierter_Gesamtfehler_der_Komponentenfunktionen|Berechnung des Gesamtfehlers]]).
@@ -357,6 +357,9 @@ latex4A <- matrix2latex(A)
 latex4x <- matrix2latex(x)
 latex4y <- matrix2latex(y)
 
+str <- paste("A \\cdot x =",latex4A,"\\cdot",latex4x,"=",latex4y)
+str
+writeLines(str,"data/latex4matrix.tex")
 ```
 Nun wird die Berechnung einer Matrixmultiplikation in Latex ausgegeben.
 $$
@@ -369,13 +372,16 @@ $$
 mdimLR <- function (pA, px_D, py_D, alpha=1, max_iteration=10, evalcount=100)  {
   ## max_iteration  maximale Anzahl der  Iterationszyklen
   ## max_iteration <- 25
+  ## Lernrate alpha4it wird mit alpha initialisiert
+  ## alpha4it kann sich bei der Optimierung verkleinern, 
+  ## wenn sich der Fehler in einem Optimierungsschritt vergrößert.
   alterfehler <- E_MLR(pA,px_D,py_D)
   minwert <- c(0,alterfehler)
   print(paste("Error 0: ",alterfehler,sep=""))
   for (it in 1:max_iteration) {
     ### minimalen Fehler in Gradientenrichtung suchen 
     minwert <- find_min4error(E_MLR, normGradE_MLR, pA, px_D, py_D, alpha, evalcount)
-    print(paste("Iteration ",it," (",paste(minwert[1]*alpha,minwert[2],sep=","),")",sep=""))
+    print(paste("Iteration ",it," Skalar=",minwert[1]," alpha=",alpha,minwert[2],sep=""))
     #print(minwert) 
     ### normierten Gradienten berechnen
     normgrad <- normGradE_MLR(pA, px_D, py_D)
@@ -383,12 +389,13 @@ mdimLR <- function (pA, px_D, py_D, alpha=1, max_iteration=10, evalcount=100)  {
     pA + minwert[1]* normgrad
     
     if (alterfehler > minwert[2]) {
-      pA <- pA + minwert[1]*normgrad
+      pA <- pA + minwert[1] * alpha * normgrad
       print(paste("Gradient",it," alpha=",alpha,sep=""))
       print(paste("Error ",it,": ",minwert[2],sep=""))
       alterfehler > minwert[2]
     } else {
       print("Fehler wird größer")
+      alpha <- alpha * 0.8
     }
   }
   ### Rückgabewert ist die Matrix mit kleinerem MLR-Fehler
@@ -410,28 +417,105 @@ mdimLR <- function (pA, px_D, py_D, alpha=1, max_iteration=10, evalcount=100)  {
  ### Datei befindet sich im Unterverzeichnis "data/"
  df <- load_inout_csv(file4data,incolnames,outcolnames)
 
- x_ID <- df$xin
- y_ID <- df$yout
+ x_D <- df$xin
+ y_D <- df$yout
 
  ## Startmatrix für die mehrdim. lin Regression setzen
  A <- matrix(c(1,2,3,4,5,6), ncol=3)
  
  ## Tests der Funktionen
  ## MLR-Gradientenmatrix
- print("Berechnung GradE_MLR(A,x_D,y_D)")
- GradE_MLR(A,x_D,y_D)
+ # print("Berechnung GradE_MLR(A,x_D,y_D)")
+ g0 <- GradE_MLR(A,x_D,y_D)
  ## normierte MLR-Gradientenmatrix
- #normGradE_MLR(A,x_D,y_D)
+ g0n <- normGradE_MLR(A,x_D,y_D)
  
+ e0 <- E_MLR(A,x_D,y_D)
  
  ## mehrdim lin. Regression starten
 #mdimLR(A,x_D,y_D)
 ```
 
-## Ausgabe der Ergebnisse 
-* In der obigen Berechnung wurden die Daten aus der Datei  `r file4data` geladen. 
-* Die Ausgangsmatrix ist eine `r nrow(A)`x`r ncol(A)`-Matrix.
-* 
+## Ausgabe der Ergebnisse vor der Optimierung 
+* In der obigen Berechnung wurden die Daten aus der Datei ` `r file4data` ` geladen.
+* Die Ausgangsmatrix \( A \) ist eine `r nrow(A)`x`r ncol(A)`-Matrix.
+
+* Der Fehler \( E_{MLR} \) der Ausgangsmatrix \( A \) bzgl. der Eingabedaten \( x_{\mathbb{D}} \) und  der Ausgabedaten \( y_{\mathbb{D}} \) ist.
+$$ 
+  E_{MLR}(A,x_{\mathbb{D}},y_{\mathbb{D}}) = `r e0`
+$$
+* Nun berechnet man den Gradienten für die Ausgangsmatrix \( A \). Der Gradient  ist wie \( A \) eine `r nrow(A)`x`r ncol(A)`-Matrix.
+$$
+ g_{0} := Grad_A\bigg(E_{MLR}(A,x_{\mathbb{D}},y_{\mathbb{D}})\bigg) = `r matrix2latex(g0)`
+$$ 
+* Für die Veränderung der Parameter wird der normalisierte Gradient verwendet. Dieser wird mit der Funktion `normGrad_MLR(A,x_D,y_D)` und ist folgt definiert:
+$$
+  \frac{g_{0}}{\| g_{0} \|} = `r matrix2latex(g0n)``
+$$
+* Index 0 bedeutet, dass die Berechnungen des Fehlers vor dem ersten Optimierungsschritt erfolgt.
+
+## Optmierungsschritt 1
+* Nun berechnen man den Skalar \( \lambda_1 \in \mathbb{R} \) mit der Funktion `find_min4error()`-Funktion:
+```{r}
+ ## Lernrate als maximale Lernschrittweite für den normierten Gradienten
+ alpha <- 10
+ # print("Berechnung GradE_MLR(A,x_D,y_D)")
+ g0 <- GradE_MLR(A,x_D,y_D)
+ ## normierte MLR-Gradientenmatrix
+ g0n <- normGradE_MLR(A,x_D,y_D)
+ ### maximale Lernschrittweite
+ minwert <- find_min4error(E_MLR, normGradE_MLR, A, x_D, y_D, alpha)
+
+ A1 <- A + minwert[1] * alpha * g0n
+ e1 <- minwert[2] 
+```
+* Mit dem Skalar \( \lambda_1 = `r minwert[1] ` \) wird der normierte Gradient \( g_{1n} \) gestreckt/gestaucht und die Ausgangsmatrix \( A \) wird wie folgt mit der Lernrate \( \alpha = `r alpha` \) verändert:
+$$
+  A_1 = A +(`r minwert[1] `) \cdot `r alpha ` \cdot g_{0n} 
+$$
+* Der neue Matrix \( A_1 \)  lautet:
+$$
+  A_1 =  `r matrix2latex(A1) `
+$$
+
+* Der neue Fehler \( E_{MLR}( A_1 , x_{\mathbb{D}} , y_{\mathbb{D}} ) \) Matrix lautet:
+$$ 
+  E_{MLR}( A_1 , x_{\mathbb{D}} , y_{\mathbb{D}} ) = `r minwert[2]`
+$$
+* Der Fehler wurde durch die Optimierung um `r e0 - minwert[2]` kleiner.
+
+## Optmierungsschritt 2
+* Nun berechnen man den 2. Skalar \( \lambda_2 \in \mathbb{R} \) mit der Funktion `find_min4error()`-Funktion, wober man nun als Matrix die bereits verbessert Matrix \( A_1 \) verwendet:
+```{r}
+minwert <- find_min4error(E_MLR, normGradE_MLR, A1, x_D, y_D, alpha=10, evalcount = 100)
+ ## MLR-Gradientenmatrix  
+ g1 <- GradE_MLR(A1,x_D,y_D)
+ ## normierte MLR-Gradientenmatrix
+ g1n <- normGradE_MLR(A1,x_D,y_D)
+
+ A2 <- A1 + minwert[1] * alpha * g1n
+ e2 <- minwert[2] 
+
+```
+* Mit dem Skalar \( \lambda = `r minwert[1] ` \) wird der normierte Gradient \( g_{2n} \) gestreckt/gestaucht, wobei nun als die bereits verbesserte Matrix \( A_1 \) gewählt. Mit dem gefundenen minimalen Wert der Fehlerfunktion wird nun die Matrix \( A_1 \) zur Matrix  \( A_2 \) verändert.
+$$
+  A_2 = A_1 +(`r minwert[1] `) \cdot `r alpha ` \cdot  g_{1n} 
+$$
+* Der neue Matrix \( A_1 \)  lautet:
+$$
+  A_2 =  `r matrix2latex(A2) `
+$$
+* Der neue Fehler \( E_{MLR}(A_2,x_{\mathbb{D}},y_{\mathbb{D}}) \) Matrix lautet:
+$$ 
+  E_{MLR}(A_2,x_{\mathbb{D}},y_{\mathbb{D}}) = `r minwert[2]`
+$$
+* Der Fehler wurde durch die Optimierung um `r e1 - minwert[2]` kleiner.
+
+## Automatisierte Interationsschritte
+```{r}
+mdimLR(A, x_D, y_D, alpha=10, max_iteration=10) 
+
+```
 
 ##  Literatur/Quellennachweise 
 
