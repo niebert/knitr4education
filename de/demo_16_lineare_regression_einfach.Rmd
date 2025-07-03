@@ -1,0 +1,27 @@
+---
+title: "Lineare Regression einfach"
+author: "Bert Niehaus"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Daten
+Die Daten beschreiben das Alter in Tagen nach der Geburt und dem Gewicht in Gramm.
+
+```{r cars}
+ x <- c(1, 3, 6, 11, 12, 15, 19, 23, 28, 33, 35, 39, 47, 60, 66, 73)
+ y <- c(3180, 2960, 3220, 3270, 3350, 3410, 3700, 3830, 4090, 4310, 4360, 4520, 4650, 5310, 5490, 5540)
+```
+
+## Daten plotten
+Nach dem Plotten der Daten nehmen wir für die Alterphase einen linearen Zusammenhang an. Dabei kann diese Modellannahme natürlich nicht für das Erwachsenenalter verwendet werden.
+```{r}
+ plot(x,y)
+linreg <- lm(y~x)
+ abline(linreg)
+```
+
