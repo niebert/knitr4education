@@ -393,8 +393,8 @@ mdimLR <- function (pA, px_D, py_D, alpha=1, max_iteration=10, evalcount=100)  {
       print(paste("Error ",it,": ",minwert[2],sep=""))
       alterfehler > minwert[2]
     } else {
-      print("Fehler wird größer")
-      alpha <- alpha * 0.8
+      print("Fehler wird nicht kleiner - alpha halbieren")
+      alpha <- alpha * 0.5
     }
   }
   ### Rückgabewert ist die Matrix mit kleinerem MLR-Fehler
