@@ -381,8 +381,7 @@ mdimLR <- function (pA, px_D, py_D, alpha=1, max_iteration=10, evalcount=100)  {
   for (it in 1:max_iteration) {
     ### minimalen Fehler in Gradientenrichtung suchen 
     minwert <- find_min4error(E_MLR, normGradE_MLR, pA, px_D, py_D, alpha, evalcount)
-    print(paste("Iteration ",it," Skalar=",minwert[1]," alpha=",alpha,minwert[2],sep=""))
-    #print(minwert) 
+    print(paste("Iteration ",it," Skalar=",minwert[1]," alpha=",alpha,sep=""))
     ### normierten Gradienten berechnen
     normgrad <- normGradE_MLR(pA, px_D, py_D)
     ### Matrix in Richtung des normierten Gradienten mit der Schrittweite minwert[1] verändern
