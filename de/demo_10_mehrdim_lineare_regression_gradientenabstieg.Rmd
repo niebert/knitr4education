@@ -291,8 +291,8 @@ find_min4error <- function (pError, pGrad, pa, px_D, py_D, alpha=1, evalcount=10
   #s4a <- 2*runif(2*evalcount+1,-1,1)
   E4a <-  rep(0,2*evalcount+1) ## +1 wegen x4a=0
   ## smin - Skalar für Gradient für das Minimum der berechneten Fehler
-  scalar4min <- s4a[1] ### ersten smin-Wert setzen - hier -1
-  ### Fehler in pa berechnen als Startwert
+  scalar4min <- 0  ### scalar4min = 0 bedeutet Gradient wird mit 0 gestreckt "man bleibt am Ort"
+  ### Fehler in pa an der aktuellen Paramterposition berechnen als Startwert
   error4min <- pError( pa, px_D, py_D )
   grad4a      <- alpha * pGrad( pa, px_D, py_D )
   ## in Gradientenrichtung auswerten zwischen -1*pGrad und +1*Grad
