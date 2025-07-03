@@ -391,7 +391,8 @@ mdimLR <- function (pA, px_D, py_D, alpha=1, max_iteration=10, evalcount=100)  {
       pA <- pA + minwert[1] * alpha * normgrad
       print(paste("Gradient",it," alpha=",alpha,sep=""))
       print(paste("Error ",it,": ",minwert[2],sep=""))
-      alterfehler > minwert[2]
+      print(paste("Verbesserung ",it,": ",minwert[2]-alterfehler,sep=""))
+      alterfehler <- minwert[2]
     } else {
       print("Fehler wird nicht kleiner - alpha halbieren")
       alpha <- alpha * 0.5
