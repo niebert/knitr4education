@@ -1,0 +1,1571 @@
+---
+title: "Demo 17 - Support Vector Machine"
+author: "Bert Niehaus"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Einleitung
+In dieser Lerneinheit werden mit Verständnis über die Funktionsweise des Skalarproduktes und der Zerlegung in Halbebenen das Thema der Support Vector Machines (SVM) behandelt, um diese dann in R zu implementieren.
+
+Die Grundlagen der Support Vector Machines und ihre Funktionsweise werden am besten mit einem zweidimensionalen  Beispiel erläutern, bei dem die Daten zweidimensional sind, also aus Wertepaaren \( (x_1,x_2) \in \matbb{R}^2 \) bestehen. Den Datenpunkten ist nun eine von zwei möglichen Klasse zugeordnet, im weiteren Verlauf in der Ebene mit unterschiedlichen Farben eingefärbt wurden, Ziel ist es nun, eine Klassifikator erstellen, der die Datenpunkte durch eine Hyperebene in dem jeweiligen Raum trennt.  Im Allgemeinen wird in einen n-dimensionalen Raum eine \( n-1 \)-dimensionale Hyperebene gesucht. In dem folgenden Beispiel wird eine Hyperebene im zweidimensionalen Raum gesucht, die Hyperebene ist in diesem einfachen Fall eine Gerade. 
+
+Wenn die Daten dreidimensionalaus Wertetripeln \( (x_1,x_2,x_3) \in \matbb{R}^3 \) bestehen, ist die Hyperebene, die die Klassen nach Möglichkeit sauber trennen soll eine Ebene.
+
+## Bibliotheken 
+In diesem KnitR-Datei werden Bibliotheken verwendet, die für die folgenden Nutzung im Kontext von SVM verwendet werden.
+*  `rgl` für 3D-Plots von Daten
+*  `e1071` Statistikbibliothek der TU Wien, in der auch Support Vector Machines implementiert wurden. Bibliothek `e1071` enthält auch weitere Funktionen aus Statistik und Wahrscheinlichkeit.
+
+URL: <https://cran.r-project.org/web/packages/e1071/index.html>
+
+Diese kann als Paket z.B. R/RStudio importiert werden.
+
+### Hilfsfunktion echo4vec
+Die folgenden Funktion gibt den Inhalt eines Vektors mit dem Variablennamen `pVarname` und dem Vektor `pVec` aus.
+
+```{r echo4vecdef}
+echo4vec <- function (pVarname,pVec) {
+    print(paste(pVarname,"=(",paste(pVec,collapse=","),")"),sep="")
+}
+```
+
+### Laden und Speichern von CSV-Dateien
+
+Im Folgenden Codechunk werden zwei Funktionen für das Laden und Speichern definiert. Diese können jeweils mit weiteren Aufgaben für die Vor- Nachverarbeitung von Daten erweitert werden, die Funktionen können dann auf mehrere Lade- bzw. Speichervorgänge von Daten angewendet werden. 
+```{r , echo=FALSE}
+
+## Konvertierung von "3,7" nach 3.7 für Dezimalzahl mit deutscher Zahlnotation 
+komma2punkt <- function(pWert) {
+  pWert <- as.character(pWert)
+  pWert <- gsub(",", ".", pWert)
+  pWert <- as.numeric(pWert)
+  return(pWert)
+}
+
+load_csv <- function(pFilename,pNumCols) {
+  ## pNumCols ist eine Vektor mit Spaltenbezeichnungen, 
+  ## für die eine Komma-Punktkonvertierung vorgesehen ist.
+  ## pNumCols ist ein optionaler Parameter
+  retData <- read.csv(pFilename, header=TRUE, stringsAsFactors=FALSE)
+  # Überprüfen, ob pNumCols ein Vektor ist
+  if (is.vector(pNumCols)) {
+    for (i in 1:length(pNumCols)) {
+      col4str <- as.vector(unlist(retData[pNumCols[i]]))
+      retData[pNumCols[i]] <- komma2punkt(col4str)
+    }
+  }
+  ### Rückgabe retData ist ein Dataframe (Tabelle)
+  return(retData)
+}
+
+save_csv <- function(pFilename, pData) {
+  write.csv(pData, pFilename, row.names = FALSE)
+}
+```
+
+
+### Matrix als LaTeX
+Eine Matrix in R ist eine Datenstruktur. Mathematische Ausdrücke werden sowohl im Mediawiki als auch R-Markdown in der LaTeX definiert. Die folgende Funktion erzeugt eine Matrix als Zeichenkette (String), die man in KnitR in mathematischen Formeln verwenden kann und dann die Zahlenwert der mit R berechneten Matrix enthält.
+```{r}
+matrix2latex <- function(pA) {
+  # Überprüfe, ob pA eine Matrix ist
+  if (!is.matrix(pA)) {
+    stop("pA muss eine Matrix sein")
+  }
+  
+  ### Schliesse die pmatrix-Umgebung 
+  latex_string <- "\\begin{pmatrix} \n"
+  #### Fuege die Zeilen der Matrix hinzu
+  for (i in 1:nrow(pA)) {
+    for (j in 1:ncol(pA)) {
+      latex_string <- paste0(latex_string, " ", pA[i, j], " ")
+      if (j < ncol(pA)) {
+        latex_string <- paste0(latex_string, " & ")
+      }
+    }
+    latex_string <- paste0(latex_string, "\\\\ \n")
+  }
+  
+  ### Schliesse die pmatrix-Umgebung 
+  latex_string <- paste0(latex_string, "\\end{pmatrix}")
+  
+  return(latex_string)
+}
+```
+
+
+### 3D-Plot
+
+```{r}
+library("rgl")
+
+save_3D_plot <-function (pFilename,pExtension,pWidth,pHeight) {
+  ### temporary file
+  temp_file <- paste(pFilename,"_tmp.",pExtension,sep="")
+  ### save file image
+  save_file <- paste(pFilename,".",pExtension,sep="")
+  ### save file HTML
+  save_html <- paste(pFilename,".html",sep="");
+  file.copy(temp_file, save_file);
+  ### create image
+  rgl.snapshot(temp_file, fmt = 'png');
+  
+  ### create interactive model in HTML
+  htmlwidgets::saveWidget(rglwidget(width = pWidth, height = pHeight), 
+                        file = save_html,
+                        libdir = "libs",
+                        selfcontained = FALSE
+                        )
+  ### File export DONE
+}
+```
+
+
+Erzeugtes Bild in KnitR importieren mit einer [interaktiven Vorschau](./img/3dplot.html).
+
+![3D-Plot - Beispiel](./img/3dplot.png)
+
+### Daten generieren für zwei Klassen
+```{r}
+set.seed(13943)
+
+datenanzahl <- 20 ## Datenanzahl pro Klasse P(ositiv) und N(egativ)
+x1P <-  rnorm(datenanzahl)
+x2P <-  rnorm(datenanzahl)
+x1N <-  rnorm(datenanzahl)+3
+x2N <-  rnorm(datenanzahl)-1
+yP <-  rep(+1, datenanzahl)
+yN <-  rep(-1, datenanzahl)
+x1PN <-  c(x1P,x1N)
+x2PN <-  c(x2P,x2N)
+yPN  <-  c(yP,yN)
+
+data4svm <- data.frame(x1=x1PN,x2=x2PN,y=yPN)
+save_csv("data/data4svm20.csv",data4svm)
+
+x_ID <- data.frame(x1=x1PN,x2=x2PN)
+y_ID <- data.frame(y=yPN)
+```
+
+### Farbkodierung für die Cluster
+Die folgende Funktion färbt die Vektor entsprechend der Clusterzuordnung ein. Positive Werte einhalten die Farbe `pColorP` und negative Werte die Farbe `pColorN`.
+```{r}
+
+col4points <- function (y,pColorP,pColorN) {
+  ## y Vector with real values
+  ## when y[i] is positve set color in vector to pColorP
+  ## when y[i] is negatve set color in vector to pColorN
+  colors <- rep("blue", length(y))
+  for (i in 1:length(y)) {
+    if (y[i] > 0) {
+      colors[i] <- pColorP
+    } else {
+      if  (y[i] < 0) {
+        colors[i] <- pColorN
+      }
+    }
+  }
+  ### return the color vector
+  return(colors)
+}
+
+```
+Nun kann man für die Clusterzuordnung die Farben wählen.
+```{r}
+yPN
+col4points(yPN,"green","red") 
+
+```
+### Plotten des Punkte 
+```{r}
+
+col4pts <- col4points(yPN,"darkgreen","red") 
+#View(data4svm)
+ 
+plot(x=x1PN,y=x2PN, col = col4pts, pch = 4) ## 19
+
+```
+
+### Clustermitten bestimmen
+
+```{r}
+## Clustermitte positiv +1
+mx1P <- mean(x1P)
+mx2P <- mean(x2P)
+
+## Clustermitte negaitiv -1
+mx1N <- mean(x1N)
+mx2N <- mean(x2N)
+
+
+plot(x1PN,x2PN, col = col4pts, pch = 4) ## runde ausgefüllt Punkte mit pch=19
+### Clustermitten anzeigen
+points(mx1P,mx2P, col ="darkgreen", pch = 19) 
+points(mx1N,mx2N, col ="red", pch = 19) 
+
+```
+
+## Support Vector Machine - Implementation
+Bibliothek `e1071` enthält Funktionsbibliothek TU Wien zu Statistik und Wahrscheinlichkeit
+
+URL: <https://cran.r-project.org/web/packages/e1071/index.html>
+
+Diese kann als Paket z.B. R/RStudio importiert werden.
+
+
+### Sigmoide Funktion für die Berechnung des SVM-Fehlers
+Für die SVM-Fehlerfunktion betrachtet man nun einen Spezialfall mit \( x_o = 0 \),  \( M = 1 \) und  \( s > 0 \):
+$$
+  f_{sig}(x,s) = \frac{1}{1 + e^{s\cdot x}}
+$$ 
+Der Einzelfehler \( e \) wird mit dieser sigmoiden Funtkion \( f_{sig} \) berechnet. 
+$$
+e _{_{SVM}}\left( v,p,s,x^{(i)},y^{(i)} \right) := f_{sig} \left( s\, , \, \langle v, x^{(i)} - p \rangle \cdot y^{(i)} \right)
+$$
+
+### Mittlerer Einzelfehler
+Im Folgenden werden der Einzelfehler nicht allein aufsummiert, sondern der mittlere Einzelfehler über alle Daten in \( \mathbb{D} \) berechnet.
+
+$$
+E _{_{SVM}}(v,p,s,x_\mathbb{D},y_\mathbb{D}) := \frac{1}{d}\cdot \sum_{i=1}^{d} e_{_{SVM}}(v,p,s,x_i,y_i)
+$$ 
+
+### Partielle Ableitungen der sigmoiden Funktion
+Die verallgemeinerte sigmoide Funktion hat drei verschiedene Funktionsparameter \( m,k,t_o \). Die sigmoide Funktion wird nun partiell nach diesen 3 Parametern der Funktion abgeleitet.
+
+
+### Partielle Ableitungen der sigmoiden Funktion nach m
+Zunächst wird die partielle Ableitungen nach \( m \) berechnet.
+
+$$
+\frac{\partial f}{\partial m}(t,m,k,t_o) = {{1}\over{e^ {- k\left(t-t_{0}\right) }+1}}
+$$
+
+### Partielle Ableitungen der sigmoiden Funktion nach k
+Die partielle Ableitung nach \( k \) lautet:
+$$
+\frac{\partial f}{\partial k}(t,m,k,t_o) = 
+{{m\cdot \left(t-t_{0}\right)\cdot e^ {- k\,\left(t-t_{0}\right) }}\over{
+ \left(e^ {- k\,\left(t-t_{0}\right) }+1\right)^2}} 
+$$
+
+### Partielle Ableitungen der sigmoiden Funktion nach to
+Partielle Ableitung nach \( t_0 \) enthält man wie folgt: 
+$$
+\frac{\partial f}{\partial t_o }(x,m,k,t_o) =
+-{{m\cdot k\cdot e^ {- k\,\left(t-t_{0}\right) }}\over{\left(e^ {- k\,
+ \left(t-t_{0}\right) }+1\right)^2}} 
+$$
+
+### Sigmoide Funktion in R
+Erläuterungen:
+
+* `m` ist der maximale Werte der sigmoiden Funktion
+* `k` bestimmt die maximale Steigung der sigmoiden Funktion, wenn `k` negativ ist fällt die Funktion, wenn `k` positiv ist, steigt die sigmoide Funktion streng monoton.
+* `x0` ist der Wendepunkt der sigmoiden Funktion
+
+Wenn man die sigmoide Funktion an der Stelle `x` auswertet, liefert `f_sigmoid(x,m,k,x0)` den Funktionswert an der Stelle 
+
+```{r}
+f_sigmoid <- function (x,m,k,x0) {
+  return <- m/(1+exp(-k*(x-x0)))
+  ## Rückgabewert der sigmoiden Funktion - logistisches Wachstum
+  return
+}
+
+f_sigmoid(1,2,3,4) 
+```
+
+### Graph der sigmoiden Funktion
+Graph mit positivem \( k \in \mathbb{R}^+ \).
+
+```{r}
+xmin <- -5
+xmax <- +5
+steps <- 10
+x4sig <- (xmin*steps):(xmax*steps)/steps
+
+m <- 1
+k <- 3
+x0 <- 2
+
+y4sig <- f_sigmoid(x4sig,m,k,x0)
+plot( x4sig,y4sig,
+      main="Graph sigmoide Funktion",
+      ylab="y-Label",
+      type="l",
+      col="darkgreen"
+)
+
+```
+Graph mit negativem \( k \in \mathbb{R}^- \).
+
+```{r}
+xmin <- -5
+xmax <- +5
+steps <- 10
+x4sig <- (xmin*steps):(xmax*steps)/steps
+
+m <- 1
+k <- -3
+x0 <- 2
+
+y4sig <- f_sigmoid(x4sig,m,k,x0)
+plot( x4sig,y4sig,
+      main="Graph sigmoide Funktion",
+      ylab="y-Label",
+      type="l",
+      col="red"
+)
+
+```
+
+### Sigmoide Funktion für die SVM
+Die sigmoide Funktion der Support Vector Maschine benötigt nicht alle Parameter der obigen allgemeineren Definition. Für die SVM wird \( m=1 \), \( x_o=0 \) und \( s=-k \) gesetzt.
+
+```{r defSigmoid4SVM}
+sigmoid_SVM <- function (t,s=1) {
+  ### Grenzwertverhalte gegen 0 für t -> +infty 1 für t-> -infty
+  return <- 1/(1+exp(s*t))
+  ### Rückgabe dew sigmoiden Funktionswertes
+  return
+} 
+
+sigmoid_SVM(100)
+sigmoid_SVM(-100)
+
+f_sigmoid(1,2,3,4) 
+
+```
+
+
+### Gradient für die SVM-Fehlerfunktion
+
+Man berechnet Gradient zunächst für einen einzelnen Datensatz \( (x,y) \). Dabei werden die partiellen Ableitungen nach den Komponenten  \( v_i \) und \( p_i \) gebildet. \( x \) und \( y \) sind dabei Konstanten, die mit Werten aus den Trainingsdaten belegt werden. Daher erscheinen die \( x \) und \( y \) nicht als Parameter im Gradienten. Die Auflistung als Funktionsargument erfolgt, damit die Argumente in den R-Funktionen analog gelistet werden.
+
+$$
+ Grad(e_{_{SVM}})(v,p,x,y) = 
+  \begin{pmatrix}
+    \frac{\partial e_{_{SVM}}}{\partial v_1 } (v,p,x,y) \\ 
+   \vdots \\  
+   \frac{\partial e_{_{SVM}}}{\partial v_n } (v,p,x,y) \\
+   \frac{\partial e_{_{SVM}}}{\partial p_1 }(v,p,x,y) \\
+   \vdots \\  
+   \frac{\partial e_{_{SVM}}}{\partial p_n }(v,p,x,y) \\
+ \end{pmatrix} = y \cdot   \frac{
+      e^{\langle v, x - p \rangle \cdot y}
+    }{
+     \left(
+      e^{\langle v, x - p \rangle \cdot y} + 1
+     \right)^2
+    } \cdot
+ \begin{pmatrix}
+    p_i-x_1 \\ 
+    \vdots \\
+    p_n-x_n \\
+    v_1 \\
+    \vdots \\
+    v_n
+    \end{pmatrix}
+$$
+
+Gradient der SVM-Fehlerfunktion insgesamt:
+
+$$
+  Grad(E_{_{SVM}})(x,y,v,p) = \sum_{i=1}^d  Grad(e_{_{SVM}})(x_i,y_i,v,p)
+$$
+
+
+## Definition des Skalarproduktes
+
+```{r DefinitionSkalarprodukt}
+
+sprod <- function (v,w) {
+  ## Berechnung des euklidischen Skalarproduktes von Vektoren v und w
+  if (length(v) == length(w)) {
+    return <- sum(v*w)
+  } else {
+    print("Fehler: sprod(v,w) - Längen der Vektoren v und w sind unterschiedlich")
+    return <- 0
+  }
+  ### Rückgabewert Skalarprodukt
+  return
+}
+```
+
+## Normalisieren von Vektoren
+Normalisiert die Länge des Vektors auf 1.
+```{r}
+normalize4vec <- function (vec) {
+  vec <- as.vector(unlist(vec))
+  norm4vec <- norm(vec,"2")
+  return <- vec
+  if (norm4vec > 0) {
+    print(paste("Länge des Vektors vec =",norm4vec))
+    return <- vec/norm4vec
+  } else {
+    print("Vektor hat die Länge 0 und kann daher nicht normalisiert werden!")
+  }
+  ### Normalisierten Vektor zurückgeben
+  return 
+}
+norm(c(3,4),"2")
+normalize4vec(c(3,4))
+```
+
+## Berechnung der Steigung und y-Achsenabschnitt 
+In der folgenden Funktion ist der Normalenvektor und Stützvektor gegeben und man möchte aus den vektoriellen Größen die Steigung \( a \) und den y-Achsenabschnitt  \( b \) einer Funktion \(f(x)= a\cdot x + b \)
+```{r}
+norm_supp2abline <- function (pNormVec,pSuppVec) {
+  if (pNormVec[1] == 0) {
+    ## normvec ist senkrecht, Trenngerade hat die Steigung unendlich 
+    ## abline(v=vertikal)
+    steigung <- NA
+    yabschnitt <- NA
+    vertikal <- pSuppVec[1]
+    isvert <- 1
+  } else {
+    ## normvec ist nicht senkrecht 
+    ## abline(a=yabschnitt,b=steigung)
+    steigung <- pNormVec[2]/pNormVec[1]
+    yabschnitt <- - steigung * pSuppVec[1] + pSuppVec[2]
+    vertikal <- NA
+    is_vertical <- 0
+  }
+  ### Plot the graph and the initial hyperplane
+  ret <- c(steigung,yabschnitt,vertikal,is_vertical)
+  ### return assoziativen Array mit den keys "a" und "b"
+  ### Bei der Gerade im Plot abline(...) ist "b" die Steigung und "a" der y-Achsenabschnitt 
+  ### Daher sind die Bezeichnungen vertauscht
+  return(ret)
+}
+```
+
+
+### Berechnung der initialen Clustermitten 
+In dem folgenden Codechunk werden die Clustermitten der Cluster \( M_{-} \) und \( M_{+} \) berechnet. Dabei ist \( M_{-} := \{x \in X \ : \ (x,y) \in \mathbb{D} \wedge y = -1 \} \) und \( M_{+} := \{x \in X \ : \ (x,y) \in \mathbb{D} \wedge y = +1 \} \)
+```{r plot4svmcluster}
+## Plot Datenpunkt SVM 
+x1c1 <- x1N
+x2c1 <- x2N
+x1c2 <- x1P
+x2c2 <- x2P
+
+## Mittelwerte für x1 und x2 von x=(x1,x2) jeweils für die Cluster berechnen
+## Mittelwert Cluster 1
+# Mittelwerte der 1. x-Komponente in Cluster 1 
+mx1c1 <- mean(x1c1)
+# Mittelwerte der 2. x-Komponente in Cluster 1
+mx2c1 <- mean(x2c1)
+# Mittelwertvektor in IR^2 für Cluster2
+meanc1 <- c(mx1c1,mx2c1)
+
+## Mittelwert Cluster 2
+# Mittelwerte der 1. x-Komponente in Cluster 2 
+mx1c2 <- mean(x1c2)
+# Mittelwerte der 2. x-Komponente in Cluster 2
+mx2c2 <- mean(x2c2)
+# Mittelwertvektor in IR^2 für Cluster2
+meanc2 <- c(mx1c2,mx2c2)
+
+### Clustervektoren bestehen aus den Clustermitten der Cluster 1 und 2
+### und aus dem Mittelwert der Clustermitten
+# x1-Koordinaten des Clustervektoren 
+# x2-Koordinaten des Clustervektoren
+x1cmean <- c(mx1c1 , (mx1c1+mx1c2)/2 , mx1c2)
+x2cmean <- c(mx2c1 , (mx2c1+mx2c2)/2 , mx2c2)
+## Supportvektor Mittelwert der Clustermitten
+suppvec <- c(mean(c(mx1c1,mx1c2)),mean(c(mx2c1,mx2c2)))
+echo4vec("suppvec",suppvec)
+## Normvektor ist der Verbindungsvektor von Clustermitte 1 zu Clustermitte 2
+normvec <- normalize4vec(meanc2 - meanc1)
+par4line <- norm_supp2abline(normvec,suppvec)
+echo4vec("par4line",par4line)
+#print(paste("normvec=",normvec[1],",",normvec[2],")", sep=""))
+echo4vec("normvec",normvec)
+orthvec <- c(-normvec[2],normvec[1])
+echo4vec("orthvec",orthvec)
+#print(paste("orthvec=(",orthvec[1],",",orthvec[2],") normvec=(",normvec[1],",",normvec[2],")", sep=""))
+
+### Plot the graph and the initial hyperplane
+plot(x=x1PN, y=x2PN, pch = 19, xlab="x1-Werte", ylab="x2-Werte", )
+### Plot Punkte - Cluster 1
+points(x1c1, x2c1, col='red', pch=19)
+### Plot Punkte - Cluster 2
+points(x1c2, x2c2, col='blue', pch=19)
+### Plot Clustermitten 
+points(x1cmean, x2cmean, col='green', pch=19)
+### gestrichelte Verbindungslinie der Clustermitten 
+lines(x1cmean, x2cmean, col='green', lwd=1, lty = 2)
+is_not_vertical <- par4line[3];
+#if (is.na(is_not_vertical)) {
+if (par4line[4] < 1) {
+  print("Keine vertikale Linie")
+  steigung <- orthvec[2]/orthvec[1]
+  #steigung <- par4line[1]
+  yabschnitt <- - steigung * suppvec[1] + suppvec[2]
+  #yabschnitt <- par4line[2]
+  print(paste("Steigung b=",steigung,sep=""))
+  print(paste("y-Achsenabschnitt a=",yabschnitt,sep=""))
+  ## keine vertikale Trenngerade
+  abline(a=yabschnitt,b=steigung,col='green')
+} else {
+  ## vertikale Trenngerade an der Stelle x=xvertical
+  print("Vertikale Linie")
+  #print(par4line)
+  abline(v=par4line[v],col='green')
+}
+
+```
+
+## Plotfunktion SVM für 2D
+
+```{r plotfct2D4svm}
+plot4svm <- function (pNormVec,pSuppVec,px_D,py_D,pPrintClusterMean=TRUE) {
+  ### Daten als Spaltenvektoren der Cluster extrahieren
+  #echo4vec("px_D$x1",px_D$x1)
+  #echo4vec("py_D$y1!=1",(py_D$y!=1))
+  print("Plot SVM mit Funktion plot4svm() ")
+  x1c1 <- px_D$x1[py_D$y!=1]
+  #echo4vec("x1c1",x1c1)
+  x2c1 <- px_D$x2[py_D$y!=1]
+  #echo4vec("x2c1",x2c1)
+  x1c2 <- px_D$x1[py_D$y!=-1]
+  #echo4vec("x1c2",x1c2)
+  x2c2 <- px_D$x2[py_D$y!=-1]
+  #echo4vec("x2c2",x2c2)
+  
+  ### Plot the graph and the initial hyperplane
+  plot(x=px_D$x1, y=px_D$x2, pch = 19, xlab="x1-Werte", ylab="x2-Werte", )
+  points(x1c1, x2c1, col='red', pch=19)
+  points(x1c2, x2c2, col='blue', pch=19)
+    
+  if (pPrintClusterMean) {
+    ## Mittelwerte für x1 und x2 von x=(x1,x2) jeweils für die Cluster berechnen
+    ## Mittelwert Cluster 1
+    # Mittelwerte der 1. x-Komponente in Cluster 1 
+    mx1c1 <- mean(x1c1)
+    # Mittelwerte der 2. x-Komponente in Cluster 1
+    mx2c1 <- mean(x2c1)
+    # Mittelwertvektor in IR^2 für Cluster2
+    meanc1 <- c(mx1c1,mx2c1)
+    ## Mittelwert Cluster 2
+    # Mittelwerte der 1. x-Komponente in Cluster 2 
+    mx1c2 <- mean(x1c2)
+    # Mittelwerte der 2. x-Komponente in Cluster 2
+    mx2c2 <- mean(x2c2)
+    # Mittelwertvektor in IR^2 für Cluster2
+    meanc2 <- c(mx1c2,mx2c2)
+
+    ### Clustervektoren bestehen aus den Clustermitten der Cluster 1 und 2
+    ### und aus dem Mittelwert der Clustermitten
+    # x1-Koordinaten des Clustervektoren 
+    # x2-Koordinaten des Clustervektoren
+    x1cmean <- c(mx1c1 , (mx1c1+mx1c2)/2 , mx1c2)
+    x2cmean <- c(mx2c1 , (mx2c1+mx2c2)/2 , mx2c2)
+    ## Supportvektor Mittelwert der Clustermitten
+    vSuppVec <- c(mean(c(mx1c1,mx1c2)),mean(c(mx2c1,mx2c2)))
+    # echo4vec("suppvec",suppvec)
+    ## Normvektor ist der Verbindungsvektor von Clustermitte 1 zu Clustermitte 2
+    echo4vec("meanc1",meanc1)
+    echo4vec("meanc2",meanc2)
+    vNormVec <- normalize4vec(meanc2 - meanc1)
+    #echo4vec("par4line",par4line)
+    #echo4vec("normvec",normvec)
+    points(x1cmean, x2cmean, col='green', pch=19)
+    #points(normvec[1], normvec[2], col='yellow', pch=19)
+    #points(orthvec[1], orthvec[2], col='yellow', pch=19)
+    lines(x1cmean, x2cmean, col='green', lwd=1, lty = 2)
+  } else {
+    print("Keine Clustermitten und Geraden einzeichnen")
+  }
+  if (!is.na(pNormVec[1])) {
+    vNormVec <- pNormVec 
+  } else {
+    print("pNormVec ist nicht definiert in plot4svm(pNormVec,pSuppVec, ...)")
+  }
+  if (!is.na(pSuppVec[1])) {
+    vSuppVec <- pSuppVec 
+  } else {
+    print("pSuppVec ist nicht definiert in plot4svm(pNormVec,pSuppVec, ...)")
+  }
+  echo4vec("vNormVec",vNormVec)
+  echo4vec("vSuppVec",vSuppVec)
+  orthvec <- c(-vNormVec[2],vNormVec[1])
+  echo4vec("orthvec",orthvec)
+  par4line <- norm_supp2abline(vNormVec,vSuppVec)
+  #par4line <- c( -1,2,NA,0 )
+  echo4vec("par4line",par4line)
+  if (par4line[4] < 1) {
+      print("Keine vertikale Linie")
+      steigung <- orthvec[2]/orthvec[1]
+      yabschnitt <- - steigung * vSuppVec[1] + vSuppVec[2]
+      #yabschnitt <- par4line[2]
+      print(paste("Steigung b=",steigung,sep=""))
+      print(paste("y-Achsenabschnitt a=",yabschnitt,sep=""))
+      ## keine vertikale Trenngerade
+      abline(a=yabschnitt,b=steigung,col='green')
+  } else {
+      ## vertikale Trenngerade an der Stelle x=xvertical
+      print("Vertikale Linie")
+      abline(v=par4line[v],col='green')
+  } 
+}
+
+#plot4svm(pNormVec=NA,pSuppVec=NA,x_ID,y_ID)
+#plot4svm(pNormVec=c(-1,1),pSuppVec=c(1,1),x_ID,y_ID)
+```
+
+
+### Skalarprodukt für SVM - Definition
+
+Das Skalarprodukt wird sowohl für die Berechnung des Einzelfehlers als
+im Gradienten verwendet.
+
+```{r}
+sp <- function (vec1,vec2) {
+  return <- sum(vec1 * vec2)
+  ### Skalarprodukt als Wert zurückgeben
+  return
+}
+
+sp(c(1,2),c(3,-1))
+```
+
+### Definition der sigmoiden Funktion für die SVM
+
+Mit der sigmoiden Funktion wird benötigt, um den EinzelFehler für die
+SVM zu berechnet. Damit geht diese Funktion mit der Ableitung auch in
+Gradienten der Fehlerfunktion für den Einzelfehler ein. 
+
+$$
+  sig_{_{SVM}} (t,s) = \frac{1}{1+e^{s\cdot t}} 
+$$
+
+
+```{r def2sigmoid4svm}
+sigmoid_SVM <- function (t,s=1) {
+  ### Grenzwertverhalte gegen 0 für t -> +infty 1 für t-> -infty
+  return <- 1/(1+exp(s*t))
+  ### Rückgabe der sigmoiden Funktion
+  return
+} 
+
+sigmoid_SVM(100)
+sigmoid_SVM(-100)
+```
+
+### Ableitung der SVM-Sigmoide
+
+Die allgemeine Ableitung der SVM-Sigmoiden nach $t$ ergibt wie folgt.
+$s > 0$ ist dabei der Parameter, der die Steigung an der Wendestelle für
+$t=0$ mit $-\frac{s}{4}$ festlegt. 
+$$
+  sig'_{_{SVM}} (t,s) = - \frac{e^{s\cdot t}}{\left( 1+e^{s\cdot t} \right)^2 } 
+$$
+Die Ableitung der Sigmoide ergibt sich unmittelbar aus den Ableitungsregel für einen Quotienten aus differenzierbaren Funktionen. 
+```{r}
+sigmoid_derivation_SVM <- function (t,s=1) {
+  ### Grenzwertverhalte gegen 0 für t -> +infty 1 für t-> -infty
+  return <- - s * exp(s*t)/((1+exp(s*t))^2)
+  ### Rückgabe der sigmoiden Funktion
+  return
+} 
+
+
+```
+
+## Definition der Funktion zur Berechnung des Einzelfehlers SVM
+
+Der Einzelfehler für die SVM wird mit einem Datensatz
+$(x^{(i)},y^{(i)} \in \mathbb{R}^n \times \{ -1 , +1 \}$ berechnen.
+
+### Normalenvektor und Supportvektor aus Lernvektor extrahieren
+In dem Lernvektor steckt der  Normalenvektor und Supportvektor. Die folgenden Funktionen können  aus Lernvektor den Normalenvektor und den Supportvektor extrahieren.
+
+```{r}
+split4LearnVec_SVM <- function (pLearnVec) {
+    veclength <- floor(length(pLearnVec)/2)
+    # print(paste("veclength=",veclength," length(pVec4Learn)=",length(pVec4Learn)))
+    if (2*veclength < length(pLearnVec)) {
+      print("Vektorlänge von pLearnVec ist kein Vielfaches von 2")
+    } 
+    if (veclength > 0){
+      vVec4Norm <- pLearnVec[1:veclength]
+      index4supp <- veclength+1:(2*veclength)
+      vVec4Supp <- pLearnVec[index4supp]
+      # entferne NA am Ende vom Supportvektor
+      vVec4Supp <- vVec4Supp[!is.na(vVec4Supp)]
+      return <-c(vec4norm=vVec4Norm,vec4supp=vVec4Supp)
+    } else {
+      return <- c(vec4norm=NA,vec4supp=NA)
+    } 
+    ## return the associative vector
+    return
+}
+
+getNormVec_SVM <- function (pLearnVec) {
+  veclength <- floor(length(pLearnVec)/2)
+  # print(paste("veclength=",veclength," length(pVec4Learn)=",length(pVec4Learn)))
+  return <- pLearnVec
+  if (veclength > 0){
+      vVec4Norm <- pLearnVec[1:veclength]
+      # entferne NA aus dem Normalenvektor
+      return <- vVec4Norm[!is.na(vVec4Norm)]
+  }
+  ### return: Normalenvektor als erste Komponenten des Lernvektors
+  return 
+}
+
+getSuppVec_SVM <- function (pLearnVec) {
+  veclength <- floor(length(pLearnVec)/2)
+  # print(paste("veclength=",veclength," length(pVec4Learn)=",length(pVec4Learn)))
+  return <- pLearnVec
+  if (veclength > 0){
+      index4supp <- veclength+1:(2*veclength)
+      vVec4Supp <- pLearnVec[index4supp]
+      # entferne NA am Ende vom Supportvektor
+      return <- vVec4Supp[!is.na(vVec4Supp)]
+  }
+  ### return: Normalenvektor als erste Komponenten des Lernvektors
+  return 
+}
+
+getLearnVec_SVM <- function (pVec4Norm,pVec4Supp) {
+  v4norm <- as.vector(unlist(pVec4Norm))
+  v4supp <- as.vector(unlist(pVec4Supp))
+  return <- c(v4norm,v4supp)
+  ### return: Lernvektor=(Normalenvektor,Supportvektor)
+  return 
+}
+
+```
+### Einzelfehler SVM berechnen
+
+Der Einzelfehler kann mit der Funktion `e1_SVM(...)` für die SVM mit
+einem Datensatz $(x^{(i)},y^{(i)} \in \mathbb{R}^n \times \{ -1 , +1 \}$
+direkt berechnet werden. Allerdings enthält die folgende Funktion keine
+Dimensionsüberprüfung der Vektoren als Parameter der Funktion.
+
+```{r simpleSingleError4SVM}
+e_fast_SVM <- function (pVec4Norm,pVec4Supp,px4svm,py4svm) {
+  ### pParam4SVM - split in pVec4Norm and pVec4Supp
+  ### pVec4Norm ist der Normalenvektor aus dem IR^n  
+  ### pVec4Supp ist der Supportvektor  aus dem IR^n
+  ### px4svm: vektor aus dem IR^n 
+  ### py4svm: Klassenzugehörigkeit +1 oder -1
+  z4x <- sp(pVec4Norm,px4svm-pVecSupp)
+  return <- sigmoid_SVM(z4x*py4svm) ### Einzelfehler für (px4svm,py4svm)
+  ### Rückgabewert des Einzelfehlers von (px4svm,py4svm)
+  return 
+}
+
+```
+
+Die folgende Funktion berechnet auch den gleichen Fehler wie die
+einfachere obige Funktion. Allerdings beinhaltet die nachfolgende
+Funktion noch zusätzliche Dimensionsüberprüfungen, die den Nutzerinnen
+und Nutzern dabei helfen, Fehler bei der falsch gewählten Dimensionen
+der Datenvektoren und Normalenvektoren zu überprüfen.
+
+Die folgende Funktion wird in der Fehleraggregationsfunktion
+`E_SVM(...)` verwendet. Falls die Fehlerberechnung und die
+Fehlerminimierung ohne Probleme funktioniert kann man die Berechnung des
+Einzelsfehlers durch `e_SVM(...)` durch die `e_fast_SVM(...)` ersetzen, damit
+entfallen die Dimensionsüberprüfungen und die Berechnungsgeschwindigkeit
+reduziert sich eine wenig.
+
+```{r singleerror4svm}
+e_SVM <- function(pVec4Norm,pVec4Supp,px4svm,py4svm) {
+  ### pVec4Norm ist der Normalenvektor aus dem IR^n  
+  ### pVec4Supp ist der Supportvektor  aus dem IR^n
+  ### px4svm: vektor aus dem IR^n 
+  ### py4svm: Klassenzugehörigkeit +1 oder -1
+  ret <- 10
+  if (length(pVec4Norm) == length(pVec4Supp)) {
+    if (length(pVec4Norm) == length(pVec4Supp)) {
+        sp4svm <- sp(pVec4Norm,px4svm-pVec4Supp)
+        ret <- sigmoid_SVM(sp4svm * py4svm)
+    } else {
+      print("Normalenvektor und Trainingsvektor haben nicht die gleiche Dimension")
+      echo4vec("Normalenvektor pVec4Norm",pVec4Norm)
+      echo4vec("Trainingsvektor px4svm",px4svm)
+    }
+  } else {
+    print("Normalenvektor und Supportvektor haben nicht die gleiche Dimension")
+    echo4vec("Normalenvektor pVec4Norm",pVec4Norm)
+    echo4vec("Supportvektor  pVec4Supp",pVec4Supp)
+  }
+  ### Fehler zurückgeben
+  return(ret)
+}
+```
+
+## Definition der Fehlerfunktion für die SVM
+
+Definition der Fehlerfunktion der Support Vector Machine.
+
+```{r FehlerfunktionSVM}
+ E_normsupp_SVM <- function (pVec4Norm,pVec4Supp,px_D,py_D,pecholevel=0) {
+   ## Parameter der Funktion
+    ## pVec4Norm : Normalenvektor v zur Hyperebene
+    ## pVec4Supp : Sützektor p der Hyperebene
+    ## px_D : Dataframe x_ID - Liste von x-Vektoren    
+    ## py_D : Dataframe y_ID - Liste von y-Werten
+    
+    ## Fehler pro Datenpunkt 
+    datenanzahl <- nrow(px_D) ## d Anzahl der Daten
+    datenanzahl <- nrow(px_D) ## d Anzahl der Daten
+    e_D <- rep(0,datenanzahl)
+    ## Fehler für alle Datenpunkte berechnen 
+    for (i in 1:datenanzahl) {
+      ## Berechnung des Einzelfehlers mit Normalenvektor und Supportvector
+      # print("Call: e_SVM() for the following record");
+      px4svm <- px_D[i, ] 
+      py4svm <- py_D[i, ]
+      ## print(paste("px4svm=(",paste(px4svm,collapse=","),")"),sep="")
+      ## print(paste("py4svm=(",paste(py4svm,collapse=","),")"),sep="")
+      e_D[i] <- e_SVM(pVec4Norm,pVec4Supp,px4svm,py4svm)
+    } 
+    ## Rückgabewert als aufsummierte Einzelfehler setzen
+    return <-  sum(e_D)/datenanzahl ## datenanzahl
+    ## Rückgabewert: return  Gesamtfehler quadratisch
+    return
+}
+
+E_normsupp_SVM(c(1,2),c(3,-1),x_ID,y_ID) 
+
+```
+
+### Lernparametervektor
+Nun werden der Normalenvektor und der Supportvektor zu einem Vektor für die Lernparameter zusammengefasst, damit die Veränderung in Richtung des Gradienten auf einen einzelnen Vektor angewendet werden können.
+```{r}
+E_SVM <- function (pVec4Learn,px_D,py_D,pecholevel=0) {
+    return <- 0
+    veclength <- floor(length(pVec4Learn)/2)
+    # print(paste("veclength=",veclength," length(pVec4Learn)=",length(pVec4Learn)))
+    if (2*veclength < length(pVec4Learn)) {
+      print("Vektorlänge von pVec4Learn ist kein Vielfaches von 2")
+    } else {
+      vVec4Norm <- pVec4Learn[1:veclength]
+      index4supp <- veclength+1:(2*veclength)
+      vVec4Supp <- pVec4Learn[index4supp]
+      # entferne NA am Ende vom Supportvektor
+      vVec4Supp <- vVec4Supp[!is.na(vVec4Supp)]
+      # echo4vec("vVec4Supp",vVec4Supp)
+      return <- E_normsupp_SVM(vVec4Norm,vVec4Supp,x_ID,y_ID,pecholevel) 
+    }
+    ## Rückgabewert: return  Gesamtfehler quadratisch
+    return 
+}
+vec4learn <- c(1,2,3,4)
+E_SVM(vec4learn,x_ID,y_ID)
+```
+
+
+
+### Partielle Ableitung mit zweidimensionalen Daten - SVM
+Zunächst werden exemplarisch die partielle Ableitungen bzgl. eines zweidimensionalen Raumes berechnet aus dem die Trainingsdaten stammen.
+
+$$ \frac{\partial e}{\partial v_1}(v,p,x,y) :=
+
+-   (x\_{1}-p\_{1}) \cdot y \cdot  \frac{ 
+     e^{\langle v , x -p\rangle \cdot y}
+    }{ {\left( 
+    e^{\langle v , x -p\rangle \cdot y} +1\right)^2}} 
+$$
+
+Dabei gilt \( v = (v_1,v_2) \in \mathbb{R}^2) \),
+\( p = (p_1,p_2 \in \mathbb{R}^2 ) \)  und \( x = (x_1,x_2) \in \mathbb{R}^2   \).
+
+### Partielle Ableitungen SVM
+
+Partielle Ableitung in Richtung $v_i$ des Normalenvektors
+$v=(v_1,\ldots v_n)$ ergibt sich damit wie folgt:
+
+$$ \frac{
+  \partial e_{_{SVM}}
+  }{
+  \partial v_i
+} (x_1,\ldots ,x_n,y,v,p) = ( x\_{i}-p\_{i}) \cdot y \cdot  \frac{
+   -  e^{\langle v, x - p \rangle \cdot y}
+}{
+  \left(
+   e^{\langle v, x - p \rangle \cdot y} + 1
+  \right)^2
+}
+
+$$
+
+Dabei ist mit \( x= (x_1,\ldots ,x_n), \  v= (v_1,\ldots , v_n)  \) und
+\( p= (p_1,\ldots , p_n)  \).
+
+$$ \frac{
+  \partial e_{_{SVM}}
+  }{
+  \partial p_i
+} (v,p,x,y) = -v_{i} \cdot y \cdot  \frac{
+   - e^{\langle v, x - p \rangle \cdot y}
+}{
+  \left(
+   e^{\langle v, x - p \rangle \cdot y} + 1
+  \right)^2
+}
+
+$$
+Damit kann man nun den Gradienten für einen Einzelfehler berechnen. Gesamtfehler der SVM ergibt sich später durch die Summenregel für Ableitungen als Summe der Gradienten für die Einzelfehler.  
+
+### Gradient des Einzelfehlers für die SVM
+
+Gradient des Einzelfehlers ergibt sich aus den partiellen Ableitungen in
+Richtung des Stützvektors und des Normalenvektors. Dabei sind
+\( x= (x_1,\ldots ,x_n), \  v= (v_1,\ldots , v_n) \) und
+\( p= (p_1,\ldots , p_n) \) jeweils Vektoren aus dem \( \mathbb{R}^n \), wobei
+der Gradient bzgl. der Komponenten \( v_i \) und \( p_i \) berechnet wird.
+
+$$ Grad_{v,p}(e\_{\_{SVM}})(v,p,x,y) = y \cdot   \frac{
+      - e^{\langle v, x - p \rangle \cdot y}
+    }{
+     \left(
+      e^{\langle v, x - p \rangle \cdot y} + 1
+     \right)^2
+    } \cdot
+
+\begin{pmatrix}
+    x_1-p_i \\ 
+    \vdots \\
+    x_n-p_n \\
+    -v_1 \\
+    \vdots \\
+    -v_n
+    \end{pmatrix}
+$$
+
+Das Minuszeichen entsteht durch die Ableitung der sigmoiden Funktion mit
+der Quotientenregel. Wenn man das Minuszeichen in den Vektor zieht,
+entsteht der folgende Term:
+
+$$ Grad_{v,p}(e_{_{SVM}})(v,p,x,y) = y \cdot   \frac{
+      e^{\langle v, x - p \rangle \cdot y}
+    }{
+     \left(
+      e^{\langle v, x - p \rangle \cdot y} + 1
+     \right)^2
+    } \cdot
+
+\begin{pmatrix}
+    p_i-x_1 \\ 
+    \vdots \\
+    p_n-x_n \\
+    v_1 \\
+    \vdots \\
+    v_n
+    \end{pmatrix}
+$$
+
+### Parameterreduktion für den Stützvektor
+
+Durch Ausnutzung der Bilinearität des Skalarproduktes kann man eine
+Parameterreduktion um \( n-1 \) Parameter vornehmen. Dies kann erfolgen,
+indem man \( \langle v, x - p \rangle \cdot y \) durch
+\( \left \langle v, x \rangle + s\right) \cdot y$ mit $s \in \mathbb{R} \)
+ersetzt.
+
+$$
+\langle v, x - p \rangle \cdot y = \bigg( \langle v, x  \rangle + \underbrace{\langle v, -p \rangle}_{s\in \mathbb{R}} \bigg) \cdot y  
+$$ 
+Nun sollen mit einer Funktion, die Vektoren auf der Konsole ausgibt, Lernende unterstützt werden, die Iterationsschritte besser zu verstehen.
+
+
+```{r}
+scalarmult4vec <- function(pScalar,pVec) {
+  # print(paste("pScalar=",pScalar," length(pVec)=",length(pVec),sep=""))
+  pVec <- as.numeric(pVec)
+  # echo4vec("pVec",pVec)
+  return <- rep(0,length(pVec))
+  for (i in 1:length(pVec)) {
+    return[i] <- pScalar * pVec[i]
+    # print(paste("return[",i,"]=",return[i],sep=""))
+  }
+  ### Return vector
+  return
+}
+
+scalarmult4vec(0.123456,c(1,2,3,4))
+```
+
+
+### Plot des Fehlers entlang Gradient SVM
+
+```{r}
+error4gradientpath <- function (pError,pLearnVec,pGrad, px_D, py_D, alpha=1, evalcount=100) {
+  ## evalcount sind die Anzahl der Datenpunkte
+  ## evalcount <- 10
+  list4alpha <- alpha * ((-evalcount:evalcount)/evalcount)
+  list4E <- rep(0,2*evalcount+1)
+  ## für alle a zwischen a -alpha*g4a und a + alpha*g4a den Fehler berechnen
+  for (k in 1:length(list4alpha)) {
+    ## Fehler für a + list4a[k]*g4a berechnen
+    ## list4a[k] liegt zwischen -alpha und +alpha
+    list4E[k] <- pError(pLearnVec + list4alpha[k]*pGrad,x_D,y_D)
+  }
+  ## Fehler zwischen a-alpha+g4a und a+alpha+g4a plotten  
+  print(plot( list4alpha, list4E))
+  return <- data.frame(list4alpha,list4E)
+  return
+}
+
+#error4gradientpath(E_SVM,learn4svm,grad4svm,x_ID,y_ID)
+```
+
+
+### Normalenvektor und Supportvektor aus Lernvektor extrahieren
+In dem Lernvektor steckt der  Normalenvektor und Supportvektor. Die folgenden Funktionen können  aus Lernvektor den Normalenvektor und den Supportvektor extrahieren.
+
+```{r}
+split4LearnVec_SVM <- function (pLearnVec) {
+    veclength <- floor(length(pLearnVec)/2)
+    # print(paste("veclength=",veclength," length(pVec4Learn)=",length(pVec4Learn)))
+    if (2*veclength < length(pLearnVec)) {
+      print("Vektorlänge von pLearnVec ist kein Vielfaches von 2")
+    } 
+    if (veclength > 0){
+      vVec4Norm <- pLearnVec[1:veclength]
+      index4supp <- veclength+1:(2*veclength)
+      vVec4Supp <- pLearnVec[index4supp]
+      # entferne NA am Ende vom Supportvektor
+      vVec4Supp <- vVec4Supp[!is.na(vVec4Supp)]
+      ret <-c(vec4norm=vVec4Norm,vec4supp=vVec4Supp)
+    } else {
+      ret <- c(vec4norm=NA,vec4supp=NA)
+    } 
+    ## return the associative vector
+    return(ret)
+}
+
+getNormVec_SVM <- function (pLearnVec) {
+  veclength <- floor(length(pLearnVec)/2)
+  # print(paste("veclength=",veclength," length(pVec4Learn)=",length(pVec4Learn)))
+  ret <- pLearnVec
+  if (veclength > 0){
+      vVec4Norm <- pLearnVec[1:veclength]
+      # entferne NA aus dem Normalenvektor
+      ret <- vVec4Norm[!is.na(vVec4Norm)]
+  }
+  ### return: Normalenvektor als erste Komponenten des Lernvektors
+  return(ret) 
+}
+
+getSuppVec_SVM <- function (pLearnVec) {
+  veclength <- floor(length(pLearnVec)/2)
+  # print(paste("veclength=",veclength," length(pVec4Learn)=",length(pVec4Learn)))
+  ret <- pLearnVec
+  if (veclength > 0){
+      index4supp <- veclength+1:(2*veclength)
+      vVec4Supp <- pLearnVec[index4supp]
+      # entferne NA am Ende vom Supportvektor
+      ret <- vVec4Supp[!is.na(vVec4Supp)]
+  }
+  ### return: Normalenvektor als erste Komponenten des Lernvektors
+  return(ret) 
+}
+
+getLearnVec_SVM <- function (pVec4Norm,pVec4Supp) {
+  v4norm <- as.vector(unlist(pVec4Norm))
+  v4supp <- as.vector(unlist(pVec4Supp))
+  return <- c(v4norm,v4supp)
+  ### return: Lernvektor=(Normalenvektor,Supportvektor)
+  return 
+}
+
+```
+
+
+### Implementation der SVM-Gradientenberechnung
+
+```{r implementgrad4svm}
+grad4e_SVM <- function (pvec4norm,pvec4supp,px4svm,py4svm,pecholevel=0) {
+  ## Parameter der Funktion
+  ## pVec4Norm : Normalenvektor v zur Hyperebene
+  ## pVec4Supp : Sützektor p der Hyperebene
+  ## px4svm: vektor aus dem IR^n 
+  ## py4svm: Klassenzugehörigkeit +1 oder -1
+  
+  ### ECHO4VEC - um Vektoren ausgeben zu lassen '#' vor echo4vec entfernen 
+  # echo4vec("pVec4Norm",pvec4norm)
+  # echo4vec("pVec4Supp",pvec4supp)
+  # echo4vec("px4svm",px4svm)
+  # echo4vec("py4svm",py4svm)
+    
+  sp4svm <- sp(pvec4norm,px4svm-pvec4supp)*py4svm
+  vec4calc <- c((px4svm - pvec4supp),- pvec4norm)
+  ## Rückgabewert als Gradient definieren
+  scalar4svm <-  py4svm * sigmoid_derivation_SVM(sp4svm)
+  ## setze pecholevle >= 3 als Parameter, um Vektoren auszugeben
+  
+  ### ECHO4VEC - um Vektoren ausgeben zu lassen '#' vor echo4vec entfernen 
+  # print(paste("SVM Skalarprodukt",sp(pvec4norm,px4svm-pvec4supp)))
+  # echo4vec("vec4calc",vec4calc)
+  # echo4vec("scalar4svm",scalar4svm)
+  
+  ### Returnvektor setzen als Multiplikation mit Skalar
+  ret <- sp(scalar4svm, vec4calc)
+  ## Rückgabewert: return  Gradient nach (pVec4Norm,pVec4Supp)
+  return(ret)
+}
+```
+
+### Normierten Gradienten SVM testen
+```{r testgrad4svm}
+### Test grade4e_SVM()
+nvec4svm <- c(1,2,3)
+svec4svm <- c(1,-1,+1)
+x4svm <- c(1,1,1)
+y4svm <- -1
+e_SVM(nvec4svm,svec4svm , x4svm, y4svm)
+g4svm <- grad4e_SVM(nvec4svm,svec4svm , x4svm, y4svm)
+g4mat <- matrix(g4svm, ncol=2)
+nvec4svm <- nvec4svm - g4mat[ ,1]
+svec4svm <- svec4svm - g4mat[ ,2]
+e_SVM(nvec4svm,svec4svm , x4svm, y4svm)
+g4svm <- grad4e_SVM(nvec4svm,svec4svm , x4svm, y4svm)
+g4mat <- matrix(g4svm, ncol=2)
+nvec4svm <- nvec4svm - g4mat[ ,1]
+svec4svm <- svec4svm - g4mat[ ,2]
+e_SVM(nvec4svm,svec4svm , x4svm, y4svm)
+```
+
+### Kopie eines Vektors erstellen 
+```{r copy4vecdef}
+
+copy4vec <- function (pVec) {
+  return <- rep(0,length(pVec))
+  for (i in length(pVec)) {
+    return[i] <- pVec[i]
+  }
+  ## return cloned vector
+  return
+}
+```
+
+### Gradient des Gesaamtfehlers für die SVM
+
+Der Gradient des Gesamtfehlers ergibt sich aus der Summe Gradienten für
+die Einzelfehler, da der Ableitungsoperator für partielle Ableitungen
+linear ist.
+
+```{r}
+gradE_SVM <- function (pLearnVec,px_D,py_D,pecholevel=0) {
+    ## Parameter der Funktion
+    ## pVec4Norm : Normalenvektor v zur Hyperebene
+    ## pVec4Supp : Sützektor p der Hyperebene
+    ## px_D : Dataframe - Liste von x-Vektoren aus dem IR^n   
+    ## py_D : Dataframe - Liste von y-Werten der Klassenzugehörigkeit +1 oder -1
+    echo4grade_svm <- 0
+    ## Fehler pro Datenpunkt 
+    datenanzahl <- nrow(px_D)
+    grad <- rep(0,length(pLearnVec)) 
+    g_D <- rep(0,datenanzahl)
+    ## Fehler für alle Datenpunkte berechnen
+    #echo4vec("pLearnVec",pLearnVec)
+    vNormVec <- getNormVec_SVM(pLearnVec)
+    vSuppVec <- getSuppVec_SVM(pLearnVec)
+    #echo4vec("vNormVec",vNormVec)
+    #echo4vec("vSuppVec",vSuppVec)
+    for (i in 1:datenanzahl) {
+      ## quadratische Einfehler mit Funktion e 
+      # px4svm <- px_D[i, ]  DOES NOT WORK because it is a data.frame line not a vector 
+      # py4svm <- py_D[i, ]  DOES NOT WORK because it is a data.frame line not a vector
+      px4svm <- as.vector(unlist(px_D[i, ])) 
+      py4svm <- as.vector(unlist(py_D[i, ]))
+      #echo4vec("px4svm",px4svm)
+      #echo4vec("py4svm",py4svm)
+      #echo4vec("BEFORE grad",grad)
+      #g_D <- grad4e_SVM(vNormVec,vSuppVec,px4svm,py4svm,pecholevel=0)
+      #echo4vec("grad4e_SVM",grad4svm)
+      grad <- grad + grad4e_SVM(vNormVec,vSuppVec,px4svm,py4svm,pecholevel=0)
+      #echo4vec("AFTER grad",grad)
+    } 
+    ##echo4vec("GradE_SVM()", grad)
+    ## grad (dataframe) als Vektor umwandeln
+    return <- as.vector(unlist(grad))
+    ## Rückgabewert: return  Gesamtfehler quadratisch
+    return
+}
+```
+### Normalisieren eines Vektors
+Die folgenden Funktion normalisiert den als Parameter übergebenen Vektor auf die Länge 1, wenn die Vektorlänge von 0 verschieden ist.
+
+```{r normedgradientdef}
+
+normalizeVector <- function (pVec) {
+ vVec <- as.vector(unlist(pVec))
+ norm4vec <- norm(vVec,"2")
+ print(norm4vec)
+ ret <- vVec
+ if (norm4vec > 0) {
+    ret <- vVec / norm4vec   
+ } else {
+   print("Vektor pVec ist Nullvektor - keine Normalisierung")
+ }
+ ## Rückgabewert: normierter Vektor, wenn pVec kein Nullvektor 
+ ##               Sonst Nullvektor als Rückgabewert
+ return(ret)
+}
+```
+
+### Normierter Gradient des Gesaamtfehlers für die SVM
+
+Der normierte Gradient des Gesamtfehlers hat die Länge 1 und man kann damit die Schrittweite bei jedem Iterationsschritt besser kontrollieren.
+
+```{r}
+normGradE_SVM <- function (pLearnVec,px_D,py_D,pecholevel=0) { 
+ g_SVM <- gradE_SVM(pLearnVec,px_D,py_D,pecholevel)
+ ret <- normalizeVector(g_SVM)
+ ## Rückgabewert: normierter Gradient, wenn kein Nullvektor 
+ ##               Sonst Nullvektor als Rückgabewert
+ return(ret)
+}
+```
+### Minimalen Fehler in Gradientenrichtung 
+Mit der folgenden Funktion wird der minimale Fehler in Gradientenrichtung gesucht.
+```{r}
+
+find_min4error <- function (pError, pGrad, pa, px_D, py_D, alpha=1, evalcount=100) {
+  ## Parameter
+  ## pError: Fehlerfunktion
+  ## pGrad:  Gradient der Fehlerfunktion
+  ## px_D: x-Vektoren der Daten für den Definitionsbereich
+  ## py_D: y-Sollwerte für die Fehlerfunktion
+  ret <- rep(0,2) ### ret <- c(0,0);
+  ## erste Komponente von ret ist der minimale lambda-Wert
+  ## zweite Komponente von ret ist der minimale Fehler
+  s4a <- (-evalcount:evalcount)/evalcount
+  #s4a <- 2*runif(2*evalcount+1,-1,1)
+  E4a <-  rep(0,2*evalcount+1) ## +1 wegen x4a=0
+  ## smin - Skalar für Gradient für das Minimum der berechneten Fehler
+  scalar4min <- 0  ### scalar4min = 0 bedeutet Gradient wird mit 0 gestreckt "man bleibt am Ort"
+  ### Fehler in pa an der aktuellen Paramterposition berechnen als Startwert
+  error4min <- pError( pa, px_D, py_D )
+  grad4a      <- alpha * pGrad( pa, px_D, py_D )
+  ## in Gradientenrichtung auswerten zwischen -1*pGrad und +1*Grad
+  ## die Fehlerfunktion auswerten und über die x4a-Liste iterieren
+  for (k in 1:length(s4a)) {
+    ## Fehler für den um x4a[k] skalierten Gradienten pGrad
+    ## und die Daten px_D, py_D berechnen
+    E4a[k] <- pError(pa + s4a[k]*grad4a, px_D, py_D)
+    ## Überprüfen, ob der Fehler kleiner ist als der
+    ## bisher berechnete minimale Fehler errormin
+    if (E4a[k] < error4min) {
+      error4min  <-E4a[k]
+      scalar4min <-s4a[k]
+    }
+  }
+  # plot(s4a,E4a)
+  ret <- c(scalar4min,error4min)
+  ## Rückgabewert des Skalars für den Gradienten und dem minimalen Fehler
+  ret
+}
+
+```
+### Minimalen Fehler in Gradientenrichtung 
+Mit der folgenden Funktion wird der minimale Fehler in Gradientenrichtung gesucht.
+```{r}
+
+find_min4error <- function (pError, pGrad, pa, px_D, py_D, alpha=1, evalcount=100) {
+  ## Parameter
+  ## pError: Fehlerfunktion
+  ## pGrad:  Gradient der Fehlerfunktion
+  ## px_D: x-Vektoren der Daten für den Definitionsbereich
+  ## py_D: y-Sollwerte für die Fehlerfunktion
+  ret <- rep(0,2) ### ret <- c(0,0);
+  ## erste Komponente von ret ist der minimale lambda-Wert
+  ## zweite Komponente von ret ist der minimale Fehler
+  s4a <- (-evalcount:evalcount)/evalcount
+  #s4a <- 2*runif(2*evalcount+1,-1,1)
+  E4a <-  rep(0,2*evalcount+1) ## +1 wegen x4a=0
+  ## smin - Skalar für Gradient für das Minimum der berechneten Fehler
+  scalar4min <- 0  ### scalar4min = 0 bedeutet Gradient wird mit 0 gestreckt "man bleibt am Ort"
+  ### Fehler in pa an der aktuellen Paramterposition berechnen als Startwert
+  error4min <- pError( pa, px_D, py_D )
+  grad4a      <- alpha * pGrad( pa, px_D, py_D )
+  ## in Gradientenrichtung auswerten zwischen -1*pGrad und +1*Grad
+  ## die Fehlerfunktion auswerten und über die x4a-Liste iterieren
+  for (k in 1:length(s4a)) {
+    ## Fehler für den um x4a[k] skalierten Gradienten pGrad
+    ## und die Daten px_D, py_D berechnen
+    E4a[k] <- pError(pa + s4a[k]*grad4a, px_D, py_D)
+    ## Überprüfen, ob der Fehler kleiner ist als der
+    ## bisher berechnete minimale Fehler errormin
+    if (E4a[k] < error4min) {
+      error4min  <-E4a[k]
+      scalar4min <-s4a[k]
+    }
+  }
+  ### Vorschlag für die Anpassung der Lernrate
+  suggested_alpha <- alpha
+  if (abs(scalar4min) > 0.9) {
+    ### Lernrate alpha vergrößern
+    suggested_alpha <- 2 * alpha
+    #print(paste("find_min4error() - Lernrate von",alpha,"auf",suggested_alpha,"vergrößern mit Skalar",scalar4min));
+  } else {
+    if (abs(scalar4min) < 0.1) {
+      ### Lernrate alpha verkleinern
+      suggested_alpha <- alpha/2
+      #print(paste("find_min4error() - Lernrate von",alpha,"auf",suggested_alpha,"verkleinern mit Skalar",scalar4min));
+    }  
+  }
+  ## RETURN enthält die berechneten Werte für das Fehlerminimum
+  ## return[1] skalare Streckung des Gradienten,
+  ## return[2] Wert des Fehlers im Minimum,
+  ## return[3] Vorschlag für die Anpassung der Lernrate alpha,
+  ret <- c(scalar4min, error4min, suggested_alpha)
+  ## Rückgabewert: Skalars für Gradienten, minimaler Fehler und Vorschlag für neues alpha
+  return(ret)
+}
+
+```
+
+
+
+### Einzelne Iteration und Verbesserung der Fehlerfunktion
+Der Test der Iteration gliedert sich in 3 Schritte:
+* Initialisierung der Lernrate und der Startvektoren. Fehlerfunktion mit den Startwerten berechnen.
+* 1. Iterationschritt wird durchgeführt und dann die Fehlerfunktion erneut ausgewertet
+* 2. Iterationschritt wird durchgeführt und dann die Fehlerfunktion nach dem 2. Schritt ausgewertet
+
+#### Initialisierung des Vektoren
+Initialisierung der Lernrate \(\alpha\) und des Normalvektors und des Stützvektors. Fehlerfunktion wird mit den diesen Startwerten berechnet.
+
+```{r}
+alpha4svm <- 1
+### Test GradE_SVM
+nvec4svm <- c(1,2)
+svec4svm <- c(1,-1)
+## pVec4Norm,pVec4Supp
+learn4svm <- getLearnVec_SVM(nvec4svm,svec4svm)
+learn4svm0 <- copy4vec(learn4svm)
+
+print("SVM Start mit folgendem Fehler")
+E_SVM(learn4svm , x_ID, y_ID)
+```
+
+#### 1. SVM Iterationsschritt
+
+```{r}
+print("SVM Schritt 1")
+minwert <- find_min4error(E_SVM,normGradE_SVM,learn4svm,x_ID, y_ID,alpha=alpha4svm)
+g4svm <- normGradE_SVM(learn4svm , x_ID, y_ID)
+learn4svm <- learn4svm + alpha4svm * minwert[1] * g4svm 
+E_SVM(learn4svm , x_ID, y_ID)
+```
+
+#### 2. SVM Iterationsschritt
+
+```{r}
+print("SVM Schritt 2")
+minwert <- find_min4error(E_SVM,normGradE_SVM,learn4svm,x_ID, y_ID,alpha=alpha4svm)
+g4svm <- normGradE_SVM(learn4svm , x_ID, y_ID)
+learn4svm <- learn4svm + alpha4svm * minwert[1] * g4svm 
+E_SVM(learn4svm, x_ID, y_ID)
+
+```
+
+### Iteration SVM ohne Funktion
+Im Folgenden wird eine Iteration mit Gradientenabstieg durchgeführt.
+```{r}
+alpha4svm <- 1
+### Test GradE_SVM
+nvec4svm <- c(1,2)
+svec4svm <- c(1,-1)
+## pVec4Norm,pVec4Supp
+learn4svm <- getLearnVec_SVM(nvec4svm,svec4svm)
+learn4svm0 <- copy4vec(learn4svm)
+max_iteration <- 10
+for (i in (1:max_iteration)) {
+  minwert <- find_min4error(E_SVM,normGradE_SVM,learn4svm,x_ID, y_ID,alpha=alpha4svm)
+  g4svm <- normGradE_SVM(learn4svm , x_ID, y_ID)
+  learn4svm <- learn4svm + alpha4svm * minwert[1] * g4svm 
+  print(paste("Error SVM",i,": ",minwert[2]," Step Scale: ",minwert[1]," alpha=",alpha4svm," suggested alpha=",minwert[3], sep=""))    
+  alpha <- minwert[3]
+  str4grad <- paste(g4svm,collapse=",")
+  print(paste("Gradient ",i,"=(",str4grad,")",collapse="",sep=""));
+  print(paste("learn4svm",i,"=(",paste(learn4svm,collapse=","),")",collapse="",sep=""))
+  print("---------------------")
+}
+
+```
+
+### Plot Result SVM
+
+```{r}
+
+plot(x1PN,x2PN, col = col4pts, pch = 4) ## runde ausgefüllt Punkte mit pch=19
+### Clustermitten anzeigen
+points(mx1P,mx2P, col ="darkgreen", pch = 19) 
+points(mx1N,mx2N, col ="red", pch = 19) 
+### Plot Clustermitten 
+points(x1cmean, x2cmean, col='green', pch=19)
+### gestrichelte Verbindungslinie der Clustermitten 
+lines(x1cmean, x2cmean, col='green', lwd=1, lty = 2)
+
+print("Steigung b")
+steigung
+print("y-Achsenabschnitt a")
+yabschnitt
+abline(a=yabschnitt,b=steigung,col='green')
+
+
+```
+
+### Initialen Lernvektor als Parameter für die SVM bestimmen
+Mit einem geeignet gewählte Startvektor für die Lernparameter kann man die Lernschritte. Dies erfolgt mit der folgenden Funktion, die 
+* zunächst aus den Daten die Clustermitten der Daten berechnet,
+* den Supportvektor als dem arithmetischen Mittel der beiden Clustermitten verwendet und
+* aus der vektoriellen Clustermittendifferenz den Normalenvektor bestimmt
+
+```{r}
+initLearnVec_SVM <- function(px_D,py_D) {
+  datenanzahl <- nrow(px_D)
+  veclength <- ncol(px_D)
+  meanc1 <- rep(0,veclength) 
+  meanc2 <-  rep(0,veclength) 
+  count4c1 <- 0
+  count4c2 <- 0
+  ## Clustermitten  berechnen 
+  for (i in 1:datenanzahl) {
+    x4svm <- px_D[i, ] 
+    y4svm <- py_D[i, ]
+    # aggregate(px_D, list(py_D), FUN=mean)
+    #echo4vec("x4svm",x4svm)
+    #echo4vec("y4svm",y4svm)
+    if (y4svm[1] < 1) {
+      meanc1 <- meanc1 + x4svm
+      count4c1 <- count4c1 + 1
+      #print("Cluster -1") 
+      #echo4vec("meanc1",meanc1)
+    } else {
+      meanc2 <- meanc2 + x4svm
+      count4c2 <- count4c2 + 1
+      #print("Cluster +1")  
+      #echo4vec("meanc2",meanc2)
+    }
+  }
+  if (count4c1 > 0) {
+    meanc1 <- meanc1 / count4c1
+  }
+  if (count4c2 > 0) {
+    meanc2 <- meanc2 / count4c2
+  }
+  vVec4Norm <- meanc2 - meanc1
+  vVec4Norm <- as.vector(unlist(vVec4Norm))
+  #echo4vec("vVec4Norm",vVec4Norm)
+  vVec4Supp <- (meanc2 + meanc1)/2
+  vVec4Supp <- as.vector(unlist(vVec4Supp))
+  #echo4vec("vVec4Supp",vVec4Supp)
+  return <- c(vVec4Norm,vVec4Supp)
+  #return <- c(vec4norm=vVec4Norm,vec4supp=vVec4Supp)
+  #### return: SVM init vector
+  return
+}
+vec4svm <- initLearnVec_SVM(x_ID,y_ID)
+vec4svm
+echo4vec("Vec4Norm",getNormVec_SVM(vec4svm))
+echo4vec("Vec4Supp",getSuppVec_SVM(vec4svm))
+#aggregate(x_ID, list(y_ID), FUN=mean)
+
+```
+### Plot des Fehlers entlang Gradient SVM
+
+```{r}
+error4gradientpath_SVM <- function (pLearnVec, px_D, py_D, alpha=1, evalcount=100) {
+  ### g4a - Gradient für Parameter a 'pa' berechnen
+  g4svm <- normGradE_SVM(pLearnVec,px_D,py_D) 
+  echo4vec("g4svm",g4svm)
+  ## evalcount sind die Anzahl der Datenpunkte
+  ## evalcount <- 10
+  list4alpha <- alpha * ((-evalcount:evalcount)/evalcount)
+  list4E <- rep(0,2*evalcount+1)
+  ## für alle a zwischen a -alpha*g4a und a + alpha*g4a den Fehler berechnen
+  for (k in 1:length(list4alpha)) {
+    ## Fehler für pLearnVec + list4a[k]*g4svm berechnen
+    ## list4a[k] liegt zwischen -alpha und +alpha
+    list4E[k] <- E_SVM(pLearnVec+list4alpha[k]*g4svm,px_D,py_D)
+  }
+  ## Fehler zwischen a-alpha+g4a und a+alpha+g4a plotten  
+  print(plot( list4alpha, list4E, type="l"
+      ))
+  return <- data.frame(list4alpha,list4E)
+  return
+}
+
+lvec4svm <- c(1,2,3,4)
+error4gradientpath_SVM(lvec4svm,x_ID,y_ID,alpha=10)
+```
+
+### Lernalgorithmus für die SVM als Funktion
+Die folgende Funktion definiert den Lernalgorithmus für die SVM.
+
+```{r}
+learnSVM <- function (pVec4Norm,pVec4Supp, px_D, py_D, palpha=1, pmaxiteration=10, pevalcount=15,echolevel=2)  {
+  ## max_interation definiert die maximalen Iterationszyklen
+  ## max_iteration <- 25
+  echo_learnSVM <- 0
+  echo4vec("pmaxiteration",pmaxiteration)
+  alpha4iteration <- palpha
+  vec4learn <- getLearnVec_SVM(pVec4Norm,pVec4Supp)
+  alterfehler <- E_SVM(vec4learn,px_D,py_D)
+  minwert <- c(0,alterfehler)
+  print("START - SVM - With Function")
+  print("--------------------------")
+  echo4vec("vec4learn",vec4learn) 
+  print(paste("max interation=",pmax_iteration," evalcount=",pevalcount,sep="",collapse=""))
+  print(paste("Error 0 SVM: ",alterfehler,sep=""))
+  
+  #vec4learn <- initLearnVec_SVM(px_D,py_D)
+  for (i in 1:pmaxiteration) {
+    vNormVec <- getNormVec_SVM(vec4learn)
+    vSuppVec <- getSuppVec_SVM(vec4learn)
+    echo4vec("vNormVec",vNormVec)
+    echo4vec("vSuppVec",vSuppVec)
+    vec4grad <- gradE_SVM(vec4learn, px_D, py_D) 
+    vec4grad <- normalizeVector(vec4grad)
+    #error4gradientpath_SVM(vec4learn,px_D, py_D,alpha=1,evalcount = 50)
+    #echo4vec("vec4grad",vec4grad)
+    #minwert <- find_min4error(E_SVM, normGradE_SVM, pa, px_D, py_D, palpha, evalcount)
+    # vec4learn <- c(pVec4Norm,pVec4Supp)
+    #move2min()
+    minwert <- move2min(E_SVM, vec4grad, vec4learn, px_D, py_D, palpha=alpha4iteration, pevalcount,echolevel) 
+    # palpha <- abs(minwert[3])*1.5
+    # minwert <- find_min4error(E_LR, normGradE_LR, a, x_D, y_D, alpha, evalcount) 
+    #step4grad <- alpha * normGradE_LR( pa, px_D, py_D ) 
+    #print(step4grad)
+    #neues_pa <- pa + step4grad
+    #print(paste("E_SVM()=",E_SVM(vec4learn, px_D, py_D)," New Error minwert[2]=",minwert[2],sep=""))
+    if (E_SVM(vec4learn, px_D, py_D) >= minwert[2]) {
+          vec4learn <- vec4learn + minwert[1]*vec4grad
+          if (echolevel >= echo_learnSVM) {
+            print(paste("Error SVM ",i,": ",minwert[2]," Step Scale minwert[1]: ",minwert[1]," alpha=",palpha," suggested alpha=",minwert[3], sep=""))    
+            #palpha <- minwert[3]
+            str4grad <- paste(vec4grad,collapse=",")
+            print(paste("Gradient ",i,"=(",str4grad,")",collapse="",sep=""));
+            print(paste("vec4learn",i,"=(",paste(vec4learn,collapse=","),")",collapse="",sep=""))
+            print("---------------------")
+          } 
+          alpha4iteration <- minwert[3]
+    } else {
+      palpha <- palpha/2
+      if (echolevel >= echo_learnSVM) {
+          print(paste("Fehler ",minwert[2]," < ",E_LR(vec4learn, px_D, py_D)," wird größer bzgl. E_LR(a, x_D, y_D) mit palpha=",palpha,sep=""))
+      }
+    } 
+  }
+  ret <- vec4learn
+  ### Rückgabewert
+  return(ret)
+}
+```
