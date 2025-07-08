@@ -11,9 +11,9 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Einleitung
 In dieser Lerneinheit werden mit Verständnis über die Funktionsweise des Skalarproduktes und der Zerlegung in Halbebenen das Thema der Support Vector Machines (SVM) behandelt, um diese dann in R zu implementieren.
 
-Die Grundlagen der Support Vector Machines und ihre Funktionsweise werden am besten mit einem zweidimensionalen  Beispiel erläutern, bei dem die Daten zweidimensional sind, also aus Wertepaaren \( (x_1,x_2) \in \matbb{R}^2 \) bestehen. Den Datenpunkten ist nun eine von zwei möglichen Klasse zugeordnet, im weiteren Verlauf in der Ebene mit unterschiedlichen Farben eingefärbt wurden, Ziel ist es nun, eine Klassifikator erstellen, der die Datenpunkte durch eine Hyperebene in dem jeweiligen Raum trennt.  Im Allgemeinen wird in einen n-dimensionalen Raum eine \( n-1 \)-dimensionale Hyperebene gesucht. In dem folgenden Beispiel wird eine Hyperebene im zweidimensionalen Raum gesucht, die Hyperebene ist in diesem einfachen Fall eine Gerade. 
+Die Grundlagen der Support Vector Machines und ihre Funktionsweise werden am besten mit einem zweidimensionalen  Beispiel erläutern, bei dem die Daten zweidimensional sind, also aus Wertepaaren \( (x_1,x_2) \in \mathbb{R}^2 \) bestehen. Den Datenpunkten ist nun eine von zwei möglichen Klasse zugeordnet, im weiteren Verlauf in der Ebene mit unterschiedlichen Farben eingefärbt wurden, Ziel ist es nun, eine Klassifikator erstellen, der die Datenpunkte durch eine Hyperebene in dem jeweiligen Raum trennt.  Im Allgemeinen wird in einen n-dimensionalen Raum eine \( n-1 \)-dimensionale Hyperebene gesucht. In dem folgenden Beispiel wird eine Hyperebene im zweidimensionalen Raum gesucht, die Hyperebene ist in diesem einfachen Fall eine Gerade. 
 
-Wenn die Daten dreidimensionalaus Wertetripeln \( (x_1,x_2,x_3) \in \matbb{R}^3 \) bestehen, ist die Hyperebene, die die Klassen nach Möglichkeit sauber trennen soll eine Ebene.
+Wenn die Daten dreidimensionalaus Wertetripeln \( (x_1,x_2,x_3) \in \mathbb{R}^3 \) bestehen, ist die Hyperebene, die die Klassen nach Möglichkeit sauber trennen soll eine Ebene.
 
 ## Bibliotheken 
 In diesem KnitR-Datei werden Bibliotheken verwendet, die für die folgenden Nutzung im Kontext von SVM verwendet werden.
@@ -1331,6 +1331,85 @@ find_min4error <- function (pError, pGrad, pa, px_D, py_D, alpha=1, evalcount=10
 ```
 
 
+### Move2Minimum
+
+Die `move2min()`-Funktion bewegt sich in Richtung eines Vektors
+`vec4grad` (i.d.R. der Gradient einer Fehlerfunktion) und gibt dann 
+
+* den skalaren Streckfaktor des Richtungsvektors,
+* den minimalen Fehler als zweite Komponente und 
+* die neue angepasste Fehlerschrittwerte $\alpha > 0$
+Im Vergleich zu `find_min4error()` wird als zweiter Parameter der Gradient bei `move2min()` und nicht die Berechnungsfunktion für den Gradienten übergeben.
+
+```{r def4move2min}
+move2min <- function (pError, pVec4Grad, pa, px_D, py_D, palpha=1, pevalcount=100,echolevel=0) {
+  ## Parameter 
+  ## pError: Fehlerfunktion 
+  ## pVec4Grad:  Richtungsvektor (i.d.R. Gradient der Fehlerfunktion)
+  ## px_D: x-Vektoren der Daten für den Definitionsbereich 
+  ## py_D: y-Sollwerte für die Fehlerfunktion
+  # echo4vec("move2min() palpha=",palpha)
+  ### definiert den Grenzwert von echolevel, ab dem echo-Ausgaben gemacht werden  
+  alpha_m2m <- palpha
+  echo_move2min <- 6
+  return <- rep(0,3) ### return <- c(0,0,0); 
+  ## erste Komponente von return ist der minimale lambda-Wert
+  ## zweite Komponente von return ist der minimale Fehler
+  #s4a <- runif(pevalcount,-1,+1)
+  #s4a <- (-pevalcount:pevalcount)/pevalcount
+  s4a <- c(0,-runif(2*pevalcount))
+  #s4a <- c(0,-runif(2*pevalcount))
+  #s4a <- c(0,1:(2*pevalcount)/-(2*pevalcount))
+  #s4a
+  #s4a <- 2*runif(2*evalcount+1,-1,1)
+  E4a <-  rep(0,2*pevalcount+1) ## +1 wegen x4a=0
+  ## smin - Skalar für Gradient für das Minimum der berechneten Fehler 
+  scalar4min <- s4a[1] ### ersten smin-Wert setzen - hier -1
+  ### Fehler in pa berechnen als Startwert
+  error4min <- pError( pa, px_D, py_D )   
+  grad4alpha      <- alpha_m2m * pVec4Grad   
+  ## in Gradientenrichtung auswerten zwischen -1*pGrad und +1*Grad 
+  ## die Fehlerfunktion auswerten und über die x4a-Liste iterieren
+  for (k in 1:length(s4a)) {
+    ## Fehler für den um x4a[k] skalierten Gradienten pGrad 
+    ## und die Daten px_D, py_D berechnen
+    E4a[k] <- pError(pa + s4a[k]*grad4alpha, px_D, py_D)
+    ## Überprüfen, ob der Fehler kleiner ist als der 
+    ## bisher berechnete minimale Fehler errormin
+    if (E4a[k] < error4min) {
+      error4min  <-E4a[k]
+      scalar4min <-s4a[k]
+    }
+  }
+  # plot(s4a,E4a)
+  ## neue Lernrate alpha ist 1.5 so groß wie 
+  ## der letzte erfolgreich Schritt in Richtung Minimum
+  ### Vorschlag für die Anpassung der Lernrate
+  suggested_alpha <- alpha
+  if (abs(scalar4min) > 0.9) {
+    ### Lernrate alpha vergrößern
+    suggested_alpha <- 2 * alpha
+    #print(paste("move2min() - Lernrate von",alpha,"auf",suggested_alpha,"vergrößern mit Skalar",scalar4min));
+  } else {
+    if (abs(scalar4min) < 0.1) {
+      ### Lernrate alpha verkleinern
+      suggested_alpha <- alpha/2
+      #print(paste("move2min() - Lernrate von",alpha,"auf",suggested_alpha,"verkleinern mit Skalar",scalar4min));
+    }  
+  }
+  ## RETURN enthält die berechneten Werte für das Fehlerminimum
+  ## return[1] skalare Streckung des Gradienten,
+  ## return[2] Wert des Fehlers im Minimum,
+  ## return[3] Vorschlag für die Anpassung der Lernrate alpha,
+  ret <- c(scalar4min, error4min, suggested_alpha)
+  ## Ausgabe
+  str4return <- paste(ret,collapse=",")
+  print(paste("move2min()=(scalarmin,error,new4alpha)=(",str4return,")",sep=" "))
+  ## Rückgabewert: Skalars für Gradienten, minimaler Fehler und Vorschlag für neues alpha
+  return(ret)
+}
+```
+
 
 ### Einzelne Iteration und Verbesserung der Fehlerfunktion
 Der Test der Iteration gliedert sich in 3 Schritte:
@@ -1523,7 +1602,8 @@ learnSVM <- function (pVec4Norm,pVec4Supp, px_D, py_D, palpha=1, pmaxiteration=1
   print("START - SVM - With Function")
   print("--------------------------")
   echo4vec("vec4learn",vec4learn) 
-  print(paste("max interation=",pmax_iteration," evalcount=",pevalcount,sep="",collapse=""))
+  print(paste("max interation=",pmaxiteration,sep=""))
+  print(paste("evalcount=",pevalcount,sep=""))
   print(paste("Error 0 SVM: ",alterfehler,sep=""))
   
   #vec4learn <- initLearnVec_SVM(px_D,py_D)
@@ -1548,14 +1628,12 @@ learnSVM <- function (pVec4Norm,pVec4Supp, px_D, py_D, palpha=1, pmaxiteration=1
     #print(paste("E_SVM()=",E_SVM(vec4learn, px_D, py_D)," New Error minwert[2]=",minwert[2],sep=""))
     if (E_SVM(vec4learn, px_D, py_D) >= minwert[2]) {
           vec4learn <- vec4learn + minwert[1]*vec4grad
-          if (echolevel >= echo_learnSVM) {
-            print(paste("Error SVM ",i,": ",minwert[2]," Step Scale minwert[1]: ",minwert[1]," alpha=",palpha," suggested alpha=",minwert[3], sep=""))    
-            #palpha <- minwert[3]
-            str4grad <- paste(vec4grad,collapse=",")
-            print(paste("Gradient ",i,"=(",str4grad,")",collapse="",sep=""));
-            print(paste("vec4learn",i,"=(",paste(vec4learn,collapse=","),")",collapse="",sep=""))
-            print("---------------------")
-          } 
+          print(paste("Error SVM ",i,": ",minwert[2]," Step Scale minwert[1]: ",minwert[1]," alpha=",palpha," suggested alpha=",minwert[3], sep=""))    
+          #palpha <- minwert[3]
+          str4grad <- paste(vec4grad,collapse=",")
+          print(paste("Gradient ",i,"=(",str4grad,")",collapse="",sep=""));
+          print(paste("vec4learn",i,"=(",paste(vec4learn,collapse=","),")",collapse="",sep=""))
+          print("---------------------")
           alpha4iteration <- minwert[3]
     } else {
       palpha <- palpha/2
@@ -1568,4 +1646,25 @@ learnSVM <- function (pVec4Norm,pVec4Supp, px_D, py_D, palpha=1, pmaxiteration=1
   ### Rückgabewert
   return(ret)
 }
+```
+
+### Test des Lernverfahrens
+
+```{r}
+### Test GradE_SVM
+nvec4svm <- c(-1,2)
+svec4svm <- c(3,1)
+#plot4svm(pNormVec=nvec4svm,pSuppVec=svec4svm,x_ID,y_ID)
+#plot4svm(pNormVec=NA,pSuppVec=NA,x_ID,y_ID)
+
+max_iteration <- 15
+# evalcount <- 10
+alpha <- 3 ## Lernrate alpha
+evalcount <- 50
+
+
+vLearnVec4SVM <- learnSVM(nvec4svm,svec4svm,x_ID,y_ID,alpha,pmaxiteration=max_iteration,pevalcount=evalcount)
+newNormVec <- getNormVec_SVM(vLearnVec4SVM)
+newSuppVec <- getSuppVec_SVM(vLearnVec4SVM)
+plot4svm(pNormVec=newNormVec,pSuppVec=newSuppVec,x_ID,y_ID)
 ```
