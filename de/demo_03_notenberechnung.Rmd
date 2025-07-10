@@ -1,4 +1,4 @@
-l---
+---
 title: "HTML Arbeitsblatt 3 - Notengebung zu Punkten"
 author: "Bert Niehaus"
 date: "`r Sys.Date()`"
@@ -63,6 +63,20 @@ knitr::kable(
 ```
 
 Die erste Datenzeile (2. Zeile) enthält die maximale Anzahl der Punkte für die jeweilige Aufgabe.
+```{r}
+
+### Fuzzy-Werte werden über die Multiplikation eines Vektors mit einem Skalar berechnet
+
+f1 <- 1/a1[1] * a1
+f2 <- 1/a2[1] * a2
+f3 <- 1/a3[1] * a3
+nf1 <- 1 - f1
+
+f1
+nf1
+
+
+```
 
 
 ## Notenberechnung 
@@ -183,12 +197,10 @@ note_zuordnen <- function(pPunkte,pGrenzen,pNotenskala) {
        ## so lange die Note verbessern bis Note jeweilge Notengrenze kleiner als Punkte
        while ((gi > 1) & (pPunkte[i] >= pGrenzen[gi]))  {
           ## Index für die Grenze auf bessere Note setzen
-          gi <- gi - 1  
-          ## Index gi kann bei Erreichen der Maximalpunkte auch 0 werden
-          ## daher Ueberpruefung, ob der Index gi >= 1
+          gi <- gi - 1 
+          ## Notenbezeichnung setzen
           if (gi >= 1) {
-            ## Notenbezeichnung setzen 
-            note4punkte[i] <- pNotenskala[gi]
+             note4punkte[i] <- pNotenskala[gi]
           }
        } 
      }
@@ -354,10 +366,14 @@ In letzten Spalte wurde nun noch eine weitere Textspalte ergänzt, die das Beste
 ```{r}
 knitr::kable(
   studentdata, booktabs = TRUE,
-  align=c('l','r','r','r','r','c','l'),
+  align=c('l','r','r','r','r','c','c','r','l'),
   caption = 'Geladene Daten mit Summespalte für data.csv.'
 )
 ```
+
+
+
+
 ## Häufigkeit der Noten im Diagramm
 Mit den folgenden Befehlen kann man die Häufigkeit der Noten in einem Balkendiagramm darstellen.
 ```{r}
@@ -402,40 +418,78 @@ write.csv(studentdata, "data/klausurnote.csv", row.names = FALSE)
 ```
 
 
-### Zuordnen von Aufgaben
-In dem folgenden Beispiel wird ein Fuzzy-Vektor in einen Indexvektor umgerechnet, der je nach Fuzzywert eine unterschiedliche Aufgabe zuordnet. Die Aufgabenschwierigkeit sollte aufsteigend nach Schwierigkeit gewählt werden.
-* `floor(x)` ist die Funktion, die `x` als Treppenfunktion die nächste kleinere ganze Zahl zuordnet
-* `ceiling(x)` ist die Funktion, die `x`  als Treppenfunktion die nächste größere ganze Zahl zuordnet.
-* Ferner wird noch mit `max()` das Maximum von 1 und den Einträgen in einem Vektor berechnet.
+## Standardabweichung 
+Die empirische Varianz ist wie folgt definiert:
+$$
+s^2 = \frac{1}{n-1}\sum \limits_{i=1}^n\left(x_i-\overline x\right)^2
+$$
+## Funktionen definieren
 
 ```{r}
-aufgaben <- c("1+1","2+3","4+6","9+6","39+14")
-## anz: Anzahl der Aufgaben - hier 5
-anz <- length(aufgaben) 
-## f1test: Vektor mit Fuzzy-Werten
-f1test <- c(0.612,0.2,0.98,0.4)
-f1floor <- floor(f1test*anz)
-f1ceil  <- ceiling(f1test*anz)
+f <- function (px1,px2) {
+  ## Die Rückgabevariable wird ausgerechnet
+  ret <- c(0,0,0,0,0)
+  ret[1] <- px1 + 3*px2 + 1
+  ret[2] <- cos(px1)+ sin(px2)
+  ret[3] <- ret[1] + ret[2]
+  ret[5] <- px1 * px2
+  ## Rückgabe der Resultats
+  ret
+}
 
-### Aufgabe mit unterschiedlichem Schwierigkeitsniveau - aufsteigend nach Schwierigkeit
+x1 <- 3 
+x2 <- -1
+
+f(x1,x2)
+f(7,5)
+```
+
+### Definition Skalarprodukt
+```{r}
+skalarprodukt <- function (v,w) {
+  ### v,w sind Vektoren die die gleiche Dimension besitzen müssen
+  ret <- sum(v*w)
+  ## Rückgabe des Skalarproduktes
+  ret
+}
+  
+v<- c(1,2,3,4,5)
+w<- c(4,5,6,-1,-2)
+skalarprodukt(v,w)
+```
+
+### Zugriff auf Spalten mit Bezeichnung
+Spallten festlegen, die die Aufgaben der Punkte enhalten.
+
+```{r}
+spalten <- c("aufgabe1","aufgabe2","aufgabe3")
+
+a2 <- studentdata[["aufgabe2"]]
+df2 <- studentdata[c("aufgabe1","aufgabe3")]
+# studentdata$aufgabe1
+```
+
+### Zuordnen von Aufgaben
+In dem folgenden Beispiel wird ein Fuzzy-Vektor in einen Indexvektor umgerechnet, der je nach Fuzzywert eine unterschiedliche Aufgabe zuordnet.
+```{r}
+aa <- 10 
+f1test <- c(0.612,0.2,0.98,0.4)
+f2test <- floor(f1test*aa)
+f3test <- ceiling(f1test*aa)
+
+#aufgaben <- c("Arithm 1","Arithm 1","Arithm 1","Arithm 1","Arithm 1","Arithm 1","Arithm 1","Arithm 2","Arithm 2","Arithm 2")
+aufgaben <- c("Arithm 1","Arithm 2","Arithm 3","Arithm 4","Arithm 5","Arithm 6","Arithm 7","Arithm 8","Arithm 9","Arithm 10")
 
 aufgabe_niveau <- function(pFuzzyVec,pAufgaben) {
-  ### anz: Gesamtzahl der möglichen Aufgaben
   anz <- length(pAufgaben)
-  ### AUfgabenzuordnung als Index
-  ind <- ceiling(pFuzzyVec*anz)
-  ### 0 als Index ausschließen - Maximum von 1 und dem Index wählen
-  ind <- max(1,ind)
-  ### tatsächliche Aufgabe als Rückgabevektor
+  ind <- min(floor(pFuzzyVec*anz),anz)
   ret <- pAufgaben[ind]
   ### Rueckgabewert ist die Aufgabenzuordnung
   ret
 }
 
-aufgaben_arith <- c("Arithm 1","Arithm 2","Arithm 3","Arithm 4","Arithm 5","Arithm 6","Arithm 7","Arithm 8","Arithm 9","Arithm 10")
-
-aufgabe_niveau(f1test,aufgaben_arith)
-
-aufgaben <- c("1+1","2+3","4+6","9+6")
 aufgabe_niveau(f1test,aufgaben)
+
+#aufg <- aufgabe_niveau(f1test,aufgaben)
 ```
+
