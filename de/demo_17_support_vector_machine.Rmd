@@ -1113,7 +1113,7 @@ grad4e_SVM <- function (pvec4norm,pvec4supp,px4svm,py4svm,pecholevel=0) {
   # echo4vec("scalar4svm",scalar4svm)
   
   ### Returnvektor setzen als Multiplikation mit Skalar
-  ret <- sp(scalar4svm, vec4calc)
+  ret <- scalar4svm * vec4calc
   ## Rückgabewert: return  Gradient nach (pVec4Norm,pVec4Supp)
   return(ret)
 }
