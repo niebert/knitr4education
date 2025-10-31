@@ -1,5 +1,7 @@
 # knitr4education
-KnitR examples used for a seminar at the [University RPTU](https://www.rptu.de) to create tailored individual worksheet according to the prerequisites of the learners. For privacy reasons the processing is performed with OpenSource software locally on your computer.
+KnitR examples used for a seminar at the [University RPTU](https://www.rptu.de) to create tailored individual worksheet according to the prerequisites of the learners. For privacy reasons the processing is performed with OpenSource software locally on your computer so that working on real data follows the same tested workflow. Additional comments are available on 
+* [English Wikiversity - KnitR](https://en.wikiversity.org/wiki/KnitR)
+* [German Wikiversity - KnitR](https://de.wikiversity.org/wiki/KnitR)
 
 ## Package knitr4education
 Main reusable functions will be bundled in an R-package that can be imported with the `devtools` package in R.
