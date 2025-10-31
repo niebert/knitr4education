@@ -427,7 +427,7 @@ norm_supp2abline <- function (pNormVec,pSuppVec) {
     steigung <- NA
     yabschnitt <- NA
     vertikal <- pSuppVec[1]
-    isvert <- 1
+    is_vertical <- 1
   } else {
     ## normvec ist nicht senkrecht 
     ## abline(a=yabschnitt,b=steigung)
