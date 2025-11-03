@@ -170,7 +170,7 @@ Von der obigen Fehlerfunktion für einzelne [Komponentenfunktionen](https://de.w
     ## Fehler für alle Datenpunkte berechnen
     for (i in 1:datenanzahl) {
       ## Gradient der Summanden der Fehlerfunktion E_LR addieren
-      grad <- grad + (sum(pa*px_D[i, ]) - py1_D[i, ]) * px_D[i, ]
+      grad <- grad + (sum(pa*px_D[i, ]) - py1_D[i,1]) * px_D[i, ]
     }
     ## Rückgabewert: ret Gradient des quadratischen Gesamtfehler as numerischen Vektor
     return(as.numeric(grad))
