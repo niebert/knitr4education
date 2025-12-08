@@ -2,7 +2,7 @@
 title: "Fuzzifizierung von Punkten"
 author: "KnitR4Education - Bert Niehaus"
 date: "`r Sys.Date()`"
-output: html_document
+output: beamer_presentation
 ---
 
 ```{r setup, include=FALSE}
@@ -17,6 +17,7 @@ Das Ziel dieses Tutorials ist es, eine Funktion in R zu definieren, die eine CSV
 ### Ausgabeformate
 `output: html_document`, wenn Sie HTML-Dokumente erstellen wollen.
 `output: odt_document`, wenn Sie Textverarbeitungsdokumente erstellen wollen.
+`output: powerpoint_document`, wenn Sie eine Präsentation erstellen wollen.
 
 
 ## Implementation in R
@@ -127,6 +128,61 @@ knitr::kable(
   caption = 'Geladene Daten  data/klausur.csv.'
 )
 ```
+
+### Fuzzyoperation auf Spalten
+```{r}
+
+fuzzy_and <- function (pf1,pf2) {
+  ret <- rep(0,length(pf1))
+  for (i in 1:length(pf1)) {
+    ret[i] <- min(pf1[i],pf2[2])
+  }
+  ### Rückgabewert ist das komponentenweise Minimum der beiden Vektoren pf1 und pf2
+  ret
+}
+
+fuzzy_or <- function (pf1,pf2) {
+  ret <- rep(0,length(pf1))
+  for (i in 1:length(pf1)) {
+    ret[i] <- max(pf1[i],pf2[i])
+  }
+  ### Rückgabewert ist das komponentenweise Maximum der beiden Vektoren pf1 und pf2
+  ret
+}
+
+fuzzy_not <- function (pf1) {
+  ret <- rep(0,length(pf1))
+  for (i in 1:length(pf1)) {
+    ret[i] <- 1 - pf1[i]
+  }
+  ### Rückgabewert ist das komponentenweise Minimum der beiden Vektoren pf1 und pf2
+  ret
+}
+
+fuzzy_indicator <- function(pf1,pgrenze,pvalue0,pvalue1) {
+  ret <- rep(pvalue0,length(pf1))
+  for (i in 1:length(pf1)) {
+    if (pf1[i] >= pgrenze) {
+      ret[i] <- pvalue1 
+    }
+  }
+  ### Rückgabewert ist das komponentenweise 
+  ####  pvalue0 wenn die Grenze pgrenze NICHT überschritten wird
+  ####  pvalue1 wenn die Grenze pgrenze überschritten wird
+  ret
+}
+
+### r=random uniform distribution
+### 10 zufaellige Werte in uniformer Verteilung auf dem Intervall [0,1] erzeugen
+f1 <- runif(10)
+f2 <- runif(10)
+f3 <- runif(10)
+
+f1
+f2
+fuzzy_and(f1,f2)
+```
+
 
 ### Speichern von CSV-Dateien - Funktionsdefinition
 
