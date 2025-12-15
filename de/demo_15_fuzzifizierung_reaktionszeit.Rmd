@@ -351,7 +351,7 @@ fuzzy_nand <- function (pf1,pf2) {
 fuzzy_and <- function (pf1,pf2) {
   ret <- rep(0,length(pf1))
   for (i in 1:length(pf1)) {
-    ret[i] <- min(pf1[i],pf2[2])
+    ret[i] <- min(pf1[i],pf2[i])
   }
   ### Rückgabewert ist das komponentenweise Minimum der beiden Vektoren pf1 und pf2
   ret
