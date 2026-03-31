@@ -146,8 +146,6 @@ lin_fak <- function (pNullstelle) {
   # return Linearfaktor
   return(lf)
 }
-```
-
 ## Test der Erzeugung von Linear
 paste(lin_fak(-5),lin_fak(0),lin_fak(5),sep=" * ")
 ## Ausgabe: (x+5) * x * (x-5)
