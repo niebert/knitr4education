@@ -7,6 +7,24 @@ output: odt_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(Ryacas)
+```
+
+## LaTeX-Ausgabe für Terme
+```{r output4latex}
+term2latex <- function(expr, prefix = "") {
+  # Beispiel: expr = "2*x"
+  # Gib zurück: $ 2\cdot x $
+  
+  # Wenn du die Ableitung berechnen willst:
+  str4expr <- yac_str(expr)
+
+  # Ersetze * durch nichts (für schönere Darstellung)
+  latex_expr <- gsub("\\*", "\\cdot ", str4expr)
+  
+  # Gib LaTeX-Formel zurück
+  return(latex_expr)
+}
 ```
 
 ## Einleitung
