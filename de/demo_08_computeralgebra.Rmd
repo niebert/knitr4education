@@ -192,7 +192,7 @@ yacas2latex <- function(pYacasCmd) {
    cmd4latex <- paste("TexForm(",pYacasCmd,")")
    ### Absenden des YACAS-Befehl zur Latex-Konvertierung an YACAS
    ### Ergebnis wird als String ausgegeben 
-   ergebnis <- yac_str(cmd4yacas)
+   ergebnis <- yac_str(cmd4latex)
    ergebnis <- extract_math(ergebnis)
    # return: Bestimmtes Integral von pTerm bzgl. der Integralgrenzen
    return(ergebnis)
