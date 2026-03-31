@@ -359,7 +359,7 @@ poly_grad3 <- function (pKoeff) {
 }
 
 # Test des Polynomterms
-koeff <- c
+koeff <- c(4,3,7)
 poly_grad3(koeff)
 ```
 
