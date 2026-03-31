@@ -159,12 +159,41 @@ term <- yac_str(cmd4yacas)
 ## Yacas Ausgabe als Latex 
 Yacas als Computeralgebrasystem behandelt mathematische Ausdrücke, die in YACAS z.B. als Term für symbolische Berechnung (z.B. Ableitungen) verwendet werden können. Für die Aussgabe benötigt man z.B. in R-Markdown mit [KnitR}(https://de.wikiversity.org/wiki/KnitR) oder als mathematische Formel in Wikiversity/Wikipedia die mathematische Formel allerdings in Latex. Daher wird die folgende Funktion `yacas2latex(pString)` für KnitR definiert.
 ```{r , echo=TRUE}
+extract_math <- function(text) {
+  # Verwende regulaere Ausdruecke in Perl-Syntax
+  regx4perl <- TRUE
+  # Prüfe, ob text ein character-Vektor ist
+  if (!is.character(text)) {
+    stop("Der Input muss eine Zeichenketten sein.")
+  }
+  
+  # Pruefe, ob überhaupt ein $-Zeichen vorhanden ist
+  if (!any(grepl("\\$", text, perl = regx4perl))) {
+    # Kein $ vorhanden → gib Originaltext zurück
+    return(text)
+  }
+  
+  # Regex: $...$ mit beliebigen Zeichen dazwischen (außer $)
+  pattern <- "\\$[^$]*\\$"
+  
+  # Finde alle Vorkommen mit gregexpr
+  matches <- regmatches(text, gregexpr(pattern, text, perl = regx4perl))
+  
+  # Entferne leere Einträge (falls vorhanden)
+  formeln <- unlist(matches)
+  formeln <- formeln[formeln != ""]  # Filtere leere Strings
+  
+  # Rückgabe: Vektor der Formeln (oder Originaltext, wenn kein $)
+  return(formeln)
+}
+
 yacas2latex <- function(pYacasCmd) {
    ### YACAS-Befehl zu Latex-Erzeugung "TexForm( 5 * x^6 )"
    cmd4latex <- paste("TexForm(",pYacasCmd,")")
    ### Absenden des YACAS-Befehl zur Latex-Konvertierung an YACAS
    ### Ergebnis wird als String ausgegeben 
    ergebnis <- yac_str(cmd4yacas)
+   ergebnis <- extract_math(ergebnis)
    # return: Bestimmtes Integral von pTerm bzgl. der Integralgrenzen
    return(ergebnis)
 }
