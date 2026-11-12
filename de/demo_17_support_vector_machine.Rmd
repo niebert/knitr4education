@@ -5,9 +5,7 @@ date: "`r Sys.Date()`"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+c
 ## Einleitung
 In dieser Lerneinheit werden mit Verständnis über die Funktionsweise des Skalarproduktes und der Zerlegung in Halbebenen das Thema der Support Vector Machines (SVM) behandelt, um diese dann in R zu implementieren.
 
