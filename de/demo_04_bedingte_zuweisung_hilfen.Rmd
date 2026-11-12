@@ -5,9 +5,6 @@ date: "`r Sys.Date()`"
 output: latex_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
 ## Einleitung
 In diesem KnitR-Arbeitsblatt werden Funktionen zu Notenberechnung und Funkionen zum Schwierigkeitsniveau erstellt. Die Notenberechnung kann dabei für Klausuren und bepunktete Leistungsüberprüfungen , aber auch für Bewertung einzelner einzelnen Aufgaben verwendet werden.  Die Notengebung für einzelne Aufgaben wird dann verwendet, um entsprechende Folgeaufgaben oder Hilfen zu bestimmen.
