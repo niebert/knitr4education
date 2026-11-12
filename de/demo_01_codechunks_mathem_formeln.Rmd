@@ -5,9 +5,6 @@ date: "`r Sys.Date()`"
 output: odt_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
 ## Einleitung
 Das ist ein R Markdown-Dokument. Markdown ist eine einfache Formatierungs-Syntax für die Erzeugung von LibreOffice-Dokumenten verwendet wird. Weitere Details zur Verwendung von R Markdown siehe <http://rmarkdown.rstudio.com>.
