@@ -4,10 +4,6 @@ author: "Bert Niehaus"
 date: "`r Sys.Date()`"
 output: html_document
 ---
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 ## Daten generieren
 Zunächst wird ein Vektor mit Namen erzeugt, der mit der Funktion `create_name_list(pAnzahl,pMaxPunkteVec)` generiert. Dabei wird über den Parameter `pAnzahl` festgelegt, wie viele Datensätze generiert werden. Der zweite Paramter `pMaxPunkteVec` legt fest, wie viele Punkte die jeweilige Aufgabe maximal vergeben werden könnnen. Durch die Vektorlänge wird ferner festgelegt, für wie viele Aufgaben Punkte mit einer Gleichverteilung generiert werden. 
 ```{r}
