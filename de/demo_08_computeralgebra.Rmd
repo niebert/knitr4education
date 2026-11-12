@@ -5,8 +5,7 @@ date: "`r Sys.Date()`"
 output: odt_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r cas}
 library(Ryacas)
 ```
 
