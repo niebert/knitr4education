@@ -5,10 +5,6 @@ date: "`r Sys.Date()`"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
 ## Load External R Code 
 The following code chunk loads the R code from `lib/knitr4education.R` and return the result of the calculations as the variable `knitr4education`.
 ```{r echo=TRUE}
