@@ -5,10 +5,6 @@ date: "2024-06-11"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
 ## R Markdown and GNU Octave
 
 This is an R Markdown document, that used [Octave](https://octave.org/) (see <https://octave.org/>). Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents, that can include code, when you use [KnitR](https://en.wikiversity.org/wiki/KnitR). For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
